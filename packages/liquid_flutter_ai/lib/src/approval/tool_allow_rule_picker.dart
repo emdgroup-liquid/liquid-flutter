@@ -117,10 +117,11 @@ class _LdToolAllowRulePickerSheetState
             children: [
               LdText.p(
                 'Choose which argument fields must match exactly, '
-                'allow any value, or mark as not allowed. Not allowed fields '
-                'are omitted from the rule — if the agent passes them later, '
-                'approval is required again. Nested object alternatives are '
-                'not OR-combined; use Any on the parent or separate rules.',
+                'allow any value (including when omitted), or mark as not '
+                'allowed. Not allowed fields are omitted from the rule — if '
+                'the agent passes them later, approval is required again. '
+                'Nested object alternatives are not OR-combined; use Any on '
+                'the parent or separate rules.',
               ),
               LdToolAllowFieldTree(
                 session: _session,

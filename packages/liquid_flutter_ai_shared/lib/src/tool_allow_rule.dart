@@ -10,7 +10,7 @@ enum LdToolAllowPinMode {
   /// Emit a concrete value (or list OR of values) into the pattern.
   exact,
 
-  /// Emit [ldToolAllowWildcard].
+  /// Emit [ldToolAllowWildcard] (any value, or key absent).
   wildcard,
 
   /// UI-only: omit the path from the pattern (must stay absent for auto-approve).
@@ -376,9 +376,18 @@ class LdToolAllowMatcher {
     return true;
   }
 
+  /// Whether [value] permits the key to be missing from the call args.
+  ///
+  /// Field wildcards mean "don't care" (present with any value, or absent).
+  /// Explicit `null` in an OR list also allows absence (see merge).
   static bool _allowsAbsent(dynamic value) {
+    if (value == ldToolAllowWildcard) {
+      return true;
+    }
     if (value is List) {
-      return value.any((e) => e == null);
+      return value.any(
+        (e) => e == null || e == ldToolAllowWildcard,
+      );
     }
     return false;
   }
@@ -572,12 +581,18 @@ class LdToolAllowFieldSession {
     required this.pins,
     required this.rootKeys,
     required this.objectPaths,
+    this.callArgs,
   });
 
   final Map<String, LdToolAllowSchemaMeta> schemaMeta;
   final Map<String, LdToolAllowFieldPin> pins;
   final List<String> rootKeys;
   final Set<String> objectPaths;
+
+  /// When non-null, [toRule] treats this as an approval against a concrete call
+  /// (picker). Exact pins on paths absent from the call include `null` so the
+  /// current request still matches. Editor sessions leave this null.
+  final Map<String, dynamic>? callArgs;
 
   LdToolAllowFieldSession copyWithPins(
     Map<String, LdToolAllowFieldPin> nextPins,
@@ -587,13 +602,54 @@ class LdToolAllowFieldSession {
         pins: nextPins,
         rootKeys: rootKeys,
         objectPaths: objectPaths,
+        callArgs: callArgs,
       );
 
-  LdToolAllowRule toRule(String toolName) => LdToolAllowRule.fromFieldPins(
+  LdToolAllowRule toRule(String toolName) {
+    final args = callArgs;
+    if (args == null) {
+      return LdToolAllowRule.fromFieldPins(
         toolName,
         pins,
         objectPaths: objectPaths,
       );
+    }
+
+    // Broader Fixed pins on optional fields the call omitted: allow absence
+    // (same as merge when combining a rule without the key and one with it).
+    final adjusted = <String, LdToolAllowFieldPin>{};
+    for (final entry in pins.entries) {
+      final pin = entry.value;
+      final path = entry.key;
+      if (pin.mode == LdToolAllowPinMode.exact &&
+          !objectPaths.contains(path) &&
+          !_argumentPathExists(args, path) &&
+          pin.values.isNotEmpty &&
+          !pin.values.contains(null)) {
+        adjusted[path] = pin.copyWith(values: [null, ...pin.values]);
+      } else {
+        adjusted[path] = pin;
+      }
+    }
+
+    return LdToolAllowRule.fromFieldPins(
+      toolName,
+      adjusted,
+      objectPaths: objectPaths,
+    );
+  }
+}
+
+bool _argumentPathExists(Map<String, dynamic> args, String path) {
+  final parts = path.split('.');
+  dynamic current = args;
+  for (final part in parts) {
+    if (current is! Map || !current.containsKey(part)) {
+      return false;
+    }
+    current = current[part];
+  }
+  return true;
 }
 
 /// Builds picker/editor field state from schema, call args, and optional seed.
@@ -602,6 +658,8 @@ LdToolAllowFieldSession ldBuildToolAllowFieldSession({
   Object? arguments,
   LdToolAllowRule? seedRule,
 }) {
+  // Null [arguments] means editor (no concrete call). Empty map is a real call.
+  final hasCallContext = arguments != null;
   final callArgs = ldParseToolArguments(arguments);
   final schemaMeta = ldParseToolInputSchema(inputSchema);
   final seedPattern =
@@ -691,6 +749,7 @@ LdToolAllowFieldSession ldBuildToolAllowFieldSession({
     pins: pins,
     rootKeys: orderedRoots,
     objectPaths: objectPaths,
+    callArgs: hasCallContext ? callArgs : null,
   );
 }
 
