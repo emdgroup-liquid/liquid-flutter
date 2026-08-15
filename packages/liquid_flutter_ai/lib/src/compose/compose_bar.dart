@@ -416,6 +416,7 @@ class _LdComposeBarState extends State<LdComposeBar> {
   }
 
   Widget _buildAttachButtons(BuildContext context) {
+    final theme = LdTheme.of(context);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -427,6 +428,7 @@ class _LdComposeBarState extends State<LdComposeBar> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 LdHorizontalScroll(
+                  edgeBleed: theme.pad(),
                   children: [
                     if (widget.onPickImage != null)
                       SizedBox(
@@ -491,7 +493,7 @@ class _LdComposeBarState extends State<LdComposeBar> {
                 if (widget.attachmentsExtra != null) widget.attachmentsExtra!,
               ],
             ),
-          ).padM(),
+          ),
           builder: (context, isShuttle, trigger, isOpen, child) {
             return LdButton.outline(
               onPressed: trigger,
