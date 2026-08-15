@@ -68,6 +68,23 @@ void main() {
       });
     });
 
+    group('Equality', () {
+      test('on and off instances with the same name are not equal', () {
+        LdFilterBool<TestItem, int> filter({required bool isOn}) {
+          return LdFilterBool<TestItem, int>(
+            name: 'active',
+            label: (context) => 'Active',
+            icon: (context) => const Icon(Icons.check),
+            isOn: isOn,
+          );
+        }
+
+        expect(filter(isOn: false) == filter(isOn: true), isFalse);
+        expect(filter(isOn: false) == filter(isOn: false), isTrue);
+        expect(filter(isOn: true) == filter(isOn: true), isTrue);
+      });
+    });
+
     group('CopyWith', () {
       test('copyWith() updates isOn correctly', () {
         final filter = LdFilterBool<TestItem, int>(
@@ -280,8 +297,7 @@ void main() {
                         builder: (context) {
                           // Watch shellState so rebuild happens on filter change
                           context.watch<TestSortAndFilterState<TestItem, int>>();
-                          final currentFilter =
-                              shellState.filtersMap['active'] as LdFilterBool<TestItem, int>;
+                          final currentFilter = shellState.filtersMap['active'] as LdFilterBool<TestItem, int>;
                           return Provider<LdMonkeySortAndFilterState<TestItem, int>>.value(
                             value: shellState.state,
                             child: currentFilter.build(context),
