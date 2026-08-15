@@ -240,5 +240,69 @@ void main() {
       expect(first.key, grown.key);
       expect(first.key, 'activity-r1');
     });
+
+    test('pinned tool calls flush activity and stay singleton', () {
+      final groups = groupConversationItems(
+        const [
+          LdReasoningItem(id: 'r1', content: 'planning'),
+          LdToolCallItem(
+            id: 't1',
+            name: 'search',
+            toolCallId: 'tc1',
+            status: LdToolCallStatus.done,
+          ),
+          LdToolCallItem(
+            id: 't2',
+            name: 'subagent',
+            toolCallId: 'tc2',
+            status: LdToolCallStatus.running,
+          ),
+          LdToolCallItem(
+            id: 't3',
+            name: 'read',
+            toolCallId: 'tc3',
+            status: LdToolCallStatus.done,
+          ),
+        ],
+        pinToolCall: (item) => item.name == 'subagent',
+      );
+
+      expect(groups, hasLength(3));
+      expect(groups[0], isA<LdConversationActivityGroup>());
+      expect(
+        (groups[0] as LdConversationActivityGroup).items.map((e) => e.id),
+        ['r1', 't1'],
+      );
+      expect(
+        (groups[1] as LdConversationSingletonGroup).item.id,
+        't2',
+      );
+      expect(groups[2], isA<LdConversationActivityGroup>());
+      expect(
+        (groups[2] as LdConversationActivityGroup).items.single.id,
+        't3',
+      );
+    });
+
+    test('pinned pending tool call stays singleton', () {
+      final groups = groupConversationItems(
+        const [
+          LdToolCallItem(
+            id: 't1',
+            name: 'subagent',
+            toolCallId: 'tc1',
+            status: LdToolCallStatus.pending,
+          ),
+        ],
+        pinToolCall: (item) => item.name == 'subagent',
+      );
+
+      expect(groups, hasLength(1));
+      expect(groups.single, isA<LdConversationSingletonGroup>());
+      expect(
+        (groups.single as LdConversationSingletonGroup).item,
+        isA<LdToolCallItem>(),
+      );
+    });
   });
 }

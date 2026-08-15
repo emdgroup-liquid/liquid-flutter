@@ -222,11 +222,12 @@ class _LdComposeBarState extends State<LdComposeBar> {
           return Padding(
             padding: MediaQuery.of(context).padding,
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildChrome(context),
                 if (hasAttachments) _buildAttachmentStrip(context),
+                _buildChrome(context),
               ],
-            ),
+            ).spaceM(),
           );
         },
       ),

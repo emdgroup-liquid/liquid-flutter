@@ -30,11 +30,20 @@ class LdUserBubble extends StatelessWidget {
 
     final measureKey = LdSendFlyMeasureKey.maybeOf(context);
     final content = LdAutoSpace(
-      crossAxisAlignment:
-          fill ? CrossAxisAlignment.start : CrossAxisAlignment.end,
+      crossAxisAlignment: fill
+          ? CrossAxisAlignment.start
+          : CrossAxisAlignment.end,
       children: [
         if (hasAttachments) _buildAttachments(theme),
-        if (hasText) SelectableText(text, style: textStyle),
+        if (hasText)
+          SelectableText(
+            text,
+            style: textStyle,
+            textHeightBehavior: TextHeightBehavior(
+              applyHeightToFirstAscent: false,
+              applyHeightToLastDescent: false,
+            ),
+          ),
       ],
     );
 
@@ -70,10 +79,7 @@ class LdUserBubble extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         Flexible(child: bubble),
-        if (trailing != null) ...[
-          ldHSpacerS,
-          trailing!,
-        ],
+        if (trailing != null) ...[ldHSpacerS, trailing!],
       ],
     );
   }
@@ -92,11 +98,7 @@ class LdUserBubble extends StatelessWidget {
     if (attachment.isImage && attachment.preview != null) {
       return ClipRRect(
         borderRadius: theme.radius(LdSize.s),
-        child: SizedBox(
-          width: 56,
-          height: 56,
-          child: attachment.preview,
-        ),
+        child: SizedBox(width: 56, height: 56, child: attachment.preview),
       );
     }
 
@@ -109,8 +111,8 @@ class LdUserBubble extends StatelessWidget {
             attachment.isImage
                 ? LucideIcons.image
                 : attachment.isAudio
-                    ? LucideIcons.mic
-                    : LucideIcons.paperclip,
+                ? LucideIcons.mic
+                : LucideIcons.paperclip,
             size: theme.labelSize(LdSize.s),
           ),
           ldHSpacerXS,
