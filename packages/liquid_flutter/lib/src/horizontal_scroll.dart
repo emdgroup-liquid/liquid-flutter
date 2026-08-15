@@ -182,17 +182,20 @@ class _LdHorizontalScrollState extends State<LdHorizontalScroll> {
     final gap = theme.paddingSize(size: widget.spacing);
     final runGap = theme.paddingSize(size: widget.runSpacing ?? widget.spacing);
 
-    return Wrap(
-      crossAxisAlignment: switch (widget.crossAxisAlignment) {
-        CrossAxisAlignment.start => WrapCrossAlignment.start,
-        CrossAxisAlignment.end => WrapCrossAlignment.end,
-        CrossAxisAlignment.center => WrapCrossAlignment.center,
-        CrossAxisAlignment.stretch => WrapCrossAlignment.center,
-        CrossAxisAlignment.baseline => WrapCrossAlignment.center,
-      },
-      spacing: gap,
-      runSpacing: runGap,
-      children: widget.children,
+    return Padding(
+      padding: widget.edgeBleed ?? EdgeInsets.zero,
+      child: Wrap(
+        crossAxisAlignment: switch (widget.crossAxisAlignment) {
+          CrossAxisAlignment.start => WrapCrossAlignment.start,
+          CrossAxisAlignment.end => WrapCrossAlignment.end,
+          CrossAxisAlignment.center => WrapCrossAlignment.center,
+          CrossAxisAlignment.stretch => WrapCrossAlignment.center,
+          CrossAxisAlignment.baseline => WrapCrossAlignment.center,
+        },
+        spacing: gap,
+        runSpacing: runGap,
+        children: widget.children,
+      ),
     );
   }
 

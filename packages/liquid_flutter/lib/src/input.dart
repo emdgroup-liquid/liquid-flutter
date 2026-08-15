@@ -356,7 +356,8 @@ class _LdInputState extends State<LdInput> {
                                     scrollPadding: theme.pad() * 5,
                                     onSubmitted: widget.onSubmitted,
                                     cursorWidth: 1,
-                                    style: widget.style ?? labelStyle.copyWith(color: colors.text),
+                                    style: widget.style ??
+                                        ldBuildTextStyle(theme, LdTextType.paragraph, widget.size, lineHeight: 1),
                                   ),
                                 ),
                                 suffix,
