@@ -26,6 +26,7 @@ class _ConversationDemoState extends State<ConversationDemo> {
   late List<LdConversationItem> _items = _seedItems();
   var _tasks = <LdAgentTask>[];
   LdToolAllowRule? _seedAllowRule;
+  int? _hideBeforeIndex;
 
   @override
   void dispose() {
@@ -64,6 +65,13 @@ class _ConversationDemoState extends State<ConversationDemo> {
         status: LdToolCallStatus.done,
         argsPreview: '{"path": "CHANGELOG.md"}',
         resultPreview: '## 23.0.0\n- Conversation UI\n- Send fly animation',
+      ),
+      const LdToolCallItem(
+        id: 't-sub',
+        name: 'run_subagent',
+        toolCallId: 'tc-sub',
+        status: LdToolCallStatus.running,
+        argsPreview: '{"title": "Explore CHANGELOG history"}',
       ),
       const LdReasoningItem(
         id: 'r2',
@@ -588,8 +596,48 @@ Call out if you want this expanded into a full changelog entry, a PR description
         id: id,
         child: LdUserBubble(text: text, attachments: attachments),
       ),
-      _ => LdConversation.defaultItemBuilder(context, item, isSingleton, approval: _approvalActions),
+      _ => LdConversation.defaultItemBuilder(
+        context,
+        item,
+        isSingleton,
+        approval: _approvalActions,
+      ),
     };
+  }
+
+  LdToolCallOverride? _toolCallOverride(LdToolCallItem item) {
+    return switch (item.name) {
+      'read_file' => (context) => _RichFileResult(item: item),
+      'run_subagent' => (context) => _SubAgentRow(
+        item: item,
+        onTap: () {
+          LdModalRoute(
+            context: context,
+            pageBuilder: (modalContext) => LdScaffold(
+              body: LdAppBar.top(
+                title: LdText.h('Subagent'),
+                child: LdScaffoldBody(
+                  addContainer: true,
+                  children: [
+                    LdText.p(
+                      item.resultPreview ??
+                          'Subagent is still running. This modal stands in for the nested conversation.',
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ).show(context, useRootNavigator: true);
+        },
+      ),
+      _ => null,
+    };
+  }
+
+  void _compactHistory() {
+    // Hide preparation / older transcript; leave the last few items visible.
+    final cut = (_items.length - 3).clamp(0, _items.length);
+    setState(() => _hideBeforeIndex = cut > 0 ? cut : null);
   }
 
   @override
@@ -600,8 +648,13 @@ Call out if you want this expanded into a full changelog entry, a PR description
           final fly = LdSendFlyScope.of(context);
           final conversation = LdAgentTaskPanel(
             tasks: _tasks,
-
-            child: LdConversation(items: _items, approval: _approvalActions, itemBuilder: _buildItem),
+            child: LdConversation(
+              items: _items,
+              approval: _approvalActions,
+              itemBuilder: _buildItem,
+              toolCallOverride: _toolCallOverride,
+              hideBeforeIndex: _hideBeforeIndex,
+            ),
           );
           final composeBar = LdComposeBar(
             controller: _controller,
@@ -719,9 +772,104 @@ Call out if you want this expanded into a full changelog entry, a PR description
             child: conversation,
           );
 
-          return LdScaffold(body: composeBar);
+          return LdScaffold(
+            body: LdAppBar.top(
+              title: LdText.h('Conversation'),
+              actions: [
+                LdButton.ghost(
+                  size: LdSize.s,
+                  onPressed: _compactHistory,
+                  child: const Text('Compact'),
+                ),
+              ],
+              child: composeBar,
+            ),
+          );
         },
       ),
     );
+  }
+}
+
+class _RichFileResult extends StatelessWidget {
+  final LdToolCallItem item;
+
+  const _RichFileResult({required this.item});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = LdTheme.of(context);
+    final preview = item.resultPreview ?? '';
+
+    return LdCard(
+      child: LdAutoSpace(
+        children: [
+          Row(
+            children: [
+              Icon(LucideIcons.fileText, color: theme.primaryColor),
+              ldHSpacerS,
+              Expanded(child: LdText.l(item.argsPreview ?? item.name)),
+            ],
+          ),
+          if (preview.isNotEmpty)
+            Container(
+              width: double.infinity,
+              padding: theme.pad(size: LdSize.s),
+              decoration: BoxDecoration(
+                color: theme.surface,
+                borderRadius: theme.radius(LdSize.s),
+              ),
+              child: LdText.p(preview),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SubAgentRow extends StatelessWidget {
+  final LdToolCallItem item;
+  final VoidCallback onTap;
+
+  const _SubAgentRow({
+    required this.item,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = LdTheme.of(context);
+    final title = _titleFromArgs(item) ?? 'Subagent';
+    final isRunning = item.status == LdToolCallStatus.pending ||
+        item.status == LdToolCallStatus.running;
+    final statusLabel = switch (item.status) {
+      LdToolCallStatus.pending || LdToolCallStatus.running => 'Running',
+      LdToolCallStatus.done => 'Completed',
+      LdToolCallStatus.error => 'Failed',
+    };
+
+    return LdCard(
+      padding: EdgeInsets.zero,
+      child: LdListItem.trailingForward(
+        onPressed: onTap,
+        leading: LdAvatar(
+          child: isRunning
+              ? const LdLoader(size: 16)
+              : const Icon(LucideIcons.bot),
+        ),
+        title: Text(title),
+        subtitle: Text(statusLabel),
+        borderRadius: theme.radius(LdSize.s),
+      ),
+    );
+  }
+
+  String? _titleFromArgs(LdToolCallItem item) {
+    final args = item.argsPreview;
+    if (args == null) {
+      return null;
+    }
+    final match = RegExp(r'"title"\s*:\s*"([^"]+)"').firstMatch(args);
+    return match?.group(1);
   }
 }

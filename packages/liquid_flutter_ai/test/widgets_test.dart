@@ -729,4 +729,80 @@ void main() {
       expect(find.text('Hello from agent'), findsOneWidget);
     },
   );
+
+  testWidgets('LdConversation toolCallOverride replaces tool call card',
+      (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        SizedBox(
+          width: 400,
+          height: 600,
+          child: LdConversation(
+            items: const [
+              LdToolCallItem(
+                id: 't1',
+                name: 'search_docs',
+                toolCallId: 'tc1',
+                status: LdToolCallStatus.done,
+                resultPreview: '3 docs',
+              ),
+              LdToolCallItem(
+                id: 't2',
+                name: 'show_chart',
+                toolCallId: 'tc2',
+                status: LdToolCallStatus.done,
+                resultPreview: 'chart data',
+              ),
+            ],
+            toolCallOverride: (item) {
+              if (item.name != 'show_chart') {
+                return null;
+              }
+              return (context) => const Text('RICH_CHART');
+            },
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('RICH_CHART'), findsOneWidget);
+    expect(find.text('show_chart'), findsNothing);
+    expect(find.text('search_docs'), findsOneWidget);
+  });
+
+  testWidgets('LdConversation hideBeforeIndex reveals earlier items',
+      (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        SizedBox(
+          width: 400,
+          height: 600,
+          child: LdConversation(
+            hideBeforeIndex: 2,
+            items: const [
+              LdUserMessageItem(id: 'u1', text: 'Hidden user message'),
+              LdAgentMarkdownItem(id: 'a1', markdown: 'Hidden agent reply'),
+              LdUserMessageItem(id: 'u2', text: 'Visible user message'),
+              LdAgentMarkdownItem(id: 'a2', markdown: 'Visible agent reply'),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('Hidden user message'), findsNothing);
+    expect(find.text('Hidden agent reply'), findsNothing);
+    expect(find.text('Visible user message'), findsOneWidget);
+    expect(find.text('Visible agent reply'), findsOneWidget);
+    expect(find.text('Show 2 earlier messages'), findsOneWidget);
+
+    await tester.tap(find.text('Show 2 earlier messages'));
+    await tester.pump();
+
+    expect(find.text('Hidden user message'), findsOneWidget);
+    expect(find.text('Hidden agent reply'), findsOneWidget);
+    expect(find.text('Show 2 earlier messages'), findsNothing);
+  });
 }

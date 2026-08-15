@@ -38,7 +38,7 @@ class LdAgentMarkdownReply extends StatelessWidget {
             active: isStreaming,
             child: SizedBox(
               width: double.infinity,
-              child: LdMarkdown(data: markdown),
+              child: SelectionArea(child: LdMarkdown(data: markdown)),
             ),
           ),
       ],

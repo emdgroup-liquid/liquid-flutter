@@ -269,7 +269,7 @@ class _LdAgentTaskPanelState extends State<LdAgentTaskPanel> {
             size: LdSize.s,
             onPressed: _toggleExpanded,
             leading: Icon(
-              _expanded ? LucideIcons.chevronUp : LucideIcons.chevronDown,
+              _expanded ? LucideIcons.chevronDown : LucideIcons.chevronUp,
             ),
             child: Text("${widget.tasks.length} Tasks"),
           ),
