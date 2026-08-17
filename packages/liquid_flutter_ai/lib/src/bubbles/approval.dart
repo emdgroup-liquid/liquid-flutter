@@ -115,7 +115,7 @@ class LdApprovalCard extends StatelessWidget {
   Widget _buildPendingActions(BuildContext context, LdTheme theme) {
     return LdAutoSpace(
       children: [
-        Row(
+        LdHorizontalScroll(
           children: [
             LdButton.outline(
               onPressed: () async => onDeny?.call(),
@@ -134,7 +134,7 @@ class LdApprovalCard extends StatelessWidget {
               child: const Text('Approve once'),
             ),
           ],
-        ).spaceS(),
+        ),
       ],
     );
   }

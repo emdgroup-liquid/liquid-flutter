@@ -627,8 +627,9 @@ class _LdSliderState extends State<LdSlider> {
     // Anchoring to globalPosition avoids this entirely.
     final double totalPixelDelta;
     if (_isVertical) {
-      // Inverted: drag up (negative dy) increases value.
-      totalPixelDelta = -(_rangeDragStartGlobal!.dy - details.globalPosition.dy);
+      // Inverted: drag up (current.dy < start.dy) increases value.
+      totalPixelDelta =
+          _rangeDragStartGlobal!.dy - details.globalPosition.dy;
     } else {
       totalPixelDelta = details.globalPosition.dx - _rangeDragStartGlobal!.dx;
     }

@@ -71,7 +71,7 @@ class LdComposeBar extends StatefulWidget {
 }
 
 class _LdComposeBarState extends State<LdComposeBar> {
-  static const _controlSize = LdSize.m;
+  static const _controlSize = LdSize.l;
 
   TextEditingController? _ownedController;
   FocusNode? _ownedFocusNode;
@@ -88,7 +88,11 @@ class _LdComposeBarState extends State<LdComposeBar> {
   @override
   void initState() {
     super.initState();
-    _waveController = WaveformRecorderController();
+    _waveController = WaveformRecorderController(
+      // openai_dart / OpenAI chat only type wav|mp3 for input_audio; wav is
+      // universally supported for voice notes across platforms.
+      config: const RecordConfig(encoder: AudioEncoder.wav),
+    );
     _waveController.addListener(_handleWaveChanged);
     if (widget.controller == null) {
       _ownedController = TextEditingController();
@@ -287,7 +291,9 @@ class _LdComposeBarState extends State<LdComposeBar> {
 
   Widget _buildInputRow(BuildContext context) {
     final showAttachRow =
-        widget.onPickImage != null || widget.onPickCamera != null || widget.onPickFile != null;
+        widget.onPickImage != null ||
+        widget.onPickCamera != null ||
+        widget.onPickFile != null;
     final showMic = _voiceEnabled && _controller.text.isEmpty && !_isRecording;
 
     final theme = LdTheme.of(context);
@@ -303,10 +309,17 @@ class _LdComposeBarState extends State<LdComposeBar> {
             children: [
               LdButton.outline(
                 onPressed: _handleCancelRecording,
+                size: _controlSize,
                 child: const Icon(LucideIcons.x),
               ),
-              ldSpacerS,
+              ldSpacerXS,
             ],
+          ),
+        ),
+        LdReveal.quick(
+          revealed: !_isRecording && !_focusNode.hasFocus,
+          child: Row(
+            children: [if (widget.leading != null) widget.leading!, ldSpacerXS],
           ),
         ),
         LdReveal.quick(
@@ -314,10 +327,8 @@ class _LdComposeBarState extends State<LdComposeBar> {
           axes: {Axis.horizontal},
           child: Row(
             children: [
-              if (widget.leading != null) widget.leading!,
-              ldSpacerXS,
               if (showAttachRow) _buildAttachButtons(context),
-              ldSpacerS,
+              ldSpacerXS,
             ],
           ),
         ),
@@ -357,9 +368,10 @@ class _LdComposeBarState extends State<LdComposeBar> {
           revealed: widget.isBusy && widget.onStop != null,
           child: Row(
             children: [
-              ldSpacerS,
+              ldSpacerXS,
               LdButton(
                 color: theme.error,
+                size: _controlSize,
                 onPressed: widget.onStop ?? () {},
 
                 child: const Icon(LucideIcons.square),
@@ -371,9 +383,10 @@ class _LdComposeBarState extends State<LdComposeBar> {
           revealed: !widget.isBusy && (_hasContent && widget.onSend != null),
           child: Row(
             children: [
-              ldSpacerS,
+              ldSpacerXS,
               LdButton.filled(
                 onPressed: _handleSend,
+                size: _controlSize,
                 child: const Icon(LucideIcons.arrowUp),
               ),
             ],
@@ -382,15 +395,16 @@ class _LdComposeBarState extends State<LdComposeBar> {
         LdReveal.quick(
           revealed: showMic,
           axes: {Axis.horizontal},
-          child: Row(children: [ldSpacerS, _buildMicButton(context)]),
+          child: Row(children: [ldSpacerXS, _buildMicButton(context)]),
         ),
         LdReveal.quick(
           revealed: _isRecording,
           axes: {Axis.horizontal},
           child: Row(
             children: [
-              ldSpacerS,
+              ldSpacerXS,
               LdButton.filled(
+                size: _controlSize,
                 onPressed: _handleConfirmRecording,
                 child: const Icon(LucideIcons.arrowUp),
               ),
@@ -481,6 +495,7 @@ class _LdComposeBarState extends State<LdComposeBar> {
           builder: (context, isShuttle, trigger, isOpen, child) {
             return LdButton.outline(
               onPressed: trigger,
+              size: LdSize.l,
               child: const Icon(LucideIcons.plus),
             );
           },
@@ -496,7 +511,9 @@ class _LdComposeBarState extends State<LdComposeBar> {
       focusNode: _focusNode,
       size: _controlSize,
       minLines: 1,
+      borderRadius: LdTheme.of(context).radius(LdSize.l),
       maxLines: 6,
+
       allowTapOutside: true,
       onSubmitted: (_) => _handleSend(),
       onCustomPaste: widget.onCustomPaste,
@@ -506,6 +523,7 @@ class _LdComposeBarState extends State<LdComposeBar> {
   Widget _buildMicButton(BuildContext context) {
     return LdButton.outline(
       disabled: _startingRecording,
+      size: _controlSize,
       onPressed: _handleStartRecording,
       child: const Icon(LucideIcons.mic),
     );

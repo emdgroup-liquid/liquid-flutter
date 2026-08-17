@@ -60,6 +60,31 @@ void main() {
       expect(rule.matches('bash', {'cwd': '/app'}), isTrue);
       expect(rule.matches('bash', {'cwd': '/tmp'}), isFalse);
     });
+
+    test('field wildcard allows key to be absent', () {
+      const rule = LdToolAllowRule(
+        toolName: 'pr',
+        argumentPattern: {
+          'title': 'feat',
+          'body': ldToolAllowWildcard,
+        },
+      );
+      // Broader than the current call: optional body allowed as Any.
+      expect(rule.matches('pr', {'title': 'feat'}), isTrue);
+      expect(rule.matches('pr', {'title': 'feat', 'body': 'x'}), isTrue);
+      expect(rule.matches('pr', {'title': 'other'}), isFalse);
+    });
+
+    test('wildcard inside OR list allows key to be absent', () {
+      const rule = LdToolAllowRule(
+        toolName: 'bash',
+        argumentPattern: {
+          'cwd': [ldToolAllowWildcard],
+        },
+      );
+      expect(rule.matches('bash', {}), isTrue);
+      expect(rule.matches('bash', {'cwd': '/anywhere'}), isTrue);
+    });
     test('exact array value matches wrapped list arg', () {
       const rule = LdToolAllowRule(
         toolName: 'pr',
@@ -364,6 +389,61 @@ void main() {
         session.pins['title']?.values,
         containsAll(['feat-a', 'feat-b']),
       );
+    });
+
+    test('picker toRule: Any on absent optional still matches call', () {
+      final session = ldBuildToolAllowFieldSession(
+        inputSchema: schema,
+        arguments: {'title': 'feat'},
+      );
+      final withBodyAny = session.copyWithPins({
+        ...session.pins,
+        'body': const LdToolAllowFieldPin(mode: LdToolAllowPinMode.wildcard),
+      });
+      final rule = withBodyAny.toRule('pr');
+      expect(rule.argumentPattern['body'], ldToolAllowWildcard);
+      expect(rule.matches('pr', {'title': 'feat'}), isTrue);
+    });
+
+    test('picker toRule: Fixed on absent optional includes null', () {
+      final session = ldBuildToolAllowFieldSession(
+        inputSchema: schema,
+        arguments: {'title': 'feat'},
+      );
+      final withBodyFixed = session.copyWithPins({
+        ...session.pins,
+        'body': const LdToolAllowFieldPin(
+          mode: LdToolAllowPinMode.exact,
+          values: ['hello'],
+        ),
+      });
+      final rule = withBodyFixed.toRule('pr');
+      expect(rule.argumentPattern['body'], containsAll([null, 'hello']));
+      expect(rule.matches('pr', {'title': 'feat'}), isTrue);
+      expect(
+        rule.matches('pr', {'title': 'feat', 'body': 'hello'}),
+        isTrue,
+      );
+    });
+
+    test('editor toRule: does not invent null without call context', () {
+      final session = ldBuildToolAllowFieldSession(
+        inputSchema: schema,
+        arguments: null,
+        seedRule: const LdToolAllowRule(
+          toolName: 'pr',
+          argumentPattern: {'title': 'feat'},
+        ),
+      );
+      final withBodyFixed = session.copyWithPins({
+        ...session.pins,
+        'body': const LdToolAllowFieldPin(
+          mode: LdToolAllowPinMode.exact,
+          values: ['hello'],
+        ),
+      });
+      final rule = withBodyFixed.toRule('pr');
+      expect(rule.argumentPattern['body'], 'hello');
     });
 
     test('schema enum options available on meta', () {

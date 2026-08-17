@@ -16,7 +16,7 @@ class LdSubmitDialogBuilder<T, Arg> extends LdSubmitBuilder<T, Arg> {
     super.loadingBuilder,
     super.submitButtonBuilder,
     this.showSubmitButton,
-    this.targetRoot = false,
+    this.targetRoot = true,
   });
 
   final bool? showSubmitButton;
@@ -31,6 +31,7 @@ class LdSubmitDialogBuilder<T, Arg> extends LdSubmitBuilder<T, Arg> {
       loadingBuilder: loadingBuilder,
       submitButtonBuilder: submitButtonBuilder,
       showSubmitButton: showSubmitButton,
+      targetRoot: targetRoot,
     );
   }
 }
@@ -97,11 +98,15 @@ class _LdSubmitDialogState<T, Arg> extends State<LdSubmitDialog<T, Arg>> {
     if (open) {
       _overlayController.show();
     } else {
-      Future.delayed(const Duration(milliseconds: 1500), () {
-        if (mounted) {
-          _overlayController.hide();
-        }
-      });
+      if (state.type == LdSubmitStateType.result) {
+        Future.delayed(const Duration(milliseconds: 1500), () {
+          if (mounted) {
+            _overlayController.hide();
+          }
+        });
+      } else {
+        _overlayController.hide();
+      }
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {

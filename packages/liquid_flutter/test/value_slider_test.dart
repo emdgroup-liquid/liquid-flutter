@@ -1189,9 +1189,13 @@ void main() {
             reason: 'Range width must be preserved during vertical fill drag');
       }
 
-      // The range must have shifted (low != initial value).
-      expect(low, isNot(equals(0.2)),
-          reason: 'Vertical fill drag must shift the range from its initial position');
+      // Dragging downward must decrease values (range moves toward the bottom).
+      expect(low, lessThan(0.2),
+          reason:
+              'Vertical fill drag down must decrease values (not invert direction)');
+      expect(high, lessThan(0.8),
+          reason:
+              'Vertical fill drag down must decrease high as well');
     });
 
     testWidgets(

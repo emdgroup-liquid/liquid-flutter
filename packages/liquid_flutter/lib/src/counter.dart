@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
@@ -18,11 +17,31 @@ const _counterTextHeightBehavior =
   );
 }
 
+bool _isRollableDigit(String value) {
+  return value.length == 1 && value.codeUnitAt(0) >= 48 && value.codeUnitAt(0) <= 57;
+}
+
+class _DigitSlot {
+  _DigitSlot({
+    required this.id,
+    required this.digit,
+    required this.revealed,
+    required this.animateIn,
+  });
+
+  final int id;
+  String digit;
+  bool revealed;
+  final bool animateIn;
+}
+
 class LdCounter extends StatefulWidget {
   final double value;
 
   final int precision;
   final TextStyle? style;
+  final LdSize size;
+  final LdTextType type;
   final int? minDigits;
   final bool inline;
 
@@ -31,6 +50,8 @@ class LdCounter extends StatefulWidget {
     required this.value,
     this.precision = 0,
     this.style,
+    this.size = LdSize.m,
+    this.type = LdTextType.headline,
     this.minDigits,
     this.inline = false,
   });
@@ -40,17 +61,25 @@ class LdCounter extends StatefulWidget {
 }
 
 class _LdCounterState extends State<LdCounter> {
-  final List<(bool, String)> _digits = [];
+  final List<_DigitSlot> _digits = [];
+  bool _ascending = true;
+  int _nextId = 0;
+  bool _initialized = false;
+
   @override
   void initState() {
     super.initState();
 
     _generateDigits();
+    _initialized = true;
   }
 
   @override
   void didUpdateWidget(oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.value != widget.value) {
+      _ascending = widget.value >= oldWidget.value;
+    }
     if (oldWidget.value != widget.value ||
         oldWidget.precision != widget.precision ||
         oldWidget.minDigits != widget.minDigits) {
@@ -63,7 +92,11 @@ class _LdCounterState extends State<LdCounter> {
     if (widget.style != null) {
       return widget.style!;
     }
-    return DefaultTextStyle.of(context).style;
+    return ldBuildTextStyle(
+      LdTheme.of(context),
+      widget.type,
+      widget.size,
+    );
   }
 
   String _formatValue() {
@@ -89,24 +122,48 @@ class _LdCounterState extends State<LdCounter> {
     return '$sign$paddedInteger$decimalPart';
   }
 
+  /// Sync digit slots using right-aligned place values so 9→10 inserts a
+  /// leading "1" and rolls the ones place 9→0, instead of remapping indices.
   void _generateDigits() {
-    final str = _formatValue().split('');
+    final next = _formatValue().split('');
+    final alive = _digits.where((slot) => slot.revealed).toList();
 
-    for (var i = 0; i < str.length; i++) {
-      if (_digits.length > i) {
-        _digits[i] = (true, str[i]);
-      } else {
-        _digits.add((true, str[i]));
+    final common = next.length < alive.length ? next.length : alive.length;
+    for (var i = 0; i < common; i++) {
+      final aliveIndex = alive.length - 1 - i;
+      final nextIndex = next.length - 1 - i;
+      alive[aliveIndex].digit = next[nextIndex];
+    }
+
+    if (next.length > alive.length) {
+      final insertCount = next.length - alive.length;
+      for (var i = 0; i < insertCount; i++) {
+        _digits.insert(
+          i,
+          _DigitSlot(
+            id: _nextId++,
+            digit: next[i],
+            revealed: true,
+            animateIn: _initialized,
+          ),
+        );
+      }
+    } else if (next.length < alive.length) {
+      final removeCount = alive.length - next.length;
+      for (var i = 0; i < removeCount; i++) {
+        alive[i].revealed = false;
       }
     }
+  }
 
-    for (var i = str.length; i < _digits.length; i++) {
-      _digits[i] = (false, _digits[i].$2);
+  void _removeSlot(int id) {
+    final index = _digits.indexWhere((slot) => slot.id == id);
+    if (index == -1) {
+      return;
     }
-
-    if (widget.inline) {
-      _digits.removeWhere((entry) => !entry.$1);
-    }
+    setState(() {
+      _digits.removeAt(index);
+    });
   }
 
   @override
@@ -118,32 +175,28 @@ class _LdCounterState extends State<LdCounter> {
           : CrossAxisAlignment.center,
       textBaseline: TextBaseline.alphabetic,
       children: [
-        ..._digits.mapIndexed((index, e) {
-          final digit = _LdCounterDigit(
-            digit: e.$2,
-            inline: widget.inline,
-            style: _getStyle(),
-          );
-
-          if (widget.inline) {
-            return digit;
-          }
-
-          return LdReveal(
-            revealed: e.$1,
+        for (final slot in _digits)
+          LdReveal(
+            key: ValueKey(slot.id),
+            revealed: slot.revealed,
+            initialRevealed: slot.animateIn ? false : slot.revealed,
+            axes: const {Axis.horizontal},
+            mass: 8,
+            springConstant: 14,
+            dampingCoefficient: 16,
+            bufferSprings: 3,
             onAnimationEnd: (context, states) {
-              if (e.$1 == false) {
-                if (index >= _digits.length) {
-                  return;
-                }
-                setState(() {
-                  _digits.removeAt(index);
-                });
+              if (!slot.revealed) {
+                _removeSlot(slot.id);
               }
             },
-            child: digit,
-          );
-        }),
+            child: _LdCounterDigit(
+              digit: slot.digit,
+              inline: widget.inline,
+              style: _getStyle(),
+              ascending: _ascending,
+            ),
+          ),
       ],
     );
   }
@@ -153,11 +206,13 @@ class _LdCounterDigit extends StatefulWidget {
   final String digit;
   final TextStyle style;
   final bool inline;
+  final bool ascending;
 
   const _LdCounterDigit({
     required this.digit,
     this.inline = false,
     required this.style,
+    required this.ascending,
   });
 
   @override
@@ -165,26 +220,68 @@ class _LdCounterDigit extends StatefulWidget {
 }
 
 class _LdCounterDigitState extends State<_LdCounterDigit> {
-  List<double> _textWidths = [];
+  late String _current;
+  String? _outgoing;
+  String? _incoming;
+  Key _springKey = UniqueKey();
 
-  static const chars = [
-    '0',
-    '1',
-    '2',
-    '3',
-    '4',
-    '5',
-    '6',
-    '7',
-    '8',
-    '9',
-    '.',
-    '-'
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _current = widget.digit;
+  }
 
-  double calculateTextWidth(String text, TextStyle style) {
-    final TextPainter textPainter = TextPainter(
-      text: TextSpan(text: text, style: style),
+  @override
+  void didUpdateWidget(oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (oldWidget.digit == widget.digit) {
+      return;
+    }
+
+    final from = _incoming ?? _current;
+    _startTransition(from, widget.digit);
+  }
+
+  void _startTransition(String from, String to) {
+    if (from == to) {
+      _current = to;
+      _outgoing = null;
+      _incoming = null;
+      return;
+    }
+
+    if (!_isRollableDigit(from) || !_isRollableDigit(to)) {
+      setState(() {
+        _current = to;
+        _outgoing = null;
+        _incoming = null;
+      });
+      return;
+    }
+
+    setState(() {
+      _outgoing = from;
+      _incoming = to;
+      _current = to;
+      _springKey = UniqueKey();
+    });
+  }
+
+  void _onRollEnd() {
+    if (!mounted || _incoming == null) {
+      return;
+    }
+    setState(() {
+      _current = _incoming!;
+      _outgoing = null;
+      _incoming = null;
+    });
+  }
+
+  double _textWidth(String text) {
+    final textPainter = TextPainter(
+      text: TextSpan(text: text, style: widget.style),
       maxLines: 1,
       textDirection: TextDirection.ltr,
       textHeightBehavior: _counterTextHeightBehavior,
@@ -193,60 +290,82 @@ class _LdCounterDigitState extends State<_LdCounterDigit> {
     return textPainter.size.width;
   }
 
-  double _digitHeight(LdTheme theme) {
-    final style = DefaultTextStyle.of(context).style;
-    return _counterTextMetrics(style).lineHeight;
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    _generateTextWidths();
-  }
-
-  void _generateTextWidths() {
-    _textWidths =
-        chars.map((e) => calculateTextWidth(e, widget.style)).toList();
-    setState(() {});
-  }
-
-  @override
-  void didUpdateWidget(oldWidget) {
-    super.didUpdateWidget(oldWidget);
-
-    if (oldWidget.style != widget.style) {
-      _generateTextWidths();
-    }
-  }
-
   Widget _buildDigitText(String text) {
     return Text(
       text,
       style: widget.style,
+      textHeightBehavior: _counterTextHeightBehavior,
     );
   }
 
   Widget _buildDigitCell(String text, {required double height}) {
     return SizedBox(
-        height: height,
-        child: Align(
-            alignment: Alignment.topCenter, child: _buildDigitText(text)));
+      height: height,
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: _buildDigitText(text),
+      ),
+    );
   }
 
-  List<Widget> _buildDigitColumn(double height) {
-    return [
-      for (var i = 0; i < 10; i++) _buildDigitCell('$i', height: height),
-      _buildDigitCell('.', height: height),
-      _buildDigitCell('-', height: height),
-    ];
-  }
-
-  Widget _buildInlineDigit({
-    required int offset,
+  Widget _buildRollingContent({
     required double height,
     required double width,
+    required double progress,
+  }) {
+    final outgoing = _outgoing!;
+    final incoming = _incoming!;
+
+    // Increment: next digit sits below, content moves up.
+    // Decrement: next digit sits above, content moves down.
+    final children = widget.ascending
+        ? [
+            _buildDigitCell(outgoing, height: height),
+            _buildDigitCell(incoming, height: height),
+          ]
+        : [
+            _buildDigitCell(incoming, height: height),
+            _buildDigitCell(outgoing, height: height),
+          ];
+
+    final translateY = widget.ascending
+        ? -progress * height
+        : -(1 - progress) * height;
+
+    return SizedBox(
+      height: height,
+      width: width,
+      child: ClipRect(
+        child: OverflowBox(
+          maxHeight: height * 2,
+          alignment: Alignment.topCenter,
+          child: Transform.translate(
+            offset: Offset(0, translateY),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: children,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSettledContent({
+    required double height,
+    required double width,
+  }) {
+    return SizedBox(
+      height: height,
+      width: width,
+      child: _buildDigitCell(_current, height: height),
+    );
+  }
+
+  Widget _wrapInline({
+    required Widget child,
     required ({double baseline, double lineHeight}) metrics,
+    required double width,
   }) {
     return Baseline(
       baseline: metrics.baseline,
@@ -254,104 +373,63 @@ class _LdCounterDigitState extends State<_LdCounterDigit> {
       child: SizedBox(
         height: metrics.lineHeight,
         width: width,
-        child: ClipRect(
-          child: LdSpring(
-            mass: 30,
-            springConstant: 8,
-            dampingCoefficient: 20,
-            position: offset.toDouble(),
-            builder: (context, state, child) {
-              return OverflowBox(
-                maxHeight: height * chars.length,
-                alignment: Alignment.topCenter,
-                child: Transform.translate(
-                  offset: Offset(0, -state.position * height),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: _buildDigitColumn(height),
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStandaloneDigit({
-    required int offset,
-    required double height,
-    required double width,
-  }) {
-    return SizedBox(
-      height: height,
-      width: width,
-      child: LdSpring(
-        mass: 30,
-        springConstant: 8,
-        dampingCoefficient: 20,
-        position: offset.toDouble(),
-        builder: (context, state, child) {
-          return Stack(
-            clipBehavior: Clip.hardEdge,
-            fit: StackFit.expand,
-            children: [
-              ...List.generate(
-                10,
-                (index) => Positioned(
-                  top: index * height - state.position * height,
-                  child: _buildDigitCell(index.toString(), height: height),
-                ),
-              ),
-              Positioned(
-                top: 10 * height - state.position * height,
-                child: _buildDigitCell('.', height: height),
-              ),
-              Positioned(
-                top: 11 * height - state.position * height,
-                child: _buildDigitCell('-', height: height),
-              ),
-            ],
-          );
-        },
+        child: child,
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final offset = chars.indexOf(widget.digit);
-    final theme = LdTheme.of(context);
-    final height = _digitHeight(theme);
     final metrics = _counterTextMetrics(widget.style);
-    if (_textWidths.length <= offset) {
-      return const SizedBox.shrink();
-    }
-    final width = _textWidths[offset];
+    final height = metrics.lineHeight;
+    final rolling = _outgoing != null && _incoming != null;
 
-    if (widget.inline) {
-      return _buildInlineDigit(
-        offset: offset,
-        height: height,
-        width: width,
-        metrics: metrics,
-      );
+    if (!rolling) {
+      final width = _textWidth(_current);
+      final content = _buildSettledContent(height: height, width: width);
+      if (widget.inline) {
+        return _wrapInline(child: content, metrics: metrics, width: width);
+      }
+      return content;
     }
 
-    return _buildStandaloneDigit(
-      offset: offset,
-      height: height,
-      width: width,
+    final fromWidth = _textWidth(_outgoing!);
+    final toWidth = _textWidth(_incoming!);
+
+    return LdSpring(
+      key: _springKey,
+      mass: 30,
+      springConstant: 8,
+      dampingCoefficient: 20,
+      initialPosition: 0,
+      position: 1,
+      onAnimationEnd: (context, state) => _onRollEnd(),
+      builder: (context, state, child) {
+        final progress = state.position.clamp(0.0, 1.0);
+        final width = fromWidth + (toWidth - fromWidth) * progress;
+        final content = _buildRollingContent(
+          height: height,
+          width: width,
+          progress: progress,
+        );
+
+        if (widget.inline) {
+          return _wrapInline(child: content, metrics: metrics, width: width);
+        }
+        return content;
+      },
     );
   }
 }
 
 /// Inline text with an animated [LdCounter] between [before] and [after].
 ///
-/// Lays out text and counter on a shared baseline so the number sits naturally
-/// in a sentence. For custom [RichText] with other spans, use [LdCounter] with
-/// [LdCounter.inline] inside a baseline [WidgetSpan].
+/// Lays out text and counter on a shared alphabetic baseline so the number sits
+/// naturally in a sentence. For custom [RichText], embed [LdCounter] with
+/// [LdCounter.inline] in a [WidgetSpan] using
+/// [PlaceholderAlignment.baseline] and [TextBaseline.alphabetic], and match the
+/// counter [TextStyle] (and preferably [TextHeightBehavior]) to the surrounding
+/// spans.
 class LdCounterText extends StatelessWidget {
   const LdCounterText({
     required this.value,
@@ -430,23 +508,135 @@ class LdCounterText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final style = DefaultTextStyle.of(context).style;
+    final ldMute = context.findAncestorWidgetOfExactType<LdMute>();
+    final theme = LdTheme.of(context, listen: true);
 
-    return RichText(
-      text: TextSpan(
+    final style = ldBuildTextStyle(
+      theme,
+      type,
+      size,
+      color: color ?? (ldMute != null ? theme.textMuted : null),
+      lineHeight: lineHeight,
+      fontWeight: fontWeight,
+    );
+
+    // Row + shared TextHeightBehavior keeps surrounding copy and digits on
+    // the same alphabetic baseline (WidgetSpan defaults to bottom alignment).
+    return DefaultTextStyle(
+      style: style,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.baseline,
+        textBaseline: TextBaseline.alphabetic,
         children: [
-          if (before.isNotEmpty) TextSpan(text: before, style: style),
-          WidgetSpan(
-            child: LdCounter(
-              value: value,
-              precision: precision,
-              minDigits: minDigits,
-              inline: true,
+          if (before.isNotEmpty)
+            Text(
+              before,
+              style: style,
+              textHeightBehavior: _counterTextHeightBehavior,
+              textAlign: textAlign,
+              maxLines: maxLines,
+              overflow: overflow ?? TextOverflow.clip,
             ),
+          LdCounter(
+            value: value,
+            style: style,
+            precision: precision,
+            minDigits: minDigits,
+            inline: true,
           ),
-          if (after.isNotEmpty) TextSpan(text: after, style: style),
+          if (after.isNotEmpty)
+            Text(
+              after,
+              style: style,
+              textHeightBehavior: _counterTextHeightBehavior,
+              textAlign: textAlign,
+              maxLines: maxLines,
+              overflow: overflow ?? TextOverflow.clip,
+            ),
         ],
       ),
+    );
+  }
+}
+
+/// Animated clock-style duration built from [LdCounter] segments.
+///
+/// Under one hour shows `MM:SS`. At one hour and above shows `H:MM:SS` (hours
+/// unpadded, minutes and seconds always two digits). When [showTenths] is true,
+/// appends `.T` as plain text (tenths update too quickly for digit springs).
+class LdCounterDuration extends StatelessWidget {
+  const LdCounterDuration({
+    required this.duration,
+    this.style,
+    this.size = LdSize.m,
+    this.type = LdTextType.headline,
+    this.inline = false,
+    this.showTenths = false,
+    super.key,
+  });
+
+  final Duration duration;
+  final TextStyle? style;
+  final LdSize size;
+  final LdTextType type;
+  final bool inline;
+
+  /// When true, appends `.T` (plain text tenths digit) after seconds.
+  final bool showTenths;
+
+  @override
+  Widget build(BuildContext context) {
+    final resolvedStyle = style ??
+        ldBuildTextStyle(
+          LdTheme.of(context),
+          type,
+          size,
+        );
+
+    final totalMs = duration.isNegative ? 0 : duration.inMilliseconds;
+    final totalSeconds = totalMs ~/ 1000;
+    final hours = totalSeconds ~/ 3600;
+    final minutes = (totalSeconds % 3600) ~/ 60;
+    final seconds = totalSeconds % 60;
+    final tenths = (totalMs % 1000) ~/ 100;
+    final showHours = hours >= 1;
+
+    Widget plain(String text) {
+      return Text(
+        text,
+        style: resolvedStyle,
+        textHeightBehavior: _counterTextHeightBehavior,
+      );
+    }
+
+    Widget segment(double value, {int? minDigits}) {
+      return LdCounter(
+        value: value,
+        style: resolvedStyle,
+        size: size,
+        type: type,
+        precision: 0,
+        minDigits: minDigits,
+        inline: inline,
+      );
+    }
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment:
+          inline ? CrossAxisAlignment.baseline : CrossAxisAlignment.center,
+      textBaseline: TextBaseline.alphabetic,
+      children: [
+        if (showHours) ...[
+          segment(hours.toDouble()),
+          plain(':'),
+        ],
+        segment(minutes.toDouble(), minDigits: 2),
+        plain(':'),
+        segment(seconds.toDouble(), minDigits: 2),
+        if (showTenths) plain('.$tenths'),
+      ],
     );
   }
 }

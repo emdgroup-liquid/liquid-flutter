@@ -22,14 +22,19 @@ class _CounterDemoState extends State<CounterDemo> {
   int? _minDigits;
   bool _autoIncrement = false;
   bool _inlineAutoIncrement = false;
+  bool _durationRunning = false;
+  bool _showTenths = false;
+  Duration _elapsed = Duration.zero;
 
   Timer? _timer;
   Timer? _inlineTimer;
+  Timer? _durationTimer;
 
   @override
   void dispose() {
     _timer?.cancel();
     _inlineTimer?.cancel();
+    _durationTimer?.cancel();
     super.dispose();
   }
 
@@ -87,12 +92,43 @@ class _CounterDemoState extends State<CounterDemo> {
     });
   }
 
+  void _syncDurationTimer() {
+    _durationTimer?.cancel();
+    if (!_durationRunning) {
+      return;
+    }
+    final step = _showTenths
+        ? const Duration(milliseconds: 100)
+        : const Duration(seconds: 1);
+    _durationTimer = Timer.periodic(step, (_) {
+      setState(() {
+        _elapsed += step;
+      });
+    });
+  }
+
+  void _setDurationRunning(bool enabled) {
+    setState(() {
+      _durationRunning = enabled;
+    });
+    _syncDurationTimer();
+  }
+
+  void _setShowTenths(bool enabled) {
+    setState(() {
+      _showTenths = enabled;
+    });
+    if (_durationRunning) {
+      _syncDurationTimer();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return ComponentPage(
       path: "lib/components/data_display/counter.dart",
       title: "LdCounter",
-      apiComponents: const ["LdCounter", "LdCounter.s", "LdCounter.l", "LdCounter.xs", "LdCounterText"],
+      apiComponents: const ["LdCounter", "LdCounterText", "LdCounterDuration"],
       demo: LdAutoSpace(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -108,7 +144,13 @@ class _CounterDemoState extends State<CounterDemo> {
                   child: Column(
                     children: [
                       /*begin demo:LdCounter*/
-                      LdCounter(value: _value, precision: _precision, minDigits: _minDigits),
+                      LdCounter(
+                        value: _value,
+                        precision: _precision,
+                        minDigits: _minDigits,
+                        size: _size,
+                        type: _type,
+                      ),
                       /*end demo:LdCounter*/
                       ldSpacerM,
                       Row(
@@ -243,6 +285,63 @@ class _CounterDemoState extends State<CounterDemo> {
                     LdCounter(value: 42, minDigits: 4),
                     LdCounter(value: 3.14, precision: 2, minDigits: 3),
                     /*end demo:LdCounterLeadingZeros*/
+                  ],
+                ),
+              ),
+            ],
+          ),
+
+          LdBundle(
+            children: [
+              LdText.h("Duration"),
+              LdText.p(
+                "LdCounterDuration formats a Duration as MM:SS under one hour, "
+                "or H:MM:SS above. Enable tenths for a trailing .T digit.",
+              ),
+              ComponentWell(
+                onSurface: true,
+                child: LdAutoSpace(
+                  children: [
+                    /*begin demo:LdCounterDuration*/
+                    Center(
+                      child: LdCounterDuration(
+                        duration: _elapsed,
+                        size: _size,
+                        type: _type,
+                        showTenths: _showTenths,
+                      ),
+                    ),
+                    Center(
+                      child: LdCounterDuration(
+                        duration: const Duration(hours: 1, minutes: 2, seconds: 3),
+                        size: LdSize.s,
+                        type: LdTextType.label,
+                      ),
+                    ),
+                    /*end demo:LdCounterDuration*/
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        LdButton(
+                          mode: LdButtonMode.ghost,
+                          child: const Icon(LucideIcons.rotateCcw),
+                          onPressed: () => setState(() => _elapsed = Duration.zero),
+                        ),
+                        ldSpacerS,
+                        LdButton(
+                          mode: LdButtonMode.ghost,
+                          child: Icon(
+                            _durationRunning ? LucideIcons.pause : LucideIcons.play,
+                          ),
+                          onPressed: () => _setDurationRunning(!_durationRunning),
+                        ),
+                      ],
+                    ),
+                    LdToggle(
+                      checked: _showTenths,
+                      onChanged: _setShowTenths,
+                      label: "Show tenths",
+                    ),
                   ],
                 ),
               ),

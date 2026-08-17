@@ -556,14 +556,48 @@ class _ButtonShape extends StatelessWidget {
     }
   }
 
+  /// Extra icon size for circular buttons. Padding is reduced by half the bump
+  /// on each side so the outer size stays aligned with other compact controls.
+  double _circularSizeBump(BuildContext context) {
+    if (!circular) {
+      return 0;
+    }
+    final theme = LdTheme.of(context);
+    return switch (size) {
+      LdSize.xs => switch (theme.themeSize) {
+          LdThemeSize.s => 1,
+          LdThemeSize.m => 2,
+          LdThemeSize.l => 3,
+        },
+      LdSize.s => switch (theme.themeSize) {
+          LdThemeSize.s => 2,
+          LdThemeSize.m => 4,
+          LdThemeSize.l => 4,
+        },
+      LdSize.m => switch (theme.themeSize) {
+          LdThemeSize.s => 3,
+          LdThemeSize.m => 6,
+          LdThemeSize.l => 6,
+        },
+      LdSize.l => switch (theme.themeSize) {
+          LdThemeSize.s => 2,
+          LdThemeSize.m => 8,
+          LdThemeSize.l => 6,
+        },
+    };
+  }
+
   EdgeInsets _padding(BuildContext context) {
     final theme = LdTheme.of(context);
 
     final borderInsets = EdgeInsets.all(_border(context)?.left.width ?? 0);
     final inset = theme.controlContentPadding(size);
+    // Icon grows by [_circularSizeBump]; split that across both sides so the
+    // outer diameter still matches text buttons / inputs.
+    final bumpInsets = EdgeInsets.all(_circularSizeBump(context) / 2);
 
     if (circular) {
-      return EdgeInsets.all(inset.top) - borderInsets;
+      return EdgeInsets.all(inset.top) - bumpInsets - borderInsets;
     }
 
     return inset - borderInsets;
@@ -640,8 +674,8 @@ class _ButtonShape extends StatelessWidget {
               child: IconTheme(
                 data: IconThemeData(
                   color: colors.text,
-                  opticalSize: theme.labelSize(size),
-                  size: theme.labelSize(size),
+                  opticalSize: theme.labelSize(size) + _circularSizeBump(context),
+                  size: theme.labelSize(size) + _circularSizeBump(context),
                 ),
                 child: child,
               ),
