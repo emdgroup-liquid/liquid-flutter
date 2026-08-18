@@ -1,3 +1,122 @@
+## 23.0.0-12
+Released on: 8/18/2026, changelog automatically generated.
+
+
+### Bug Fixes
+
+- **LdToolAllowRule:** allow wildcard to match absent args ([#152](issues/152)) ([2e29138](commit/2e29138))
+- **LdAppBar:** remove leftover debug print statements in _buildScrim ([05bfb2b](commit/05bfb2b))
+- restore tap-through on LdTabNavigation indicator and fix LdDrawerLayout dispose crash ([4ba13c6](commit/4ba13c6))
+### Features
+
+- **LdSubmit:** allow scoping exception localization via onException ([b5870b2](commit/b5870b2))
+
+### API Changes
+
+#### 💣 Breaking changes
+
+**`class` AppBarFrame** ([lib/src/appbar/appbar_frame.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-11..liquid_flutter/v23.0.0-12#diff-f5dae86f88f57d7eacd239b0beba44a7a95e301f01ff1dd11b53d1ec43864c92))
+- 🔄 Param type changed in default constructor: `scrimColor` (`Color?` → `Color? Function(bool)?`)
+- ❌ Property removed: `insetBorderRadius`
+- 🔄 Property type changed: `scrimColor`
+
+**`class` LdAppBar** ([lib/src/appbar/appbar.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-11..liquid_flutter/v23.0.0-12#diff-3fa4ae735c9f6ca4c26ac958e08eaa30e2da735b6e0f0ed00665eb6c2b2bb49f))
+- ❌ Property removed: `insetScreenRadius`
+
+**`class` LdAppBarConfig** ([lib/src/appbar/appbar.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-11..liquid_flutter/v23.0.0-12#diff-3fa4ae735c9f6ca4c26ac958e08eaa30e2da735b6e0f0ed00665eb6c2b2bb49f))
+- ❌ Property removed: `insetScreenRadius`
+
+**`class` LdAppBarWidget** ([lib/src/appbar/appbar.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-11..liquid_flutter/v23.0.0-12#diff-3fa4ae735c9f6ca4c26ac958e08eaa30e2da735b6e0f0ed00665eb6c2b2bb49f))
+- ❌ Property removed: `insetScreenRadius`
+
+**`class` _LdCounterDigit** ([lib/src/counter.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-11..liquid_flutter/v23.0.0-12#diff-56493e7e7233aac1f95d625ed446d310fe0305379c2e1b4429cd8bc3083c6a4d))
+- ❇️ Param added in default constructor: `ascending` (named, required)
+
+#### ✨ Minor changes
+
+**`class` AppBarFrame** ([lib/src/appbar/appbar_frame.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-11..liquid_flutter/v23.0.0-12#diff-f5dae86f88f57d7eacd239b0beba44a7a95e301f01ff1dd11b53d1ec43864c92))
+- ❌ Param removed in default constructor: `insetBorderRadius` (named, optional, default: true)
+- ❇️ Param added in default constructor: `useAdaptiveRadius` (named, optional, default: true)
+- ❇️ Property added: `useAdaptiveRadius`
+
+**`class` LdAppBar** ([lib/src/appbar/appbar.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-11..liquid_flutter/v23.0.0-12#diff-3fa4ae735c9f6ca4c26ac958e08eaa30e2da735b6e0f0ed00665eb6c2b2bb49f))
+- ❌ Param removed in default constructor: `insetScreenRadius` (named, optional)
+- ❇️ Param added in default constructor: `useAdaptiveRadius` (named, optional)
+- ❌ Param removed in constructor `top`: `insetScreenRadius` (named, optional)
+- ❇️ Param added in constructor `top`: `useAdaptiveRadius` (named, optional)
+- ❌ Param removed in constructor `bottom`: `insetScreenRadius` (named, optional)
+- ❇️ Param added in constructor `bottom`: `useAdaptiveRadius` (named, optional)
+- ❇️ Property added: `useAdaptiveRadius`
+
+**`class` LdAppBarConfig** ([lib/src/appbar/appbar.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-11..liquid_flutter/v23.0.0-12#diff-3fa4ae735c9f6ca4c26ac958e08eaa30e2da735b6e0f0ed00665eb6c2b2bb49f))
+- ❌ Param removed in default constructor: `insetScreenRadius` (named, optional)
+- ❇️ Param added in default constructor: `useAdaptiveRadius` (named, optional)
+- ❇️ Property added: `useAdaptiveRadius`
+- ❌ Param removed in method `copyWith`: `insetScreenRadius` (named, optional)
+- ❇️ Param added in method `copyWith`: `useAdaptiveRadius` (named, optional)
+
+**`class` LdAppBarWidget** ([lib/src/appbar/appbar.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-11..liquid_flutter/v23.0.0-12#diff-3fa4ae735c9f6ca4c26ac958e08eaa30e2da735b6e0f0ed00665eb6c2b2bb49f))
+- ❌ Param removed in default constructor: `insetScreenRadius` (named, optional, default: true)
+- ❇️ Param added in default constructor: `useAdaptiveRadius` (named, optional, default: true)
+- ❇️ Property added: `useAdaptiveRadius`
+
+**`class` LdCounter** ([lib/src/counter.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-11..liquid_flutter/v23.0.0-12#diff-56493e7e7233aac1f95d625ed446d310fe0305379c2e1b4429cd8bc3083c6a4d))
+- ❇️ Params added in default constructor: `size` (named, optional, default: LdSize.m), `type` (named, optional, default: LdTextType.headline)
+- ❇️ Properties added: `size`, `type`
+
+**`class` LdCounterDuration** ([lib/src/counter.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-11..liquid_flutter/v23.0.0-12#diff-56493e7e7233aac1f95d625ed446d310fe0305379c2e1b4429cd8bc3083c6a4d))
+- ❇️ Class added: `LdCounterDuration`
+
+**`class` LdInput** ([lib/src/input.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-11..liquid_flutter/v23.0.0-12#diff-2ffc2d5e6008b31f35c68f6ed0d27138168bf19c95df7c0aab8349787a9a5ef6))
+- ❇️ Params added in default constructor: `style` (named, optional), `borderRadius` (named, optional)
+- ❇️ Properties added: `style`, `borderRadius`
+
+**`extension` LdModalRouteExtension** ([lib/src/modal/modal.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-11..liquid_flutter/v23.0.0-12#diff-2d55c400b021d628a7e92bc6d07673f3775bac69b40c544c8332ae622d0f715d))
+- ❇️ Property added: `isInSheet`
+
+**`class` LdModalRouteInfo** ([lib/src/modal/modal.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-11..liquid_flutter/v23.0.0-12#diff-2d55c400b021d628a7e92bc6d07673f3775bac69b40c544c8332ae622d0f715d))
+- ❇️ Class added: `LdModalRouteInfo`
+
+**`class` LdSubmit<T, Arg>** ([lib/src/submit/submit.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-11..liquid_flutter/v23.0.0-12#diff-90dec5a624a3cd55bf16ed8f4d39486f0ad3f7b8e1ff081a9177aedac7ea2802))
+- ❇️ Param added in default constructor: `onException` (named, optional)
+- ❇️ Property added: `onException`
+
+#### 👀 Patch changes
+
+**`class` _AppBarFrameState** ([lib/src/appbar/appbar_frame.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-11..liquid_flutter/v23.0.0-12#diff-f5dae86f88f57d7eacd239b0beba44a7a95e301f01ff1dd11b53d1ec43864c92))
+- ❌ Method removed: `_screenRelativeBorderRadius`
+- ❇️ Param added in method `_insidePadding`: `outsideRadius` (positional, required)
+- ❌ Param removed in method `_buildScrim`: `scrimColor` (positional, required)
+- ❇️ Param added in method `_buildScrim`: `isScrolledUnder` (positional, required)
+- ❇️ Method added: `_adaptiveBorderRadius`
+
+**`class` _ButtonShape** ([lib/src/button.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-11..liquid_flutter/v23.0.0-12#diff-ff5af0a48673590388fb412e3ae360f4d302beeea64e1280f57ea1b097e23697))
+- ❇️ Method added: `_circularSizeBump`
+
+**`class` _DigitSlot** ([lib/src/counter.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-11..liquid_flutter/v23.0.0-12#diff-56493e7e7233aac1f95d625ed446d310fe0305379c2e1b4429cd8bc3083c6a4d))
+- ❇️ Class added: `_DigitSlot`
+
+**`class` _LdCounterDigit** ([lib/src/counter.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-11..liquid_flutter/v23.0.0-12#diff-56493e7e7233aac1f95d625ed446d310fe0305379c2e1b4429cd8bc3083c6a4d))
+- ❇️ Property added: `ascending`
+
+**`class` _LdCounterDigitState** ([lib/src/counter.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-11..liquid_flutter/v23.0.0-12#diff-56493e7e7233aac1f95d625ed446d310fe0305379c2e1b4429cd8bc3083c6a4d))
+- ❌ Properties removed: `_textWidths`, `chars`
+- ❇️ Properties added: `_current`, `_outgoing`, `_incoming`, `_springKey`
+- ❌ Methods removed: `calculateTextWidth`, `_digitHeight`, `_generateTextWidths`, `_buildDigitColumn`, `_buildInlineDigit`, `_buildStandaloneDigit`
+- ❇️ Methods added: `_startTransition`, `_onRollEnd`, `_textWidth`, `_buildRollingContent`, `_buildSettledContent`, `_wrapInline`
+
+**`class` _LdCounterState** ([lib/src/counter.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-11..liquid_flutter/v23.0.0-12#diff-56493e7e7233aac1f95d625ed446d310fe0305379c2e1b4429cd8bc3083c6a4d))
+- 🔄 Property type changed: `_digits`
+- ❇️ Properties added: `_ascending`, `_nextId`, `_initialized`
+- ❇️ Method added: `_removeSlot`
+
+**`class` _LdMultiPanelLayoutState** ([lib/src/multi_panel/multi_panel_layout.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-11..liquid_flutter/v23.0.0-12#diff-dcf83dd1348efc710dbc6957e505c08eb421234a466c65f2b9630f2f41b83750))
+- 🔄 Property type changed: `_bodyDecoration`
+- ❌ Property removed: `_bodyMargin`
+
+**`function` _isRollableDigit** ([lib/src/counter.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-11..liquid_flutter/v23.0.0-12#diff-56493e7e7233aac1f95d625ed446d310fe0305379c2e1b4429cd8bc3083c6a4d))
+- ❇️ Function added: `_isRollableDigit`
+
 ## 23.0.0-11
 Released on: 8/11/2026, changelog automatically generated.
 
