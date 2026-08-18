@@ -599,11 +599,9 @@ class _AppBarFrameState extends State<AppBarFrame> {
     final scrimColor = widget.scrimColor!(isScrolledUnder);
 
     if (scrimColor == null) {
-      print('scrimColor is null');
       return const SizedBox.shrink();
     }
 
-    print('scrimColor: $scrimColor');
     final visiblePortion = (metrics.maximumSize - metrics.scrollOffset).atPosition(widget.position);
 
     height = visiblePortion.clamp(0.0, max(1, height.toDouble()));
