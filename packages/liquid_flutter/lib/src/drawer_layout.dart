@@ -57,6 +57,15 @@ class LdDrawerLayoutState extends State<LdDrawerLayout> {
   double _effectiveDrawerWidth = 0;
   bool _isSideBySide = false;
 
+  // `mounted` is still true for the whole duration of dispose() (the
+  // element reference isn't cleared until after dispose() returns), even
+  // though the element's lifecycle is already defunct at that point. Since
+  // dispose() removes the local history entry synchronously, which can
+  // synchronously invoke _handleHistoryEntryRemoved -> _hideDrawer ->
+  // setState, `mounted` alone isn't a reliable guard here. Track disposal
+  // explicitly instead.
+  bool _disposed = false;
+
   @override
   initState() {
     super.initState();
@@ -89,6 +98,7 @@ class LdDrawerLayoutState extends State<LdDrawerLayout> {
 
   @override
   void dispose() {
+    _disposed = true;
     _historyEntry?.remove();
     super.dispose();
   }
@@ -126,7 +136,7 @@ class LdDrawerLayoutState extends State<LdDrawerLayout> {
   }
 
   void _handleHistoryEntryRemoved() {
-    if (mounted) {
+    if (!_disposed && mounted) {
       _hideDrawer();
     }
   }
@@ -141,7 +151,7 @@ class LdDrawerLayoutState extends State<LdDrawerLayout> {
   }
 
   void _hideDrawer() {
-    if (!mounted) {
+    if (_disposed || !mounted) {
       return;
     }
     setState(() {

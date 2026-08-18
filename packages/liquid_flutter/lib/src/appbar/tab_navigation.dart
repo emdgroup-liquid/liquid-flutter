@@ -462,20 +462,27 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
                             _updateIndicatorPosition();
                           },
                           onHorizontalDragEnd: _onIndicatorDragEnd,
-                          child: LdTouchableSurface(
-                            onPressed: () {},
-                            trackPan: true,
-                            builder: (context, status, _) => LdTouchableTouchFeedback(
-                                scaleFactor: 100,
-                                status: status,
-                                child: Container(
-                                  width: _tabWidth,
-                                  decoration: BoxDecoration(
-                                    color: theme.primaryColor.withAlpha(26),
-                                    borderRadius:
-                                        context.adaptiveRadius.childRadius.max.atLeast(theme.radius(LdSize.m)),
-                                  ),
-                                )),
+                          // The indicator is purely decorative (onPressed is a
+                          // no-op); it must not swallow taps meant for the
+                          // real tab button it currently overlaps, so pointer
+                          // events are passed through to the widgets below it
+                          // in the stack.
+                          child: IgnorePointer(
+                            child: LdTouchableSurface(
+                              onPressed: () {},
+                              trackPan: true,
+                              builder: (context, status, _) => LdTouchableTouchFeedback(
+                                  scaleFactor: 100,
+                                  status: status,
+                                  child: Container(
+                                    width: _tabWidth,
+                                    decoration: BoxDecoration(
+                                      color: theme.primaryColor.withAlpha(26),
+                                      borderRadius:
+                                          context.adaptiveRadius.childRadius.max.atLeast(theme.radius(LdSize.m)),
+                                    ),
+                                  )),
+                            ),
                           ),
                         ),
                         builder: (context, state, child) {
