@@ -1,3 +1,13 @@
+## 1.7.0-11
+Released on: 8/18/2026, changelog automatically generated.
+
+### API Changes
+
+#### 👀 Patch changes
+
+**`meta` pubspec.yaml** ([pubspec.yaml](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_test_utils/v1.7.0-10..liquid_flutter_test_utils/v1.7.0-11#diff-8b7e9df87668ffa6a04b32e1769a33434999e54ae081c52e5d943c541d4c0d25))
+- 📦 `liquid_flutter` version changed: from `^23.0.0-10` to `^23.0.0-12`
+
 ## 1.7.0-10
 Released on: 8/7/2026, changelog automatically generated.
 
