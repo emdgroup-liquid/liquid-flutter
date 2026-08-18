@@ -69,6 +69,12 @@ class _ExceptionDemoState extends State<ExceptionDemo> {
                     ),
                     const LdDivider(),
                     LdText.h("Custom Mapper Example"),
+                    LdText.p(
+                      "LdExceptionLocalizer maps exceptions for every LdSubmit/LdExceptionView "
+                      "below it in the tree. If a mapper only applies to a single LdSubmit, prefer "
+                      "passing onException directly to that LdSubmit instead (see the LdSubmit "
+                      "docs) so the mapping does not leak to sibling widgets.",
+                    ),
                     LdExceptionLocalizer(
                       onException: (context, e) {
                         if (e.exception is MyCustomException) {

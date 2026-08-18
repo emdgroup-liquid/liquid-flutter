@@ -12,11 +12,11 @@ This rule applies when working with `LdSubmit` widgets in Liquid Flutter. Follow
 2. **Use inline builder for forms**, centered for page loads
 3. **Use autoTrigger** for operations that should run on mount
 4. **Configure retries** for network operations that might temporarily fail
-5. **Use typed exceptions + `LdExceptionLocalizer`** for localized error messages (see below)
+5. **Use typed exceptions + `LdSubmit(onException: ...)` (or `LdExceptionLocalizer`)** for localized error messages (see below)
 
 ## Localizing exceptions
 
-`LdSubmit` wraps thrown errors in `LdException` and localizes them at display time via `LdExceptionLocalizer`. Do not throw `LdLocalizedException` from actions — that bypasses locale changes and logs a debug warning.
+`LdSubmit` wraps thrown errors in `LdException` and localizes them at display time via an `LdExceptionLocalizerMapper` (provided either through `LdSubmit(onException: ...)` or an ancestor `LdExceptionLocalizer`). Do not throw `LdLocalizedException` from actions — that bypasses locale changes and logs a debug warning.
 
 ### 1. Throw typed exceptions from actions
 
@@ -36,12 +36,12 @@ if (order == null) {
 
 `LdException` already handles common Dart/IO types (`SocketException`, `TimeoutException`, `FormatException`) when no custom mapper matches. Custom domain types need a localizer entry.
 
-### 2. Map exceptions with `LdExceptionLocalizer`
+### 2. Map exceptions with `onException`
 
-Wrap the widget tree that should handle the exception with `LdExceptionLocalizer`. Return `LdLocalizedException` from `onException` when you recognize the type; return `null` to delegate to a parent localizer or the default mapper.
+Return `LdLocalizedException` from `onException` when you recognize the type; return `null` to delegate to a parent localizer or the default mapper. Prefer passing `onException` directly to the `LdSubmit` when the mapping is local to that one action:
 
 ```dart
-LdExceptionLocalizer(
+LdSubmit<Order, OrderData>(
   onException: (context, e) {
     final l10n = LiquidLocalizations.of(context);
 
@@ -55,22 +55,22 @@ LdExceptionLocalizer(
         stackTrace: e.stackTrace,
       );
     }
-    return null; // fall through to parent / defaults
+    return null; // fall through to an ancestor LdExceptionLocalizer / defaults
   },
-  child: LdSubmit<Order, OrderData>(/* ... */),
+  config: LdSubmitConfig<Order, OrderData>(/* ... */),
 )
 ```
 
 Use `LiquidLocalizations.of(context)` (or your app's l10n delegate) inside `onException` so messages follow the current locale when it changes.
 
-### 3. Place the localizer at the right level
+### 3. Place the mapper at the right level
 
 | Scope | Placement |
 | --- | --- |
-| Exception only shown by one `LdSubmit` (e.g. a single form) | Co-locate: wrap that `LdSubmit` (or its immediate parent) with `LdExceptionLocalizer` |
-| Same exception type used across a feature or app | Higher in the tree: feature root, screen, or app root so all `LdSubmit` / `LdExceptionView` descendants share one mapper |
+| Exception only shown by one `LdSubmit` (e.g. a single form) | Pass `onException` directly to that `LdSubmit` — no extra widget, and it never leaks to sibling widgets or unrelated descendants |
+| Same exception type used across a feature or app | Wrap the shared ancestor (feature root, screen, or app root) with `LdExceptionLocalizer` so all `LdSubmit` / `LdExceptionView` descendants share one mapper |
 
-Parent localizers chain automatically — child `onException` runs first; returning `null` passes to the parent `LdExceptionLocalizerMapper`.
+Mappers chain automatically — `LdSubmit.onException` (if set) runs first; returning `null` passes to any ancestor `LdExceptionLocalizerMapper`, then to the built-in defaults.
 
 ### 4. What not to do
 
@@ -112,7 +112,7 @@ class OrderForm extends StatelessWidget {
           return await ApiService.instance.createOrder(data!);
         },
       ),
-      builder: LdSubmitInlineBuilder<Order, OrderData>(),
+      child: LdSubmitInlineBuilder<Order, OrderData>(),
     );
   }
 }

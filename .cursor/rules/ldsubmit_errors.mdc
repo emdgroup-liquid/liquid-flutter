@@ -10,13 +10,13 @@ This rule applies when working with error handling in `LdSubmit` widgets or asyn
 
 `LdSubmit` automatically handles exceptions and displays them using `LdExceptionView`. User-facing text is produced when the `LdException` is localized via `LdExceptionLocalizer` (see [LdSubmit best practices](ldsubmit_best_practices.mdc)).
 
-**✅ Recommended: Throw typed exceptions and use `LdExceptionLocalizer`**
+**✅ Recommended: Throw typed exceptions and localize them**
 
-The default localizer handles common exceptions (`SocketException`, `TimeoutException`, `FormatException`) automatically. For custom exceptions, wrap the relevant subtree:
+The default localizer handles common exceptions (`SocketException`, `TimeoutException`, `FormatException`) automatically. For custom exceptions that only occur in one place, pass `onException` directly to that `LdSubmit` — no extra widget needed, and the mapping stays local to that instance instead of leaking to sibling widgets:
 
 ```dart
 Widget build(BuildContext context) {
-  return LdExceptionLocalizer(
+  return LdSubmit<User, void>(
     onException: (context, e) {
       final l10n = LiquidLocalizations.of(context);
 
@@ -37,21 +37,28 @@ Widget build(BuildContext context) {
           stackTrace: e.stackTrace,
         );
       }
-      return null; // parent localizer or built-in defaults
+      return null; // falls back to an ancestor LdExceptionLocalizer, then built-in defaults
     },
-    child: LdSubmit<User, void>(
-      config: LdSubmitConfig<User, void>(
-        action: (_) async {
-          throw const AuthenticationException(); // typed, not localized here
-        },
-      ),
-      builder: LdSubmitInlineBuilder<User, void>(),
+    config: LdSubmitConfig<User, void>(
+      action: (_) async {
+        throw const AuthenticationException(); // typed, not localized here
+      },
     ),
+    child: LdSubmitInlineBuilder<User, void>(),
   );
 }
 ```
 
-Place `LdExceptionLocalizer` at the app or feature root when the same exception types appear in many places; co-locate with a single `LdSubmit` when the error is local to that form.
+For exception types shared across many `LdSubmit`s or a whole feature/app, wrap the shared ancestor with `LdExceptionLocalizer` instead — `LdSubmit.onException` (if set) is tried first and falls back to any ancestor `LdExceptionLocalizer`, then to the built-in defaults.
+
+```dart
+LdExceptionLocalizer(
+  onException: (context, e) { /* shared mapping */ },
+  child: /* subtree with many LdSubmit widgets */,
+)
+```
+
+Prefer `LdSubmit(onException: ...)` when the mapping is local to a single submit action — it avoids mounting a separate widget and never exposes the mapper to sibling widgets or unrelated descendants the way an ancestor `LdExceptionLocalizer` would.
 
 **❌ Not recommended: Throwing `LdLocalizedException` from actions**
 

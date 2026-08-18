@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/l10n/generated/liquid_localizations_en.dart';
 
 class CounterProvider extends StatefulWidget {
   final Widget Function(BuildContext context, int counter) builder;
@@ -312,6 +313,119 @@ void main() {
       findsNWidgets(2),
     ); // Retry + More Info buttons
   });
+
+  testWidgets("LdSubmit with onException passed directly", (WidgetTester tester) async {
+    LdLocalizedException customMapper(context, e) {
+      return LdLocalizedException(
+        message: "Custom exception",
+        type: LdHintType.error,
+      );
+    }
+
+    final completer = Completer<void>();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        localizationsDelegates: const [LiquidLocalizations.delegate],
+        home: LdThemeProvider(
+          child: Scaffold(
+            body: LdSubmit<int, void>(
+              onException: customMapper,
+              config: LdSubmitConfig(action: (arg) async {
+                await completer.future;
+                throw TimeoutException('Timeout');
+              }),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Trigger action that will fail
+    await tester.tap(find.text("Submit"));
+    await tester.pump();
+
+    completer.complete();
+
+    await tester.pumpAndSettle();
+
+    // Verify error state uses the locally-provided mapper, without needing
+    // to mount a separate LdExceptionLocalizer ancestor widget.
+    expect(find.text("Custom exception"), findsOneWidget);
+  });
+
+  testWidgets(
+    "LdSubmit onException does not leak to sibling widgets",
+    (WidgetTester tester) async {
+      LdLocalizedException customMapper(context, e) {
+        return LdLocalizedException(
+          message: "Custom exception",
+          type: LdHintType.error,
+        );
+      }
+
+      final mappedCompleter = Completer<void>();
+      final unmappedCompleter = Completer<void>();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: const [LiquidLocalizations.delegate],
+          home: LdThemeProvider(
+            child: Scaffold(
+              body: Column(
+                children: [
+                  LdSubmit<int, void>(
+                    onException: customMapper,
+                    config: LdSubmitConfig(
+                      debugLabel: 'mapped',
+                      action: (arg) async {
+                        await mappedCompleter.future;
+                        throw TimeoutException('Timeout');
+                      },
+                    ),
+                  ),
+                  // A sibling LdSubmit that is not configured with a custom
+                  // mapper. It must fall back to the built-in default
+                  // mapping and never see the sibling's `onException`.
+                  LdSubmit<int, void>(
+                    config: LdSubmitConfig(
+                      debugLabel: 'unmapped',
+                      action: (arg) async {
+                        await unmappedCompleter.future;
+                        throw TimeoutException('Timeout');
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Trigger both actions.
+      final submitButtons = find.text("Submit");
+      expect(submitButtons, findsNWidgets(2));
+      await tester.tap(submitButtons.first);
+      await tester.tap(submitButtons.last);
+      await tester.pump();
+
+      mappedCompleter.complete();
+      unmappedCompleter.complete();
+
+      await tester.pumpAndSettle();
+
+      // Only the LdSubmit that was given `onException` shows the custom
+      // message; the sibling shows the default timeout error text.
+      expect(find.text("Custom exception"), findsOneWidget);
+      final localizations = LiquidLocalizationsEn();
+      expect(find.text(localizations.timeoutError), findsOneWidget);
+    },
+  );
 
   testWidgets("LdSubmit with retry config", (WidgetTester tester) async {
     int calls = 0;

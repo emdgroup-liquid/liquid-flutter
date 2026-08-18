@@ -61,6 +61,19 @@ class LdSubmit<T, Arg> extends StatefulWidget {
   final Arg? arg;
   final bool Function(Arg? oldArg, Arg? newArg)? argEquals;
 
+  /// An optional exception mapper scoped to this [LdSubmit] instance.
+  ///
+  /// This lets you localize exceptions that only occur in this specific
+  /// submit action without mounting a separate [LdExceptionLocalizer]
+  /// widget above it. Because it is applied inside this widget's own
+  /// subtree, it will never be visible to sibling widgets or unrelated
+  /// descendants elsewhere on the page.
+  ///
+  /// If this returns `null` (or is not provided), lookup falls back to any
+  /// ancestor [LdExceptionLocalizer] and finally to the built-in default
+  /// mapper, same as [LdExceptionLocalizer]'s own chaining behavior.
+  final LdExceptionLocalizeFunction? onException;
+
   const LdSubmit({
     super.key,
     this.arg,
@@ -71,6 +84,7 @@ class LdSubmit<T, Arg> extends StatefulWidget {
     /// Will default to [LdSubmitInlineBuilder] if not provided
     this.child,
     this.argEquals,
+    this.onException,
   });
 
   @override
@@ -146,9 +160,19 @@ class _LdSubmitState<T, Arg> extends State<LdSubmit<T, Arg>> {
   }
 
   Widget _buildProvider(BuildContext context) {
-    return ListenableProvider.value(
+    final provider = ListenableProvider.value(
       value: _controller,
       child: submitBuilder,
+    );
+
+    final onException = widget.onException;
+    if (onException == null) {
+      return provider;
+    }
+
+    return LdExceptionLocalizer(
+      onException: onException,
+      child: provider,
     );
   }
 

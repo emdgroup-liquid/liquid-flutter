@@ -6,6 +6,8 @@ import 'package:liquid/components/component_well/component_well.dart';
 import 'package:liquid/components/layout/components_accordion.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
+class _NotEnoughFusionException implements Exception {}
+
 class SubmitDemo extends StatefulWidget {
   const SubmitDemo({super.key});
 
@@ -304,9 +306,59 @@ class _SubmitDemoState extends State<SubmitDemo> {
             children: [
               LdText.h("Exception Handling"),
               LdText.p(
-                "Exceptions are caught, handled by an LdExceptionMapper and displayed in an LdExceptionView. The Exception mapper can be used to configure how a specific exception is displayed. To add a custom exception you can either throw an LdException directly or provide a custom LdExceptionMapper to the LdSubmitConfig.",
+                "Exceptions are caught, wrapped in an LdException and localized (turned into a "
+                "user-facing LdLocalizedException) at display time in an LdExceptionView. To "
+                "customize how a specific exception is localized you can either wrap the relevant "
+                "part of the tree with an LdExceptionLocalizer, or, if the exception only occurs "
+                "in a single LdSubmit, pass an onException mapper directly to that LdSubmit (see "
+                "below).",
               ),
-              ComponentsAccordion(components: {"LdException", "LdExceptionMapper", "LdExceptionView"}),
+              ComponentsAccordion(components: {"LdException", "LdExceptionLocalizer", "LdExceptionView"}),
+            ],
+          ),
+          ldSpacerL,
+          ldSpacerL,
+          LdBundle(
+            children: [
+              ComponentWell(
+                title: LdText.h("Localizing exceptions per LdSubmit"),
+                description: LdText.p(
+                  "Pass onException directly to LdSubmit to localize exceptions that only occur "
+                  "in this action. Unlike wrapping the tree in an LdExceptionLocalizer, this stays "
+                  "scoped to this LdSubmit instance and is never visible to sibling widgets. "
+                  "Returning null falls back to any ancestor LdExceptionLocalizer, then to the "
+                  "built-in defaults.",
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    LdSubmit<int, void>(
+                      onException: (context, e) {
+                        if (e.exception is _NotEnoughFusionException) {
+                          return LdLocalizedException(
+                            message: "Not enough fusion",
+                            moreInfo: "This message is localized locally by this LdSubmit's onException.",
+                          );
+                        }
+                        return null;
+                      },
+                      config: LdSubmitConfig<int, void>(
+                        allowResubmit: true,
+                        loadingText: ("Trying nuclear fusion"),
+                        action: (arg) async {
+                          await Future.delayed(const Duration(seconds: 1));
+                          throw _NotEnoughFusionException();
+                        },
+                      ),
+                      child: LdSubmitInlineBuilder<int, void>(
+                        resultBuilder: (context, result, controller) {
+                          return Text("The result is $result");
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
         ],
