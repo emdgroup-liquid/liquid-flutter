@@ -102,21 +102,9 @@ class _LdButtonPlaygroundDemoState extends State<LdButtonPlaygroundDemo> {
             ),
           ],
         ),
-        LdToggle(
-          checked: _disabled,
-          onChanged: (bool v) => setState(() => _disabled = v),
-          label: 'Disabled',
-        ),
-        LdToggle(
-          checked: _active,
-          onChanged: (bool v) => setState(() => _active = v),
-          label: 'Active',
-        ),
-        LdToggle(
-          checked: _showIcon,
-          onChanged: (bool v) => setState(() => _showIcon = v),
-          label: 'Show Icon',
-        ),
+        LdToggle(checked: _disabled, onChanged: (bool v) => setState(() => _disabled = v), label: 'Disabled'),
+        LdToggle(checked: _active, onChanged: (bool v) => setState(() => _active = v), label: 'Active'),
+        LdToggle(checked: _showIcon, onChanged: (bool v) => setState(() => _showIcon = v), label: 'Show Icon'),
       ],
     );
   }
@@ -141,10 +129,7 @@ class LdButtonErrorDemo extends StatelessWidget {
               color: LdTheme.of(context).warning,
               onPressed: () async {
                 await Future.delayed(const Duration(seconds: 1));
-                throw LdLocalizedException(
-                  message: "Told you!",
-                  moreInfo: "Nothing actually happened",
-                );
+                throw LdLocalizedException(message: "Told you!", moreInfo: "Nothing actually happened");
               },
               child: const Text("I won't work"),
             ),
@@ -228,8 +213,12 @@ class LdButtonCircularDemo extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               LdButton(
+                size: LdSize.xs,
+                onPressed: () async => Future.delayed(const Duration(seconds: 1)),
+                child: const Icon(LucideIcons.x),
+              ),
+              LdButton(
                 size: LdSize.s,
-                mode: LdButtonMode.ghost,
                 onPressed: () async => Future.delayed(const Duration(seconds: 1)),
                 child: const Icon(LucideIcons.x),
               ),
@@ -237,14 +226,9 @@ class LdButtonCircularDemo extends StatelessWidget {
                 onPressed: () async => Future.delayed(const Duration(seconds: 1)),
                 child: const Icon(LucideIcons.x),
               ),
-              LdButton(
-                trailing: const Icon(LucideIcons.x),
-                onPressed: () async => Future.delayed(const Duration(seconds: 1)),
-                child: const Text('Close'),
-              ),
+
               LdButton(
                 size: LdSize.l,
-                mode: LdButtonMode.vague,
                 onPressed: () async => Future.delayed(const Duration(seconds: 1)),
                 child: const Icon(LucideIcons.x),
               ),
@@ -271,10 +255,7 @@ class LdButtonFullWidthDemo extends StatelessWidget {
             mode: LdButtonMode.outline,
             width: double.infinity,
             onPressed: () => LdNotificationsController.of(context).addNotification(
-              LdNotification(
-                message: 'You pressed the full width button',
-                type: LdNotificationType.success,
-              ),
+              LdNotification(message: 'You pressed the full width button', type: LdNotificationType.success),
             ),
             child: const Text('Full width'),
           ),
@@ -294,35 +275,28 @@ class LdButtonConfigDemo extends StatelessWidget {
         children: [
           /*begin demo:LdButtonConfig*/
           LdButtonConfigProvider(
-            config: const LdButtonConfig(
-              mode: LdButtonMode.outline,
-              size: LdSize.s,
-              disabled: false,
-            ),
+            config: const LdButtonConfig(mode: LdButtonMode.outline, size: LdSize.s, disabled: false),
             child: Wrap(
               spacing: 8,
               runSpacing: 8,
               children: [
                 LdButton(
-                  onPressed: () => LdNotificationsController.of(context).addNotification(
-                    LdNotification(message: 'Button 1', type: LdNotificationType.success),
-                  ),
+                  onPressed: () => LdNotificationsController.of(
+                    context,
+                  ).addNotification(LdNotification(message: 'Button 1', type: LdNotificationType.success)),
                   child: const Text('Button 1'),
                 ),
                 LdButton(
-                  onPressed: () => LdNotificationsController.of(context).addNotification(
-                    LdNotification(message: 'Button 2', type: LdNotificationType.success),
-                  ),
+                  onPressed: () => LdNotificationsController.of(
+                    context,
+                  ).addNotification(LdNotification(message: 'Button 2', type: LdNotificationType.success)),
                   child: const Text('Button 2'),
                 ),
                 LdButton(
                   mode: LdButtonMode.filled,
                   size: LdSize.m,
                   onPressed: () => LdNotificationsController.of(context).addNotification(
-                    LdNotification(
-                      message: 'Button 3 (overrides config)',
-                      type: LdNotificationType.success,
-                    ),
+                    LdNotification(message: 'Button 3 (overrides config)', type: LdNotificationType.success),
                   ),
                   child: const Text('Button 3'),
                 ),

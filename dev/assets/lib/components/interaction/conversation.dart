@@ -562,44 +562,33 @@ Call out if you want this expanded into a full changelog entry, a PR description
     });
   }
 
-  LdConversationApprovalActions get _approvalActions =>
-      LdConversationApprovalActions(
-        onApprove: (item) => _setApproval(item.id, LdApprovalStatus.approved),
-        onDeny: (item) => _setApproval(item.id, LdApprovalStatus.denied),
-        seedRuleFor: (item) {
-          final seed = _seedAllowRule;
-          if (seed == null || seed.toolName != item.toolName) {
-            return null;
-          }
-          return seed;
-        },
-        onApproveWithRule: (item, result) {
-          // Demo: rule would be persisted by the host app.
-          debugPrint('Saved allow rule: ${result.savedRule}');
-          if (result.savedRule != null) {
-            _seedAllowRule = result.savedRule;
-          }
-          _setApproval(item.id, LdApprovalStatus.approved);
-        },
-      );
+  LdConversationApprovalActions get _approvalActions => LdConversationApprovalActions(
+    onApprove: (item) => _setApproval(item.id, LdApprovalStatus.approved),
+    onDeny: (item) => _setApproval(item.id, LdApprovalStatus.denied),
+    seedRuleFor: (item) {
+      final seed = _seedAllowRule;
+      if (seed == null || seed.toolName != item.toolName) {
+        return null;
+      }
+      return seed;
+    },
+    onApproveWithRule: (item, result) {
+      // Demo: rule would be persisted by the host app.
+      debugPrint('Saved allow rule: ${result.savedRule}');
+      if (result.savedRule != null) {
+        _seedAllowRule = result.savedRule;
+      }
+      _setApproval(item.id, LdApprovalStatus.approved);
+    },
+  );
 
-  Widget _buildItem(
-    BuildContext context,
-    LdConversationItem item,
-    bool isSingleton,
-  ) {
+  Widget _buildItem(BuildContext context, LdConversationItem item, bool isSingleton) {
     return switch (item) {
-      LdUserMessageItem(:final id, :final text, :final attachments) =>
-        LdSendFlyTarget(
-          id: id,
-          child: LdUserBubble(text: text, attachments: attachments),
-        ),
-      _ => LdConversation.defaultItemBuilder(
-        context,
-        item,
-        isSingleton,
-        approval: _approvalActions,
+      LdUserMessageItem(:final id, :final text, :final attachments) => LdSendFlyTarget(
+        id: id,
+        child: LdUserBubble(text: text, attachments: attachments),
       ),
+      _ => LdConversation.defaultItemBuilder(context, item, isSingleton, approval: _approvalActions),
     };
   }
 
@@ -612,11 +601,7 @@ Call out if you want this expanded into a full changelog entry, a PR description
           final conversation = LdAgentTaskPanel(
             tasks: _tasks,
 
-            child: LdConversation(
-              items: _items,
-              approval: _approvalActions,
-              itemBuilder: _buildItem,
-            ),
+            child: LdConversation(items: _items, approval: _approvalActions, itemBuilder: _buildItem),
           );
           final composeBar = LdComposeBar(
             controller: _controller,
