@@ -87,6 +87,70 @@ void main() {
       expect(selectedRoute, equals('/search'));
     });
 
+    testWidgets('Tapping the active tab still reaches the tab button', (WidgetTester tester) async {
+      ldDisableAnimations = true;
+      String? selectedRoute;
+
+      await tester.pumpWidget(
+        _wrapInScaffold(
+          LdScaffold(
+            body: LdTabNavigation(
+              tabs: sampleTabs,
+              activeRoute: '/home',
+              onTabPressed: (route) {
+                selectedRoute = route;
+              },
+              child: const Center(child: Text('Body')),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Home'));
+      await tester.pumpAndSettle();
+
+      expect(selectedRoute, equals('/home'));
+    });
+
+    testWidgets('Dragging the indicator selects the closest tab', (WidgetTester tester) async {
+      ldDisableAnimations = true;
+      String? selectedRoute = '/home';
+
+      await tester.pumpWidget(
+        _wrapInScaffold(
+          LdScaffold(
+            body: LdTabNavigation(
+              tabs: sampleTabs,
+              activeRoute: '/home',
+              onTabPressed: (route) {
+                selectedRoute = route;
+              },
+              child: const Center(child: Text('Body')),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      final indicator = find.byWidgetPredicate(
+        (widget) => widget is GestureDetector && widget.onHorizontalDragEnd != null,
+      );
+      expect(indicator, findsOneWidget);
+
+      final tabWidth = tester.getSize(indicator).width;
+      await tester.timedDrag(
+        indicator,
+        Offset(tabWidth + 12, 0),
+        const Duration(milliseconds: 300),
+      );
+      await tester.pumpAndSettle();
+
+      expect(selectedRoute, equals('/search'));
+    });
+
     testWidgets('Active route matching - exact', (WidgetTester tester) async {
       ldDisableAnimations = true;
       await tester.pumpWidget(

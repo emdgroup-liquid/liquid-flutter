@@ -452,6 +452,7 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
                         overriden: _springOverridden,
                         position: _indicatorPosition,
                         child: GestureDetector(
+                          behavior: HitTestBehavior.translucent,
                           onHorizontalDragStart: (details) {
                             _dragStartPosition = details.localPosition.dx;
                             _dragStartIndicatorPosition = _indicatorPosition;
@@ -462,26 +463,28 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
                             _updateIndicatorPosition();
                           },
                           onHorizontalDragEnd: _onIndicatorDragEnd,
-                          // The indicator is purely decorative (onPressed is a
-                          // no-op); it must not swallow taps meant for the
-                          // real tab button it currently overlaps, so pointer
-                          // events are passed through to the widgets below it
-                          // in the stack.
+                          // IgnorePointer lets taps reach the tab under the
+                          // indicator. translucent keeps this detector in the
+                          // hit-test path so horizontal drags still move it
+                          // (deferToChild would drop events because the child
+                          // ignores pointers).
                           child: IgnorePointer(
                             child: LdTouchableSurface(
                               onPressed: () {},
                               trackPan: true,
                               builder: (context, status, _) => LdTouchableTouchFeedback(
-                                  scaleFactor: 100,
-                                  status: status,
-                                  child: Container(
-                                    width: _tabWidth,
-                                    decoration: BoxDecoration(
-                                      color: theme.primaryColor.withAlpha(26),
-                                      borderRadius:
-                                          context.adaptiveRadius.childRadius.max.atLeast(theme.radius(LdSize.m)),
+                                scaleFactor: 100,
+                                status: status,
+                                child: Container(
+                                  width: _tabWidth,
+                                  decoration: BoxDecoration(
+                                    color: theme.primaryColor.withAlpha(26),
+                                    borderRadius: context.adaptiveRadius.childRadius.max.atLeast(
+                                      theme.radius(LdSize.m),
                                     ),
-                                  )),
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                         ),
