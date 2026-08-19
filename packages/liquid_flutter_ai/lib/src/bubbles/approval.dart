@@ -56,58 +56,64 @@ class LdApprovalCard extends StatelessWidget {
     final theme = LdTheme.of(context);
     final hasDescription = item.description?.isNotEmpty ?? false;
 
-    return LdCard(
-      padding: theme.pad(size: LdSize.m),
-      child: LdAutoSpace(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 200),
-                transitionBuilder: (child, animation) =>
-                    ScaleTransition(scale: animation, child: child),
-                child: switch (item.status) {
-                  LdApprovalStatus.pending => LdIndicator.info(
-                    key: const Key('request_pending'),
-                  ),
-                  LdApprovalStatus.approved => LdIndicator.success(
-                    key: const Key('request_approved'),
-                  ),
-                  LdApprovalStatus.denied => LdIndicator.error(
-                    key: const Key('request_denied'),
-                  ),
-                },
-              ),
-              ldHSpacerS,
-              Expanded(
-                child: LdAutoSpace(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  defaultSpacing: LdSize.xs,
-                  children: [
-                    LdText.l(item.title),
-                    if (hasDescription)
-                      LdText.p(
-                        item.description!,
-                        size: LdSize.s,
-                        color: theme.textMuted,
-                      ),
-                    switch (item.status) {
-                      LdApprovalStatus.pending => _buildPendingActions(
-                        context,
-                        theme,
-                      ),
-                      LdApprovalStatus.approved => LdText.l('Request Approved'),
-                      LdApprovalStatus.denied => LdText.l('Request Denied'),
-                    },
-                    if (trailingBuilder != null) trailingBuilder!(context),
-                  ],
+    return LdReveal.quick(
+      initialRevealed: false,
+      revealed: true,
+      child: LdCard(
+        padding: theme.pad(size: LdSize.m),
+        child: LdAutoSpace(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 200),
+                  transitionBuilder: (child, animation) =>
+                      ScaleTransition(scale: animation, child: child),
+                  child: switch (item.status) {
+                    LdApprovalStatus.pending => LdIndicator.info(
+                      key: const Key('request_pending'),
+                    ),
+                    LdApprovalStatus.approved => LdIndicator.success(
+                      key: const Key('request_approved'),
+                    ),
+                    LdApprovalStatus.denied => LdIndicator.error(
+                      key: const Key('request_denied'),
+                    ),
+                  },
                 ),
-              ),
-            ],
-          ),
-        ],
+                ldHSpacerS,
+                Expanded(
+                  child: LdAutoSpace(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    defaultSpacing: LdSize.xs,
+                    children: [
+                      LdText.l(item.title),
+                      if (hasDescription)
+                        LdText.p(
+                          item.description!,
+                          size: LdSize.s,
+                          color: theme.textMuted,
+                        ),
+                      switch (item.status) {
+                        LdApprovalStatus.pending => _buildPendingActions(
+                          context,
+                          theme,
+                        ),
+                        LdApprovalStatus.approved => LdText.l(
+                          'Request Approved',
+                        ),
+                        LdApprovalStatus.denied => LdText.l('Request Denied'),
+                      },
+                      if (trailingBuilder != null) trailingBuilder!(context),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
