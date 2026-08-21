@@ -19,10 +19,7 @@ enum LdToolAllowPinMode {
 
 /// Pin state for one argument path.
 class LdToolAllowFieldPin {
-  const LdToolAllowFieldPin({
-    required this.mode,
-    this.values = const [],
-  });
+  const LdToolAllowFieldPin({required this.mode, this.values = const []});
 
   final LdToolAllowPinMode mode;
 
@@ -32,19 +29,17 @@ class LdToolAllowFieldPin {
   LdToolAllowFieldPin copyWith({
     LdToolAllowPinMode? mode,
     List<Object?>? values,
-  }) =>
-      LdToolAllowFieldPin(
-        mode: mode ?? this.mode,
-        values: values ?? this.values,
-      );
+  }) => LdToolAllowFieldPin(
+    mode: mode ?? this.mode,
+    values: values ?? this.values,
+  );
 
   String get summaryLabel {
     return switch (mode) {
       LdToolAllowPinMode.wildcard => 'Any',
       LdToolAllowPinMode.notAllowed => 'Not allowed',
-      LdToolAllowPinMode.exact => values.isEmpty
-          ? '—'
-          : values.map(_formatPinValue).join(' | '),
+      LdToolAllowPinMode.exact =>
+        values.isEmpty ? '—' : values.map(_formatPinValue).join(' | '),
     };
   }
 
@@ -78,12 +73,11 @@ class LdToolAllowRule {
     String? toolName,
     Map<String, dynamic>? argumentPattern,
     bool? wildcard,
-  }) =>
-      LdToolAllowRule(
-        toolName: toolName ?? this.toolName,
-        argumentPattern: argumentPattern ?? this.argumentPattern,
-        wildcard: wildcard ?? this.wildcard,
-      );
+  }) => LdToolAllowRule(
+    toolName: toolName ?? this.toolName,
+    argumentPattern: argumentPattern ?? this.argumentPattern,
+    wildcard: wildcard ?? this.wildcard,
+  );
 
   bool matches(String name, Map<String, dynamic> args) {
     if (toolName != name) {
@@ -99,10 +93,7 @@ class LdToolAllowRule {
     if (wildcard) {
       return {'tool_name': toolName, 'argument_pattern': '*'};
     }
-    return {
-      'tool_name': toolName,
-      'argument_pattern': argumentPattern,
-    };
+    return {'tool_name': toolName, 'argument_pattern': argumentPattern};
   }
 
   factory LdToolAllowRule.fromJson(Map<String, dynamic> json) {
@@ -127,10 +118,7 @@ class LdToolAllowRule {
         pattern = Map<String, dynamic>.from(decoded);
       }
     }
-    return LdToolAllowRule(
-      toolName: toolName,
-      argumentPattern: pattern,
-    );
+    return LdToolAllowRule(toolName: toolName, argumentPattern: pattern);
   }
 
   /// Builds a rule from legacy mode-only pins and a display [args] map.
@@ -380,14 +368,20 @@ class LdToolAllowMatcher {
   ///
   /// Field wildcards mean "don't care" (present with any value, or absent).
   /// Explicit `null` in an OR list also allows absence (see merge).
+  /// A nested object allows absence when it is non-empty and every child
+  /// also allows absence (e.g. all known fields pinned to Any).
   static bool _allowsAbsent(dynamic value) {
     if (value == ldToolAllowWildcard) {
       return true;
     }
     if (value is List) {
-      return value.any(
-        (e) => e == null || e == ldToolAllowWildcard,
-      );
+      return value.any((e) => e == null || _allowsAbsent(e));
+    }
+    if (value is Map) {
+      if (value.isEmpty) {
+        return false;
+      }
+      return value.values.every(_allowsAbsent);
     }
     return false;
   }
@@ -478,7 +472,8 @@ Map<String, dynamic> ldBuildArgumentPattern(
   Set<String>? objectPaths,
 }) {
   final pattern = <String, dynamic>{};
-  final objects = objectPaths ??
+  final objects =
+      objectPaths ??
       pins.entries
           .where(
             (e) =>
@@ -596,14 +591,13 @@ class LdToolAllowFieldSession {
 
   LdToolAllowFieldSession copyWithPins(
     Map<String, LdToolAllowFieldPin> nextPins,
-  ) =>
-      LdToolAllowFieldSession(
-        schemaMeta: schemaMeta,
-        pins: nextPins,
-        rootKeys: rootKeys,
-        objectPaths: objectPaths,
-        callArgs: callArgs,
-      );
+  ) => LdToolAllowFieldSession(
+    schemaMeta: schemaMeta,
+    pins: nextPins,
+    rootKeys: rootKeys,
+    objectPaths: objectPaths,
+    callArgs: callArgs,
+  );
 
   LdToolAllowRule toRule(String toolName) {
     final args = callArgs;
@@ -662,8 +656,9 @@ LdToolAllowFieldSession ldBuildToolAllowFieldSession({
   final hasCallContext = arguments != null;
   final callArgs = ldParseToolArguments(arguments);
   final schemaMeta = ldParseToolInputSchema(inputSchema);
-  final seedPattern =
-      seedRule != null && !seedRule.wildcard ? seedRule.argumentPattern : null;
+  final seedPattern = seedRule != null && !seedRule.wildcard
+      ? seedRule.argumentPattern
+      : null;
 
   final paths = <String>{};
   paths.addAll(schemaMeta.keys);
@@ -694,8 +689,9 @@ LdToolAllowFieldSession ldBuildToolAllowFieldSession({
       objectPaths.add(path);
       continue;
     }
-    final seedValue =
-        seedPattern == null ? null : _valueAtPathInPattern(seedPattern, path);
+    final seedValue = seedPattern == null
+        ? null
+        : _valueAtPathInPattern(seedPattern, path);
     if (seedValue is Map) {
       objectPaths.add(path);
     }
@@ -761,8 +757,9 @@ LdToolAllowFieldPin _defaultPinForPath({
   required bool isObject,
 }) {
   final callValue = ldValueAtArgumentPath(callArgs, path);
-  final seedValue =
-      seedPattern == null ? null : _valueAtPathInPattern(seedPattern, path);
+  final seedValue = seedPattern == null
+      ? null
+      : _valueAtPathInPattern(seedPattern, path);
   final meta = schemaMeta[path];
   final hasCall = _pathExists(callArgs, path);
   final hasSeed = seedPattern != null && _patternPathExists(seedPattern, path);
@@ -814,10 +811,7 @@ LdToolAllowFieldPin _defaultPinForPath({
   }
 
   if (values.isNotEmpty) {
-    return LdToolAllowFieldPin(
-      mode: LdToolAllowPinMode.exact,
-      values: values,
-    );
+    return LdToolAllowFieldPin(mode: LdToolAllowPinMode.exact, values: values);
   }
 
   if (meta != null && !meta.required) {

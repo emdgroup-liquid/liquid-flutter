@@ -64,15 +64,67 @@ void main() {
     test('field wildcard allows key to be absent', () {
       const rule = LdToolAllowRule(
         toolName: 'pr',
-        argumentPattern: {
-          'title': 'feat',
-          'body': ldToolAllowWildcard,
-        },
+        argumentPattern: {'title': 'feat', 'body': ldToolAllowWildcard},
       );
       // Broader than the current call: optional body allowed as Any.
       expect(rule.matches('pr', {'title': 'feat'}), isTrue);
       expect(rule.matches('pr', {'title': 'feat', 'body': 'x'}), isTrue);
       expect(rule.matches('pr', {'title': 'other'}), isFalse);
+    });
+
+    test('nested object of all wildcards allows object to be absent', () {
+      const rule = LdToolAllowRule(
+        toolName: 'pr',
+        argumentPattern: {
+          'title': 'feat',
+          'repo': {'owner': ldToolAllowWildcard, 'name': ldToolAllowWildcard},
+        },
+      );
+      expect(rule.matches('pr', {'title': 'feat'}), isTrue);
+      expect(
+        rule.matches('pr', {
+          'title': 'feat',
+          'repo': {'owner': 'mtrust', 'name': 'liquid-flutter'},
+        }),
+        isTrue,
+      );
+      expect(
+        rule.matches('pr', {
+          'title': 'feat',
+          'repo': {'owner': 'mtrust', 'name': 'liquid-flutter', 'extra': true},
+        }),
+        isFalse,
+      );
+    });
+
+    test('empty nested object still requires the key', () {
+      const rule = LdToolAllowRule(
+        toolName: 'pr',
+        argumentPattern: {'title': 'feat', 'repo': <String, dynamic>{}},
+      );
+      expect(rule.matches('pr', {'title': 'feat'}), isFalse);
+      expect(
+        rule.matches('pr', {'title': 'feat', 'repo': <String, dynamic>{}}),
+        isTrue,
+      );
+    });
+
+    test('nested object with an exact child still requires the object', () {
+      const rule = LdToolAllowRule(
+        toolName: 'pr',
+        argumentPattern: {
+          'title': 'feat',
+          'repo': {'owner': 'mtrust', 'visibility': ldToolAllowWildcard},
+        },
+      );
+      expect(rule.matches('pr', {'title': 'feat'}), isFalse);
+      expect(
+        rule.matches('pr', {
+          'title': 'feat',
+          'repo': {'owner': 'mtrust'},
+        }),
+        isTrue,
+      );
     });
 
     test('wildcard inside OR list allows key to be absent', () {
@@ -94,8 +146,18 @@ void main() {
           ],
         },
       );
-      expect(rule.matches('pr', {'labels': ['ui', 'ai']}), isTrue);
-      expect(rule.matches('pr', {'labels': ['ui']}), isFalse);
+      expect(
+        rule.matches('pr', {
+          'labels': ['ui', 'ai'],
+        }),
+        isTrue,
+      );
+      expect(
+        rule.matches('pr', {
+          'labels': ['ui'],
+        }),
+        isFalse,
+      );
       expect(rule.matches('pr', {'labels': 'ui'}), isFalse);
     });
 
@@ -109,9 +171,24 @@ void main() {
           ],
         },
       );
-      expect(rule.matches('pr', {'labels': ['ui']}), isTrue);
-      expect(rule.matches('pr', {'labels': ['ui', 'ai']}), isTrue);
-      expect(rule.matches('pr', {'labels': ['docs']}), isFalse);
+      expect(
+        rule.matches('pr', {
+          'labels': ['ui'],
+        }),
+        isTrue,
+      );
+      expect(
+        rule.matches('pr', {
+          'labels': ['ui', 'ai'],
+        }),
+        isTrue,
+      );
+      expect(
+        rule.matches('pr', {
+          'labels': ['docs'],
+        }),
+        isFalse,
+      );
     });
   });
 
@@ -127,14 +204,8 @@ void main() {
           argumentPattern: {'command': 'ls'},
         ),
       ];
-      expect(
-        ldIsToolAutoApproved('bash', {'command': 'ls'}, rules),
-        isTrue,
-      );
-      expect(
-        ldIsToolAutoApproved('bash', {'command': 'rm'}, rules),
-        isFalse,
-      );
+      expect(ldIsToolAutoApproved('bash', {'command': 'ls'}, rules), isTrue);
+      expect(ldIsToolAutoApproved('bash', {'command': 'rm'}, rules), isFalse);
     });
   });
 
@@ -186,7 +257,10 @@ void main() {
       ];
       final result = ldMergeToolAllowRules(input);
       expect(result.length, 1);
-      expect(result.first.argumentPattern['cwd'], containsAll(['/app', '/tmp']));
+      expect(
+        result.first.argumentPattern['cwd'],
+        containsAll(['/app', '/tmp']),
+      );
     });
 
     test('absent field becomes null in list', () {
@@ -252,18 +326,13 @@ void main() {
 
   group('LdToolAllowRule.fromFieldPins', () {
     test('omits notAllowed paths', () {
-      final rule = LdToolAllowRule.fromFieldPins(
-        'pr',
-        {
-          'title': const LdToolAllowFieldPin(
-            mode: LdToolAllowPinMode.exact,
-            values: ['feat'],
-          ),
-          'body': const LdToolAllowFieldPin(
-            mode: LdToolAllowPinMode.notAllowed,
-          ),
-        },
-      );
+      final rule = LdToolAllowRule.fromFieldPins('pr', {
+        'title': const LdToolAllowFieldPin(
+          mode: LdToolAllowPinMode.exact,
+          values: ['feat'],
+        ),
+        'body': const LdToolAllowFieldPin(mode: LdToolAllowPinMode.notAllowed),
+      });
       expect(rule.argumentPattern['title'], 'feat');
       expect(rule.argumentPattern.containsKey('body'), isFalse);
     });
@@ -286,58 +355,54 @@ void main() {
     });
 
     test('multi-value exact emits list', () {
-      final rule = LdToolAllowRule.fromFieldPins(
-        'bash',
-        {
-          'cwd': const LdToolAllowFieldPin(
-            mode: LdToolAllowPinMode.exact,
-            values: ['/app', '/tmp'],
-          ),
-        },
-      );
+      final rule = LdToolAllowRule.fromFieldPins('bash', {
+        'cwd': const LdToolAllowFieldPin(
+          mode: LdToolAllowPinMode.exact,
+          values: ['/app', '/tmp'],
+        ),
+      });
       expect(rule.argumentPattern['cwd'], ['/app', '/tmp']);
     });
 
     test('array pin emits wrapped OR list', () {
-      final rule = LdToolAllowRule.fromFieldPins(
-        'pr',
-        {
-          'labels': LdToolAllowFieldPin(
-            mode: LdToolAllowPinMode.exact,
-            values: [
-              ['ui', 'ai'],
-              ['docs'],
-            ],
-          ),
-        },
-      );
+      final rule = LdToolAllowRule.fromFieldPins('pr', {
+        'labels': LdToolAllowFieldPin(
+          mode: LdToolAllowPinMode.exact,
+          values: [
+            ['ui', 'ai'],
+            ['docs'],
+          ],
+        ),
+      });
       expect(rule.argumentPattern['labels'], [
         ['ui', 'ai'],
         ['docs'],
       ]);
-      expect(rule.matches('pr', {'labels': ['docs']}), isTrue);
-      expect(rule.matches('pr', {'labels': ['ui', 'ai']}), isTrue);
+      expect(
+        rule.matches('pr', {
+          'labels': ['docs'],
+        }),
+        isTrue,
+      );
+      expect(
+        rule.matches('pr', {
+          'labels': ['ui', 'ai'],
+        }),
+        isTrue,
+      );
       expect(rule.matches('pr', {'labels': 'ui'}), isFalse);
     });
 
     test('inclusive matcher rejects later extra key', () {
-      final rule = LdToolAllowRule.fromFieldPins(
-        'pr',
-        {
-          'title': const LdToolAllowFieldPin(
-            mode: LdToolAllowPinMode.exact,
-            values: ['feat'],
-          ),
-          'body': const LdToolAllowFieldPin(
-            mode: LdToolAllowPinMode.notAllowed,
-          ),
-        },
-      );
+      final rule = LdToolAllowRule.fromFieldPins('pr', {
+        'title': const LdToolAllowFieldPin(
+          mode: LdToolAllowPinMode.exact,
+          values: ['feat'],
+        ),
+        'body': const LdToolAllowFieldPin(mode: LdToolAllowPinMode.notAllowed),
+      });
       expect(rule.matches('pr', {'title': 'feat'}), isTrue);
-      expect(
-        rule.matches('pr', {'title': 'feat', 'body': 'hello'}),
-        isFalse,
-      );
+      expect(rule.matches('pr', {'title': 'feat', 'body': 'hello'}), isFalse);
     });
   });
 
@@ -385,10 +450,7 @@ void main() {
         ),
       );
       expect(session.pins['title']?.mode, LdToolAllowPinMode.exact);
-      expect(
-        session.pins['title']?.values,
-        containsAll(['feat-a', 'feat-b']),
-      );
+      expect(session.pins['title']?.values, containsAll(['feat-a', 'feat-b']));
     });
 
     test('picker toRule: Any on absent optional still matches call', () {
@@ -405,6 +467,65 @@ void main() {
       expect(rule.matches('pr', {'title': 'feat'}), isTrue);
     });
 
+    test(
+      'picker toRule: all Any including extra nested fields matches call',
+      () {
+        final session = ldBuildToolAllowFieldSession(
+          inputSchema: schema,
+          arguments: {'title': 'feat'},
+        );
+        final allAny = session.copyWithPins({
+          for (final entry in session.pins.entries)
+            entry.key: const LdToolAllowFieldPin(
+              mode: LdToolAllowPinMode.wildcard,
+            ),
+        });
+        final rule = allAny.toRule('pr');
+        expect(rule.matches('pr', {'title': 'feat'}), isTrue);
+        expect(
+          rule.matches('pr', {
+            'title': 'other',
+            'body': 'x',
+            'repo': {'owner': 'mtrust'},
+          }),
+          isTrue,
+        );
+      },
+    );
+
+    test(
+      'picker toRule: Any leaves under Fixed absent object still matches call',
+      () {
+        final session = ldBuildToolAllowFieldSession(
+          inputSchema: schema,
+          arguments: {'title': 'feat'},
+        );
+        final expanded = session.copyWithPins({
+          ...session.pins,
+          'repo': const LdToolAllowFieldPin(mode: LdToolAllowPinMode.exact),
+          'repo.owner': const LdToolAllowFieldPin(
+            mode: LdToolAllowPinMode.wildcard,
+          ),
+          'repo.visibility': const LdToolAllowFieldPin(
+            mode: LdToolAllowPinMode.wildcard,
+          ),
+        });
+        final rule = expanded.toRule('pr');
+        expect(rule.argumentPattern['repo'], {
+          'owner': ldToolAllowWildcard,
+          'visibility': ldToolAllowWildcard,
+        });
+        expect(rule.matches('pr', {'title': 'feat'}), isTrue);
+        expect(
+          rule.matches('pr', {
+            'title': 'feat',
+            'repo': {'owner': 'mtrust'},
+          }),
+          isTrue,
+        );
+      },
+    );
+
     test('picker toRule: Fixed on absent optional includes null', () {
       final session = ldBuildToolAllowFieldSession(
         inputSchema: schema,
@@ -420,10 +541,7 @@ void main() {
       final rule = withBodyFixed.toRule('pr');
       expect(rule.argumentPattern['body'], containsAll([null, 'hello']));
       expect(rule.matches('pr', {'title': 'feat'}), isTrue);
-      expect(
-        rule.matches('pr', {'title': 'feat', 'body': 'hello'}),
-        isTrue,
-      );
+      expect(rule.matches('pr', {'title': 'feat', 'body': 'hello'}), isTrue);
     });
 
     test('editor toRule: does not invent null without call context', () {
@@ -454,10 +572,10 @@ void main() {
           'repo': {'visibility': 'private'},
         },
       );
-      expect(
-        session.schemaMeta['repo.visibility']?.enumOptions,
-        ['public', 'private'],
-      );
+      expect(session.schemaMeta['repo.visibility']?.enumOptions, [
+        'public',
+        'private',
+      ]);
     });
 
     test('invalid schema falls back to map walk', () {
