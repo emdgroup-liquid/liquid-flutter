@@ -1,6 +1,6 @@
 name: liquid_flutter_ai
 description: "AI conversation UI components for Liquid Flutter"
-version: 0.0.1-1
+version: 0.0.1-2
 repository: https://github.com/emdgroup-liquid/liquid-flutter
 
 environment:
