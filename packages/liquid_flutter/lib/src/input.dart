@@ -243,7 +243,12 @@ class _LdInputState extends State<LdInput> {
 
     final contentPadding = widget.padding ?? EdgeInsets.zero;
 
-    final labelStyle = ldBuildTextStyle(theme, LdTextType.label, widget.size);
+    final labelStyle = ldBuildTextStyle(
+      theme,
+      LdTextType.label,
+      widget.size,
+      fontWeight: FontWeight.w400,
+    );
     final hintStyle = labelStyle.copyWith(color: theme.textMuted);
     final lineBoxHeight = labelStyle.fontSize! * labelStyle.height!;
     final cursorHeight = lineBoxHeight;
