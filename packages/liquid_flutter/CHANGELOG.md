@@ -1,3 +1,20 @@
+## 23.0.0-13
+Released on: 8/22/2026, changelog automatically generated.
+
+
+### Bug Fixes
+
+- **LdTabNavigation:** restore indicator drag without blocking tab taps ([e114b12](commit/e114b12))
+- **LdToolAllowRule:** match absent nested objects pinned to Any ([1d24ad1](commit/1d24ad1))
+- **LdInput:** use regular weight for field text ([55e73bc](commit/55e73bc))
+- **LdInput:** restore label style for compact control height ([ceeee8b](commit/ceeee8b))
+### Features
+
+- **LdFilterBool:** implement equality operator and hashCode method ([c144052](commit/c144052))
+- **LdComposeBar:** integrate theme into attach buttons and adjust padding ([61c60f3](commit/61c60f3))
+- **LdConversation:** add tool call override functionality and history compacting feature ([9edd17d](commit/9edd17d))
+- **LdMarkdown:** add GFM footnote rendering ([f0d2c6a](commit/f0d2c6a))
+
 ## 23.0.0-12
 Released on: 8/18/2026, changelog automatically generated.
 
