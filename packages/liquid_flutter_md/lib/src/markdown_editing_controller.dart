@@ -44,6 +44,10 @@ class LdMarkdownEditingController extends TextEditingController {
   bool _gesturesEnabled = false;
   bool _initialBuildDone = false;
 
+  /// Label (lowercased) → 1-based ordinal for footnotes that have both a
+  /// reference and a definition. Rebuilt at the start of [buildTextSpan].
+  Map<String, int> _footnoteOrdinals = const {};
+
   /// Intercepts newline insertions from the engine/IME (Flutter 3.44+)
   /// to implement smart list/blockquote continuation.
   @override
@@ -232,6 +236,10 @@ class LdMarkdownEditingController extends TextEditingController {
 
     final spans = <InlineSpan>[];
 
+    var footnoteDefOpen = false;
+    var footnoteBlankSeen = false;
+    _footnoteOrdinals = _collectFootnoteOrdinals(lines);
+
     var i = 0;
     while (i < lines.length) {
       final line = lines[i];
@@ -307,9 +315,42 @@ class LdMarkdownEditingController extends TextEditingController {
         continue;
       }
 
+      final isBlank = line.trim().isEmpty;
+      final isFootnoteDef = _footnoteDef.hasMatch(line);
+      final isIndented = _indentedCode.hasMatch(line);
+      var footnoteContinuation = false;
+      if (footnoteDefOpen) {
+        if (isBlank) {
+          if (footnoteBlankSeen) {
+            footnoteDefOpen = false;
+          } else {
+            footnoteBlankSeen = true;
+          }
+        } else if (isFootnoteDef) {
+          footnoteBlankSeen = false;
+        } else if (isIndented) {
+          footnoteContinuation = true;
+          footnoteBlankSeen = false;
+        } else {
+          footnoteDefOpen = false;
+        }
+      }
+      if (isFootnoteDef) {
+        footnoteDefOpen = true;
+        footnoteBlankSeen = false;
+      }
+
       // ── Normal single-line rendering ───────────────────────────────────────
       final lineIsFocused = isEditing && i == focusedLineIdx;
-      _emitLine(line, baseStyle, theme, spans, context, focused: lineIsFocused);
+      _emitLine(
+        line,
+        baseStyle,
+        theme,
+        spans,
+        context,
+        focused: lineIsFocused,
+        footnoteContinuation: footnoteContinuation,
+      );
 
       if (!isLast) {
         spans.add(TextSpan(text: '\n', style: baseStyle));
@@ -347,6 +388,9 @@ class LdMarkdownEditingController extends TextEditingController {
   static final _fencedFence = RegExp(r'^(```|~~~)');
   static final _checkbox = RegExp(r'^(\s*[-*+] \[)([ xX])(\] )(.*)$');
   static final _indentedCode = RegExp(r'^( {4}|\t)(.*)$');
+  static final _footnoteDef = RegExp(
+    r'^([ ]{0,3}\[\^([^\] \r\n\t]+)\]:[ \t]*)(.*)$',
+  );
 
   static final _tableRow = RegExp(r'^\|(.+)\|$');
   static final _tableSepCell = RegExp(r'^\s*:?-+:?\s*$');
@@ -358,6 +402,7 @@ class LdMarkdownEditingController extends TextEditingController {
     List<InlineSpan> out,
     BuildContext context, {
     bool focused = false,
+    bool footnoteContinuation = false,
   }) {
     if (line.isEmpty) return;
 
@@ -389,8 +434,46 @@ class LdMarkdownEditingController extends TextEditingController {
       return;
     }
 
+    // ── Footnote definition ────────────────────────────────────────────────
+    final fnDefMatch = _footnoteDef.firstMatch(line);
+    if (fnDefMatch != null) {
+      final marker = fnDefMatch.group(1)!;
+      final label = fnDefMatch.group(2)!;
+      final content = fnDefMatch.group(3)!;
+      final paraStyle = _paragraphStyle(theme, baseStyle);
+      final ordinal = _footnoteOrdinals[label.toLowerCase()];
+      if (!focused && ordinal != null) {
+        if (marker.length > 1) {
+          _hide(marker.substring(0, marker.length - 1), out);
+        }
+        out.add(
+          WidgetSpan(
+            alignment: PlaceholderAlignment.middle,
+            child: _FootnoteDefMarker(number: '$ordinal'),
+          ),
+        );
+      } else {
+        out.add(
+          TextSpan(
+            text: marker,
+            style: paraStyle.copyWith(color: theme.textMuted),
+          ),
+        );
+      }
+      _emitInline(
+        content,
+        baseStyle,
+        paraStyle,
+        theme,
+        out,
+        context,
+        focused: focused,
+      );
+      return;
+    }
+
     // ── Indented code block line ───────────────────────────────────────────
-    if (_indentedCode.hasMatch(line)) {
+    if (!footnoteContinuation && _indentedCode.hasMatch(line)) {
       out.add(
         TextSpan(
           text: line,
@@ -558,6 +641,7 @@ class LdMarkdownEditingController extends TextEditingController {
   static final _image = RegExp(r'!\[([^\]]*)\]\(([^)]+)(?:\s+"[^"]*")?\)');
   static final _strikethrough = RegExp(r'(~~)(.*?)\1');
   static final _hashtag = RegExp(r'(?<!\w)#(\w[\w-]*)');
+  static final _footnoteRef = RegExp(r'\[\^([^\] \r\n\t]+)\](?!:)');
 
   void _emitInline(
     String text,
@@ -586,6 +670,7 @@ class LdMarkdownEditingController extends TextEditingController {
         }
       }
 
+      tryPattern(_footnoteRef, _InlineKind.footnoteRef);
       tryPattern(_image, _InlineKind.image);
       tryPattern(_link, _InlineKind.link);
       tryPattern(_boldItalic, _InlineKind.boldItalic);
@@ -674,6 +759,33 @@ class LdMarkdownEditingController extends TextEditingController {
           _conceal(delim, lineStyle, theme, out, focused: focused);
           out.add(TextSpan(text: inner, style: codeStyle));
           _conceal(delim, lineStyle, theme, out, focused: focused);
+
+        case _InlineKind.footnoteRef:
+          final label = earliest!.group(1)!;
+          final ordinal = _footnoteOrdinals[label.toLowerCase()];
+          if (!focused && ordinal != null) {
+            if (matchLen > 1) {
+              _hide(matchStr.substring(0, matchLen - 1), out);
+            }
+            out.add(
+              WidgetSpan(
+                alignment: PlaceholderAlignment.top,
+                child: _FootnoteSupWidget(number: '$ordinal'),
+              ),
+            );
+          } else {
+            _conceal('[^', lineStyle, theme, out, focused: focused);
+            out.add(
+              TextSpan(
+                text: label,
+                style: lineStyle.copyWith(
+                  color: theme.primaryColor,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            );
+            _conceal(']', lineStyle, theme, out, focused: focused);
+          }
 
         case _InlineKind.link:
           final linkText = earliest!.group(1)!;
@@ -859,6 +971,24 @@ class LdMarkdownEditingController extends TextEditingController {
   static TextStyle _paragraphStyle(LdTheme theme, TextStyle base) =>
       base.merge(ldBuildTextStyle(theme, LdTextType.paragraph, LdSize.m));
 
+  static Map<String, int> _collectFootnoteOrdinals(List<String> lines) {
+    final defined = <String>{};
+    for (final line in lines) {
+      final m = _footnoteDef.firstMatch(line);
+      if (m != null) defined.add(m.group(2)!.toLowerCase());
+    }
+    final ordinals = <String, int>{};
+    for (final line in lines) {
+      for (final m in _footnoteRef.allMatches(line)) {
+        final key = m.group(1)!.toLowerCase();
+        if (defined.contains(key) && !ordinals.containsKey(key)) {
+          ordinals[key] = ordinals.length + 1;
+        }
+      }
+    }
+    return ordinals;
+  }
+
   static TextStyle _headingStyle(int level, LdTheme theme, TextStyle base) {
     const sizes = [
       LdSize.l,
@@ -902,10 +1032,59 @@ enum _InlineKind {
   bold,
   italic,
   code,
+  footnoteRef,
   link,
   image,
   strikethrough,
   hashtag,
+}
+
+// ---------------------------------------------------------------------------
+// Footnote widgets
+// ---------------------------------------------------------------------------
+
+class _FootnoteSupWidget extends StatelessWidget {
+  const _FootnoteSupWidget({required this.number});
+
+  final String number;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = LdTheme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 1),
+      child: Text(
+        number,
+        style: ldBuildTextStyle(theme, LdTextType.label, LdSize.xs).copyWith(
+          height: 1,
+          fontWeight: FontWeight.w600,
+          color: theme.primaryColor,
+        ),
+      ),
+    );
+  }
+}
+
+class _FootnoteDefMarker extends StatelessWidget {
+  const _FootnoteDefMarker({required this.number});
+
+  final String number;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = LdTheme.of(context);
+    return Padding(
+      padding: EdgeInsets.only(right: theme.pad(size: LdSize.xs).right),
+      child: Text(
+        '$number.',
+        style: ldBuildTextStyle(
+          theme,
+          LdTextType.label,
+          LdSize.s,
+        ).copyWith(color: theme.textMuted),
+      ),
+    );
+  }
 }
 
 // ---------------------------------------------------------------------------

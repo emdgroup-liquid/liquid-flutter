@@ -68,8 +68,9 @@ extension MarkdownNodeDebug on md.Node {
 /// Renders a markdown string using native Liquid Flutter components.
 ///
 /// The parser uses the GitHub Web extension set, supporting tables, fenced
-/// code blocks, strikethrough, task lists, and GitHub-flavored alerts
-/// (`> [!NOTE]`, `> [!WARNING]`, etc.).
+/// code blocks, strikethrough, task lists, GitHub-flavored alerts
+/// (`> [!NOTE]`, `> [!WARNING]`, etc.), and GFM footnotes (`[^label]`).
+/// Footnote references open their definition in an [LdContextMenu].
 ///
 /// The parsed AST is cached: re-rendering with the same [data] string does
 /// not re-parse.
@@ -142,40 +143,53 @@ class LdMarkdown extends StatefulWidget {
 class _LdMarkdownState extends State<LdMarkdown> {
   String? _cachedData;
   List<md.Node>? _cachedNodes;
+  Map<String, List<md.Node>> _cachedFootnotes = const {};
 
-  List<md.Node> _nodes() {
+  void _ensureParsed() {
     if (_cachedData != widget.data || _cachedNodes == null) {
       _cachedData = widget.data;
-      _cachedNodes = _parseMarkdownNodes(widget.data);
+      final extracted = _extractFootnotes(_parseMarkdownNodes(widget.data));
+      _cachedNodes = extracted.$1;
+      _cachedFootnotes = extracted.$2;
     }
-    return _cachedNodes!;
   }
 
   @override
   Widget build(BuildContext context) {
     if (widget.data.isEmpty) return const SizedBox.shrink();
 
-    final widgets = markdownToWidgets(
-      context,
-      _nodes(),
-      onLinkTap: widget.onLinkTap,
-      onHashtagTap: widget.onHashtagTap,
-      imageBuilder: widget.imageBuilder,
-    );
+    _ensureParsed();
+    final nodes = _cachedNodes!;
+    if (nodes.isEmpty) return const SizedBox.shrink();
 
-    if (widgets.isEmpty) return const SizedBox.shrink();
+    return _FootnoteScope(
+      definitions: _cachedFootnotes,
+      child: Builder(
+        builder: (context) {
+          final widgets = markdownToWidgets(
+            context,
+            nodes,
+            onLinkTap: widget.onLinkTap,
+            onHashtagTap: widget.onHashtagTap,
+            imageBuilder: widget.imageBuilder,
+          );
 
-    return Padding(
-      padding: widget.padding,
-      child: widget.shrinkWrap
-          ? LdAutoSpace(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: widgets,
-            )
-          : Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: widgets,
-            ),
+          if (widgets.isEmpty) return const SizedBox.shrink();
+
+          return Padding(
+            padding: widget.padding,
+            child: widget.shrinkWrap
+                ? LdAutoSpace(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: widgets,
+                  )
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: widgets,
+                  ),
+          );
+        },
+      ),
     );
   }
 }
@@ -447,6 +461,20 @@ void Function(String url, String title)? onLinkTap,
           ),
         ),
       ),
+      _ => SizedBox(
+        width: double.infinity,
+        child: _combineBlockWidgets(
+          context,
+          node.children ?? [],
+          onLinkTap: onLinkTap,
+          onHashtagTap: onHashtagTap,
+          imageBuilder: imageBuilder,
+        ),
+      ),
+    },
+
+    'section' => switch (node.attributes['class']?.split(' ').firstOrNull) {
+      'footnotes' => const SizedBox.shrink(),
       _ => SizedBox(
         width: double.infinity,
         child: _combineBlockWidgets(
@@ -993,16 +1021,19 @@ void Function(String url, String title)? onLinkTap,
         children: children,
         style: const TextStyle(fontStyle: FontStyle.italic),
       ),
-      'a' => TextSpan(
-        children: children,
-        mouseCursor: SystemMouseCursors.click,
-        recognizer: TapGestureRecognizer()
-          ..onTap = () {
-            final href = node.attributes['href'] ?? '';
-            final title = node.attributes['title'] ?? '';
-            onLinkTap?.call(href, title);
-          },
-        style: TextStyle(color: theme.primaryColor),
+      'a' => _buildAnchorSpan(
+        context,
+        node,
+        children,
+        onLinkTap: onLinkTap,
+      ),
+      'sup' => _buildSuperscriptSpan(
+        context,
+        node,
+        children,
+        onLinkTap: onLinkTap,
+        onHashtagTap: onHashtagTap,
+        imageBuilder: imageBuilder,
       ),
       'code' => TextSpan(
         children: children,
@@ -1020,4 +1051,212 @@ void Function(String url, String title)? onLinkTap,
     };
   }
   return TextSpan(text: node.textContent);
+}
+
+bool _isFootnoteHref(String href) =>
+    href.startsWith('#fn-') || href.startsWith('#fnref-');
+
+InlineSpan _buildAnchorSpan(
+  BuildContext context,
+  md.Element node,
+  List<InlineSpan> children, {
+  void Function(String url, String title)? onLinkTap,
+}) {
+  final theme = LdTheme.of(context);
+  final href = node.attributes['href'] ?? '';
+  final title = node.attributes['title'] ?? '';
+  final classes = (node.attributes['class'] ?? '').split(' ');
+  final isBackref = classes.contains('footnote-backref');
+
+  if (isBackref) {
+    return TextSpan(
+      children: children,
+      style: TextStyle(color: theme.textMuted),
+    );
+  }
+
+  if (_isFootnoteHref(href)) {
+    return TextSpan(
+      children: children,
+      style: TextStyle(color: theme.primaryColor),
+    );
+  }
+
+  return TextSpan(
+    children: children,
+    mouseCursor: SystemMouseCursors.click,
+    recognizer: TapGestureRecognizer()
+      ..onTap = () {
+        onLinkTap?.call(href, title);
+      },
+    style: TextStyle(color: theme.primaryColor),
+  );
+}
+
+class _FootnoteScope extends InheritedWidget {
+  const _FootnoteScope({
+    required this.definitions,
+    required super.child,
+  });
+
+  final Map<String, List<md.Node>> definitions;
+
+  static _FootnoteScope? maybeOf(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<_FootnoteScope>();
+  }
+
+  @override
+  bool updateShouldNotify(_FootnoteScope oldWidget) =>
+      !identical(definitions, oldWidget.definitions);
+}
+
+(List<md.Node>, Map<String, List<md.Node>>) _extractFootnotes(
+  List<md.Node> nodes,
+) {
+  final definitions = <String, List<md.Node>>{};
+  final content = <md.Node>[];
+  for (final node in nodes) {
+    if (node is md.Element &&
+        node.tag == 'section' &&
+        (node.attributes['class'] ?? '').split(' ').contains('footnotes')) {
+      final ol = node.children
+          ?.whereType<md.Element>()
+          .firstWhereOrNull((e) => e.tag == 'ol');
+      for (final child in ol?.children ?? const <md.Node>[]) {
+        if (child is! md.Element || child.tag != 'li') continue;
+        final id = child.attributes['id'];
+        if (id == null) continue;
+        definitions[id] = _stripFootnoteBackrefs(child.children ?? []);
+      }
+    } else {
+      content.add(node);
+    }
+  }
+  return (content, definitions);
+}
+
+List<md.Node> _stripFootnoteBackrefs(List<md.Node> nodes) {
+  final out = <md.Node>[];
+  for (final node in nodes) {
+    if (node is md.Element) {
+      if ((node.attributes['class'] ?? '').split(' ').contains(
+        'footnote-backref',
+      )) {
+        continue;
+      }
+      final children = node.children;
+      if (children == null) {
+        out.add(node);
+        continue;
+      }
+      final stripped = _stripFootnoteBackrefs(children);
+      while (stripped.isNotEmpty &&
+          stripped.last is md.Text &&
+          (stripped.last as md.Text).textContent.trim().isEmpty) {
+        stripped.removeLast();
+      }
+      final copy = md.Element(node.tag, stripped);
+      copy.attributes.addAll(node.attributes);
+      out.add(copy);
+    } else {
+      out.add(node);
+    }
+  }
+  return out;
+}
+
+String? _footnoteDefId(md.Element sup) {
+  final anchor = sup.children?.whereType<md.Element>().firstWhereOrNull(
+    (e) => e.tag == 'a',
+  );
+  final href = anchor?.attributes['href'];
+  if (href == null || !href.startsWith('#fn-') || href.startsWith('#fnref-')) {
+    return null;
+  }
+  return href.substring(1);
+}
+
+TextStyle _footnoteSupStyle(LdTheme theme) {
+  return ldBuildTextStyle(theme, LdTextType.label, LdSize.xs).copyWith(
+    height: 1,
+    fontWeight: FontWeight.w600,
+    color: theme.primaryColor,
+  );
+}
+
+InlineSpan _buildSuperscriptSpan(
+  BuildContext context,
+  md.Element node,
+  List<InlineSpan> children, {
+  void Function(String url, String title)? onLinkTap,
+  void Function(String tag)? onHashtagTap,
+  Widget? Function(String src, String alt)? imageBuilder,
+}) {
+  final theme = LdTheme.of(context);
+  final style = _footnoteSupStyle(theme);
+  final isFootnoteRef = (node.attributes['class'] ?? '').split(' ').contains(
+    'footnote-ref',
+  );
+  final defId = isFootnoteRef ? _footnoteDefId(node) : null;
+  final body = defId == null
+      ? null
+      : _FootnoteScope.maybeOf(context)?.definitions[defId];
+
+  if (body == null || body.isEmpty) {
+    return WidgetSpan(
+      alignment: PlaceholderAlignment.top,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 1),
+        child: Text.rich(
+          TextSpan(children: children, style: style),
+        ),
+      ),
+    );
+  }
+
+  final number = node.textContent;
+  return WidgetSpan(
+    alignment: PlaceholderAlignment.top,
+    child: LdContextMenu(
+      positionMode: LdContextPositionMode.relativeTrigger,
+      zoomMode: LdContextZoomMode.never,
+      scaleFromTrigger: false,
+      builder: (context, isShuttle, open, isOpen, child) {
+        return MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            onTap: open,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 1),
+              child: Text(
+                number,
+                style: style.copyWith(
+                  decoration: isOpen ? TextDecoration.underline : null,
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+      menuBuilder: (menuContext) {
+        final menuTheme = LdTheme.of(menuContext);
+        return ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 320),
+          child: Padding(
+            padding: menuTheme.pad(size: LdSize.s),
+            child: LdAutoSpace(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: markdownToWidgets(
+                menuContext,
+                body,
+                onLinkTap: onLinkTap,
+                onHashtagTap: onHashtagTap,
+                imageBuilder: imageBuilder,
+              ),
+            ),
+          ),
+        );
+      },
+    ),
+  );
 }

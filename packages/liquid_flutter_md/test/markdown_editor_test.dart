@@ -107,6 +107,74 @@ void main() {
       addTearDown(ctrl.dispose);
       await checkInvariant(tester, ctrl);
     });
+
+    testWidgets('invariant holds for footnote ref', (tester) async {
+      final ctrl = LdMarkdownEditingController(
+        text: 'See this.[^1]\n',
+      );
+      addTearDown(ctrl.dispose);
+      await checkInvariant(tester, ctrl);
+    });
+
+    testWidgets('invariant holds for footnote definition', (tester) async {
+      final ctrl = LdMarkdownEditingController(
+        text: 'See this.[^1]\n\n[^1]: The footnote body.\n',
+      );
+      addTearDown(ctrl.dispose);
+      await checkInvariant(tester, ctrl);
+    });
+
+    testWidgets('invariant holds for indented footnote continuation', (
+      tester,
+    ) async {
+      final ctrl = LdMarkdownEditingController(
+        text:
+            'See this.[^bignote]\n'
+            '\n'
+            '[^bignote]: First paragraph.\n'
+            '\n'
+            '    Second paragraph stays in the footnote.\n'
+            '\n'
+            '    `{ my code }`\n',
+      );
+      addTearDown(ctrl.dispose);
+      await checkInvariant(tester, ctrl);
+    });
+
+    testWidgets('enumerates matching footnotes as widget spans off-focus', (
+      tester,
+    ) async {
+      final ctrl = LdMarkdownEditingController(
+        text:
+            'Here is a simple footnote,[^1] and a named one.[^bignote]\n'
+            '\n'
+            '[^1]: First footnote body.\n'
+            '\n'
+            '[^bignote]: Named footnote body.\n',
+      );
+      addTearDown(ctrl.dispose);
+      ctrl.isEditing = false;
+
+      late TextSpan span;
+      await tester.pumpWidget(
+        _withTheme(
+          Builder(
+            builder: (context) {
+              span = ctrl.buildTextSpan(
+                context: context,
+                style: const TextStyle(),
+                withComposing: false,
+              );
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      );
+
+      expect(_flattenSpan(span).length, ctrl.text.length);
+      // Two inline refs + two definition markers.
+      expect(_widgetSpanCount(span), 4);
+    });
   });
 
   group('LdMarkdownEditor widget', () {
@@ -274,4 +342,16 @@ String _flattenSpan(InlineSpan span) {
     return '\uFFFC';
   }
   return '';
+}
+
+int _widgetSpanCount(InlineSpan span) {
+  if (span is WidgetSpan) return 1;
+  if (span is TextSpan) {
+    var count = 0;
+    for (final child in span.children ?? const <InlineSpan>[]) {
+      count += _widgetSpanCount(child);
+    }
+    return count;
+  }
+  return 0;
 }

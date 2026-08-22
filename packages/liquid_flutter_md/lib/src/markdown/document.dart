@@ -85,6 +85,9 @@ class Document {
 
   /// Parses the given [lines] of [Line] to a series of AST nodes.
   List<Node> parseLineList(List<Line> lines) {
+    linkReferences.clear();
+    footnoteReferences.clear();
+    footnoteLabels.clear();
     final nodes = BlockParser(lines, this).parseLines();
     _parseInlineContent(nodes);
     // Do filter after parsing inline as we need ref count.
