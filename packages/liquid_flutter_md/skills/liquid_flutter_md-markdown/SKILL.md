@@ -47,6 +47,7 @@ LdMarkdown(
 | Links | tappable via `onLinkTap` |
 | Horizontal rules | `LdDivider` |
 | GFM alerts | `[!NOTE]` / `[!TIP]` / `[!IMPORTANT]` / `[!CAUTION]` / `[!WARNING]` → `LdHint` |
+| Footnotes | `[^label]` refs open the definition in an `LdContextMenu`; unused defs are omitted |
 
 ## LdMarkdownEditor — WYSIWYG Editor
 

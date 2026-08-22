@@ -117,4 +117,34 @@ void main() {
       }
     });
   });
+
+  group('Footnotes', () {
+    test('parse twice does not leak footnote labels', () {
+      final doc = md.Document(extensionSet: md.ExtensionSet.gitHubWeb);
+      doc.parse('Hi.[^1]\n\n[^1]: One.\n');
+      expect(doc.footnoteLabels, isNotEmpty);
+      expect(doc.footnoteReferences, isNotEmpty);
+
+      final nodes = doc.parse('No footnotes here.\n');
+      expect(doc.footnoteLabels, isEmpty);
+      expect(doc.footnoteReferences, isEmpty);
+      expect(
+        nodes.whereType<md.Element>().any(
+          (e) => e.attributes['class'] == 'footnotes',
+        ),
+        isFalse,
+      );
+    });
+
+    test('collects referenced footnotes into a section', () {
+      final doc = md.Document(extensionSet: md.ExtensionSet.gitHubWeb);
+      final nodes = doc.parse(
+        'A note.[^1]\n\n[^1]: The footnote body.\n',
+      );
+      final section = nodes.whereType<md.Element>().firstWhere(
+        (e) => e.tag == 'section' && e.attributes['class'] == 'footnotes',
+      );
+      expect(section.textContent, contains('The footnote body'));
+    });
+  });
 }

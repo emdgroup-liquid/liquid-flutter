@@ -13,6 +13,20 @@ class LdFilterBool<T extends Identifiable<IdType>, IdType> extends LdFilterOptio
   });
 
   @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) {
+      return true;
+    }
+    if (other is! LdFilterBool<T, IdType>) {
+      return false;
+    }
+    return name == other.name && isOn == other.isOn;
+  }
+
+  @override
+  int get hashCode => Object.hash(name, isOn);
+
+  @override
   String serialize() {
     return "true";
   }
