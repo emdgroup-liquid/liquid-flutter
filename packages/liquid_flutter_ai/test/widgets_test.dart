@@ -604,19 +604,19 @@ void main() {
     await tester.pump();
 
     expect(find.text('Draft reply'), findsOneWidget);
-    expect(find.byIcon(LucideIcons.chevronDown), findsOneWidget);
-
-    await tester.tap(find.byIcon(LucideIcons.chevronDown));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Search docs'), findsOneWidget);
-    expect(find.text('Deliver'), findsOneWidget);
     expect(find.byIcon(LucideIcons.chevronUp), findsOneWidget);
 
     await tester.tap(find.byIcon(LucideIcons.chevronUp));
     await tester.pumpAndSettle();
 
+    expect(find.text('Search docs'), findsOneWidget);
+    expect(find.text('Deliver'), findsOneWidget);
     expect(find.byIcon(LucideIcons.chevronDown), findsOneWidget);
+
+    await tester.tap(find.byIcon(LucideIcons.chevronDown));
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(LucideIcons.chevronUp), findsOneWidget);
   });
 
   testWidgets('LdAgentTaskPanel peeks open when tasks are added', (tester) async {
@@ -651,7 +651,7 @@ void main() {
     await tester.pump();
     await tester.pump(); // post-frame peek start
 
-    expect(find.byIcon(LucideIcons.chevronUp), findsOneWidget);
+    expect(find.byIcon(LucideIcons.chevronDown), findsOneWidget);
     expect(find.text('Search docs'), findsOneWidget);
     expect(find.text('Deliver'), findsOneWidget);
 
@@ -662,7 +662,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 500));
     await tester.pump();
 
-    expect(find.byIcon(LucideIcons.chevronDown), findsOneWidget);
+    expect(find.byIcon(LucideIcons.chevronUp), findsOneWidget);
   });
 
   testWidgets('LdConversation wires approval actions into default item builder',

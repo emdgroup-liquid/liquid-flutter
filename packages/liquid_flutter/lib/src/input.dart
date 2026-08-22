@@ -357,7 +357,9 @@ class _LdInputState extends State<LdInput> {
                                     onSubmitted: widget.onSubmitted,
                                     cursorWidth: 1,
                                     style: widget.style ??
-                                        ldBuildTextStyle(theme, LdTextType.paragraph, widget.size, lineHeight: 1),
+                                        labelStyle.copyWith(
+                                          color: colors.text,
+                                        ),
                                   ),
                                 ),
                                 suffix,
