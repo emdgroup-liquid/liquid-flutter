@@ -15,7 +15,7 @@ dependencies:
   genui: ^0.9.2
   json_schema_builder: ^0.1.2
   liquid_flutter: ^23.0.0-8
-  liquid_flutter_md: ^0.0.1-1
+  liquid_flutter_md: ^0.0.1-2
   liquid_flutter_ai_shared: ^0.0.1-1
   lucide_icons_flutter: ^3.1.9
   provider: ^6.1.5+1
