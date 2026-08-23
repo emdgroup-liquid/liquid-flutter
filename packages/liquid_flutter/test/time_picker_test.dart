@@ -25,6 +25,31 @@ void main() {
     expect(find.text('14:30'), findsOneWidget);
   });
 
+  testWidgets('trigger height matches compact control height', (tester) async {
+    const size = LdSize.m;
+    final theme = LdTheme();
+
+    await tester.pumpWidget(
+      withLiquidTheme(
+        LdTimePicker(
+          size: size,
+          value: const TimeOfDay(hour: 14, minute: 30),
+          onChanged: (_) {},
+        ),
+        theme: theme,
+      ),
+    );
+
+    final triggerSize = tester.getSize(
+      find.descendant(
+        of: find.byKey(const Key('time_picker_button')),
+        matching: find.byType(Container),
+      ),
+    );
+
+    expect(triggerSize.height, theme.controlHeight(size));
+  });
+
   testWidgets('opens time picker when button is pressed', (WidgetTester tester) async {
     await tester.pumpWidget(
       withLiquidTheme(

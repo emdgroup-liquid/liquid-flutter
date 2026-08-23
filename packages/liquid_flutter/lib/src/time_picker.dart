@@ -8,6 +8,7 @@ class LdTimePicker extends StatelessWidget {
   final bool useRootNavigator;
   final bool disabled;
   final String? label;
+  final LdSize size;
   final TimeOfDay? value;
   final void Function(TimeOfDay) onChanged;
   final int minutePrecision;
@@ -20,6 +21,7 @@ class LdTimePicker extends StatelessWidget {
     required this.onChanged,
     this.disabled = false,
     this.label,
+    this.size = LdSize.m,
     this.buttonMode = LdButtonMode.filled,
     this.value,
     this.minutePrecision = 15,
@@ -29,7 +31,9 @@ class LdTimePicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final locale = LiquidLocalizations.of(context);
-    final theme = LdTheme.of(context);
+    final theme = LdTheme.of(context, listen: true);
+    final lineBoxHeight = theme.labelSize(size) * ldLineHeight(LdTextType.label, size: size);
+    final fieldPadding = theme.controlContentPadding(size) - EdgeInsets.all(theme.borderWidth);
 
     var initialTimeString = locale.selectTime;
 
@@ -39,7 +43,11 @@ class LdTimePicker extends StatelessWidget {
 
     return LdBundle(
       children: [
-        if (label != null) LdText.l(label!),
+        if (label != null)
+          LdText.l(
+            label!,
+            size: size,
+          ),
         LdTouchableSurface(
           allowTapOutside: true,
           disabled: disabled,
@@ -60,7 +68,7 @@ class LdTimePicker extends StatelessWidget {
             final colorBundle = inputColor(theme, status, isValid: true);
             return Container(
               clipBehavior: Clip.hardEdge,
-              padding: theme.pad(size: LdSize.s),
+              padding: fieldPadding,
               width: double.infinity,
               decoration: BoxDecoration(
                 color: colorBundle.surface,
@@ -70,7 +78,19 @@ class LdTimePicker extends StatelessWidget {
                   width: theme.borderWidth,
                 ),
               ),
-              child: LdText.l(initialTimeString),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: lineBoxHeight,
+                ),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: LdText.l(
+                    initialTimeString,
+                    size: size,
+                    color: colorBundle.text,
+                  ),
+                ),
+              ),
             );
           }),
         ),

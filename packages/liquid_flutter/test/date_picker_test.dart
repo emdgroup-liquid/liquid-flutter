@@ -25,6 +25,31 @@ void main() {
     expect(find.text('1/1/2023'), findsOneWidget);
   });
 
+  testWidgets('trigger height matches compact control height', (tester) async {
+    const size = LdSize.m;
+    final theme = LdTheme();
+
+    await tester.pumpWidget(
+      withLiquidTheme(
+        LdDatePicker(
+          size: size,
+          value: DateTime(2023, 1, 1),
+          onChanged: (_) {},
+        ),
+        theme: theme,
+      ),
+    );
+
+    final triggerSize = tester.getSize(
+      find.descendant(
+        of: find.byKey(const Key('date_picker_button')),
+        matching: find.byType(Container),
+      ),
+    );
+
+    expect(triggerSize.height, theme.controlHeight(size));
+  });
+
   testWidgets('opens date picker when pressed', (WidgetTester tester) async {
     await tester.pumpWidget(
       withLiquidTheme(

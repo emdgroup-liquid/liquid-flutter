@@ -16,6 +16,7 @@ class LdDatePicker extends StatefulWidget {
   final DateTime? value;
   final String displayFormat;
   final LdButtonMode buttonMode;
+  final LdSize size;
   final bool disabled;
   final bool useRootNavigator;
   final void Function(DateTime) onChanged;
@@ -28,6 +29,7 @@ class LdDatePicker extends StatefulWidget {
     this.maxDate,
     this.displayFormat = "yMd",
     this.buttonMode = LdButtonMode.filled,
+    this.size = LdSize.m,
     required this.onChanged,
     this.disabled = false,
     this.useRootNavigator = false,
@@ -70,9 +72,16 @@ class _LdDatePickerState extends State<LdDatePicker> {
   @override
   Widget build(BuildContext context) {
     final theme = LdTheme.of(context, listen: true);
+    final size = widget.size;
+    final lineBoxHeight = theme.labelSize(size) * ldLineHeight(LdTextType.label, size: size);
+    final fieldPadding = theme.controlContentPadding(size) - EdgeInsets.all(theme.borderWidth);
     return LdBundle(
       children: [
-        if (widget.label != null) LdText.l(widget.label!),
+        if (widget.label != null)
+          LdText.l(
+            widget.label!,
+            size: size,
+          ),
         LdTouchableSurface(
           allowTapOutside: true,
           key: const Key("date_picker_button"),
@@ -98,7 +107,7 @@ class _LdDatePickerState extends State<LdDatePicker> {
             final colorBundle = inputColor(theme, status, isValid: true);
             return Container(
               clipBehavior: Clip.hardEdge,
-              padding: theme.pad(size: LdSize.s),
+              padding: fieldPadding,
               width: double.infinity,
               decoration: BoxDecoration(
                 color: colorBundle.surface,
@@ -108,7 +117,19 @@ class _LdDatePickerState extends State<LdDatePicker> {
                   width: theme.borderWidth,
                 ),
               ),
-              child: LdText.l(initialDateString),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: lineBoxHeight,
+                ),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: LdText.l(
+                    initialDateString,
+                    size: size,
+                    color: colorBundle.text,
+                  ),
+                ),
+              ),
             );
           }),
         )

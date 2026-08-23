@@ -8,6 +8,7 @@ class LdFormDatePicker extends StatelessWidget {
   final String formKey;
   final String? label;
   final bool? disabled;
+  final LdSize size;
   final bool useRootNavigator;
 
   final LdHint? Function(ReactiveFormFieldState<DateTime, DateTime>)? hintBuilder;
@@ -18,6 +19,7 @@ class LdFormDatePicker extends StatelessWidget {
     required this.formKey,
     this.label,
     this.disabled,
+    this.size = LdSize.m,
     this.useRootNavigator = false,
     this.hintBuilder,
     this.validationMessages,
@@ -38,6 +40,7 @@ class LdFormDatePicker extends StatelessWidget {
         field: LdDatePicker(
           label: label,
           value: state.control.value,
+          size: size,
           useRootNavigator: useRootNavigator,
           onChanged: (value) {
             state.didChange(value);

@@ -15,6 +15,7 @@ class LdFormTimePicker extends StatelessWidget {
   final String formKey;
   final String? label;
   final bool? disabled;
+  final LdSize size;
   final int minutePrecision;
   final bool useRootNavigator;
   final LdHint? Function(ReactiveFormFieldState<TimeOfDay, TimeOfDay>)? hintBuilder;
@@ -25,6 +26,7 @@ class LdFormTimePicker extends StatelessWidget {
     required this.formKey,
     this.label,
     this.disabled,
+    this.size = LdSize.m,
     this.minutePrecision = 15,
     this.useRootNavigator = false,
     this.hintBuilder,
@@ -46,6 +48,7 @@ class LdFormTimePicker extends StatelessWidget {
         field: LdTimePicker(
           label: label,
           value: state.control.value,
+          size: size,
           minutePrecision: minutePrecision,
           useRootNavigator: useRootNavigator,
           disabled: disabled ?? state.control.disabled,
