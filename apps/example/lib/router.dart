@@ -11,6 +11,7 @@ import 'package:liquid/components/feedback/reveal.dart';
 import 'package:liquid/components/form_elements/choose.dart';
 import 'package:liquid/components/form_elements/emoji_picker.dart';
 import 'package:liquid/components/form_elements/date_time_pickers.dart';
+import 'package:liquid/components/form_elements/recurrence_picker.dart';
 import 'package:liquid/components/form_elements/radio.dart';
 import 'package:liquid/components/form_elements/select.dart';
 import 'package:liquid/components/form_elements/slider.dart';
@@ -303,6 +304,11 @@ class AppRouter {
             path: "/components/date-time-picker",
             pageBuilder: (context, state) =>
                 NoTransitionPage<void>(key: state.pageKey, child: const DateTimePickerDemo()),
+          ),
+          GoRoute(
+            path: "/components/recurrence-picker",
+            pageBuilder: (context, state) =>
+                NoTransitionPage<void>(key: state.pageKey, child: const RecurrencePickerDemo()),
           ),
           GoRoute(
             path: "/components/divider",

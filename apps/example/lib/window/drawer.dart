@@ -48,6 +48,7 @@ const components = [
   _Component("Choose", "/components/choose", LucideIcons.textSelect, ComponentCategory.formElements),
   _Component("Emoji Picker", "/components/emoji-picker", LucideIcons.smile, ComponentCategory.formElements),
   _Component("Date/Time Picker", "/components/date-time-picker", LucideIcons.calendar, ComponentCategory.formElements),
+  _Component("Recurrence Picker", "/components/recurrence-picker", LucideIcons.repeat, ComponentCategory.formElements),
   _Component("Form", "/components/form", LucideIcons.penTool, ComponentCategory.formElements),
   _Component("Input", "/components/input", LucideIcons.textCursorInput, ComponentCategory.formElements),
   _Component("Radio", "/components/radio", LucideIcons.circle, ComponentCategory.formElements),

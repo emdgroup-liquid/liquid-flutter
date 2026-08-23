@@ -76,7 +76,96 @@
   "saving": "Saving",
   "create": "Create",
   "creating": "Creating..",
-  "discardChanges": "Dicard changes"
-  
+  "discardChanges": "Dicard changes",
+  "selectRecurrence": "Select recurrence",
+  "recurrenceFrequency": "Frequency",
+  "recurrenceSecondly": "Secondly",
+  "recurrenceMinutely": "Minutely",
+  "recurrenceHourly": "Hourly",
+  "recurrenceDaily": "Daily",
+  "recurrenceWeekly": "Weekly",
+  "recurrenceMonthly": "Monthly",
+  "recurrenceYearly": "Yearly",
+  "recurrenceEvery": "Every",
+  "recurrenceUnitSeconds": "{count,plural, =1{second}other{seconds}}",
+  "@recurrenceUnitSeconds": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "recurrenceUnitMinutes": "{count,plural, =1{minute}other{minutes}}",
+  "@recurrenceUnitMinutes": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "recurrenceUnitHours": "{count,plural, =1{hour}other{hours}}",
+  "@recurrenceUnitHours": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "recurrenceUnitDays": "{count,plural, =1{day}other{days}}",
+  "@recurrenceUnitDays": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "recurrenceUnitWeeks": "{count,plural, =1{week}other{weeks}}",
+  "@recurrenceUnitWeeks": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "recurrenceUnitMonths": "{count,plural, =1{month}other{months}}",
+  "@recurrenceUnitMonths": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "recurrenceUnitYears": "{count,plural, =1{year}other{years}}",
+  "@recurrenceUnitYears": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "recurrenceOnDay": "On day",
+  "recurrenceOnThe": "On the",
+  "recurrenceLastDay": "Last day",
+  "recurrenceNthFirst": "First",
+  "recurrenceNthSecond": "Second",
+  "recurrenceNthThird": "Third",
+  "recurrenceNthFourth": "Fourth",
+  "recurrenceNthLast": "Last",
+  "recurrenceEnds": "Ends",
+  "recurrenceEndsNever": "Never",
+  "recurrenceEndsOn": "On date",
+  "recurrenceEndsAfter": "After",
+  "recurrenceOccurrences": "{count,plural, =1{occurrence}other{occurrences}}",
+  "@recurrenceOccurrences": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "recurrenceNextOccurrences": "Next occurrences",
+  "recurrenceUnsupportedHint": "This rule has parts this picker cannot edit. Saving will drop those parts.",
+  "recurrenceOn": "on",
+  "recurrenceIn": "in",
+  "recurrenceUntil": "until",
+  "recurrenceTimes": "{count,plural, =1{once}other{{count} times}}",
+  "@recurrenceTimes": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "recurrenceLastOccurrence": "Last occurrence",
+  "recurrenceViewAllOccurrences": "View all occurrences",
+  "recurrenceAllOccurrences": "All occurrences",
+  "recurrenceShowingFirstN": "Showing the first {count} occurrences",
+  "@recurrenceShowingFirstN": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  }
 
 }

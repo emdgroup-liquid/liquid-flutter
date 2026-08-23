@@ -34,5 +34,95 @@
   "fieldConflictYours": "Ihr Wert",
   "fieldConflictServer": "Serverwert",
   "noItemsMatchFilter": "Keine Elemente entsprechen Ihren Filtern",
-  "clearFilters": "Filter zurücksetzen"
+  "clearFilters": "Filter zurücksetzen",
+  "selectRecurrence": "Wiederholung auswählen",
+  "recurrenceFrequency": "Häufigkeit",
+  "recurrenceSecondly": "Sekündlich",
+  "recurrenceMinutely": "Minütlich",
+  "recurrenceHourly": "Stündlich",
+  "recurrenceDaily": "Täglich",
+  "recurrenceWeekly": "Wöchentlich",
+  "recurrenceMonthly": "Monatlich",
+  "recurrenceYearly": "Jährlich",
+  "recurrenceEvery": "Alle",
+  "recurrenceUnitSeconds": "{count,plural, =1{Sekunde}other{Sekunden}}",
+  "@recurrenceUnitSeconds": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "recurrenceUnitMinutes": "{count,plural, =1{Minute}other{Minuten}}",
+  "@recurrenceUnitMinutes": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "recurrenceUnitHours": "{count,plural, =1{Stunde}other{Stunden}}",
+  "@recurrenceUnitHours": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "recurrenceUnitDays": "{count,plural, =1{Tag}other{Tage}}",
+  "@recurrenceUnitDays": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "recurrenceUnitWeeks": "{count,plural, =1{Woche}other{Wochen}}",
+  "@recurrenceUnitWeeks": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "recurrenceUnitMonths": "{count,plural, =1{Monat}other{Monate}}",
+  "@recurrenceUnitMonths": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "recurrenceUnitYears": "{count,plural, =1{Jahr}other{Jahre}}",
+  "@recurrenceUnitYears": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "recurrenceOnDay": "Am Tag",
+  "recurrenceOnThe": "Am",
+  "recurrenceLastDay": "Letzter Tag",
+  "recurrenceNthFirst": "Ersten",
+  "recurrenceNthSecond": "Zweiten",
+  "recurrenceNthThird": "Dritten",
+  "recurrenceNthFourth": "Vierten",
+  "recurrenceNthLast": "Letzten",
+  "recurrenceEnds": "Endet",
+  "recurrenceEndsNever": "Nie",
+  "recurrenceEndsOn": "Am Datum",
+  "recurrenceEndsAfter": "Nach",
+  "recurrenceOccurrences": "{count,plural, =1{Wiederholung}other{Wiederholungen}}",
+  "@recurrenceOccurrences": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "recurrenceNextOccurrences": "Nächste Termine",
+  "recurrenceUnsupportedHint": "Diese Regel enthält Teile, die dieser Picker nicht bearbeiten kann. Speichern entfernt diese Teile.",
+  "recurrenceOn": "am",
+  "recurrenceIn": "in",
+  "recurrenceUntil": "bis",
+  "recurrenceTimes": "{count,plural, =1{einmal}other{{count} Mal}}",
+  "@recurrenceTimes": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "recurrenceLastOccurrence": "Letzter Termin",
+  "recurrenceViewAllOccurrences": "Alle Termine anzeigen",
+  "recurrenceAllOccurrences": "Alle Termine",
+  "recurrenceShowingFirstN": "Zeigt die ersten {count} Termine",
+  "@recurrenceShowingFirstN": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  }
 }

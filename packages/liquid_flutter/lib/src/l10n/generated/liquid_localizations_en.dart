@@ -251,4 +251,198 @@ class LiquidLocalizationsEn extends LiquidLocalizations {
 
   @override
   String get discardChanges => 'Dicard changes';
+
+  @override
+  String get selectRecurrence => 'Select recurrence';
+
+  @override
+  String get recurrenceFrequency => 'Frequency';
+
+  @override
+  String get recurrenceSecondly => 'Secondly';
+
+  @override
+  String get recurrenceMinutely => 'Minutely';
+
+  @override
+  String get recurrenceHourly => 'Hourly';
+
+  @override
+  String get recurrenceDaily => 'Daily';
+
+  @override
+  String get recurrenceWeekly => 'Weekly';
+
+  @override
+  String get recurrenceMonthly => 'Monthly';
+
+  @override
+  String get recurrenceYearly => 'Yearly';
+
+  @override
+  String get recurrenceEvery => 'Every';
+
+  @override
+  String recurrenceUnitSeconds(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'seconds',
+      one: 'second',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String recurrenceUnitMinutes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'minutes',
+      one: 'minute',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String recurrenceUnitHours(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'hours',
+      one: 'hour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String recurrenceUnitDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'days',
+      one: 'day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String recurrenceUnitWeeks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'weeks',
+      one: 'week',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String recurrenceUnitMonths(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'months',
+      one: 'month',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String recurrenceUnitYears(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'years',
+      one: 'year',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get recurrenceOnDay => 'On day';
+
+  @override
+  String get recurrenceOnThe => 'On the';
+
+  @override
+  String get recurrenceLastDay => 'Last day';
+
+  @override
+  String get recurrenceNthFirst => 'First';
+
+  @override
+  String get recurrenceNthSecond => 'Second';
+
+  @override
+  String get recurrenceNthThird => 'Third';
+
+  @override
+  String get recurrenceNthFourth => 'Fourth';
+
+  @override
+  String get recurrenceNthLast => 'Last';
+
+  @override
+  String get recurrenceEnds => 'Ends';
+
+  @override
+  String get recurrenceEndsNever => 'Never';
+
+  @override
+  String get recurrenceEndsOn => 'On date';
+
+  @override
+  String get recurrenceEndsAfter => 'After';
+
+  @override
+  String recurrenceOccurrences(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'occurrences',
+      one: 'occurrence',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get recurrenceNextOccurrences => 'Next occurrences';
+
+  @override
+  String get recurrenceUnsupportedHint => 'This rule has parts this picker cannot edit. Saving will drop those parts.';
+
+  @override
+  String get recurrenceOn => 'on';
+
+  @override
+  String get recurrenceIn => 'in';
+
+  @override
+  String get recurrenceUntil => 'until';
+
+  @override
+  String recurrenceTimes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count times',
+      one: 'once',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get recurrenceLastOccurrence => 'Last occurrence';
+
+  @override
+  String get recurrenceViewAllOccurrences => 'View all occurrences';
+
+  @override
+  String get recurrenceAllOccurrences => 'All occurrences';
+
+  @override
+  String recurrenceShowingFirstN(int count) {
+    return 'Showing the first $count occurrences';
+  }
 }

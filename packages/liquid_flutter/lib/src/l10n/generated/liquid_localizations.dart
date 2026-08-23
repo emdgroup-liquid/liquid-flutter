@@ -526,6 +526,246 @@ abstract class LiquidLocalizations {
   /// In en, this message translates to:
   /// **'Dicard changes'**
   String get discardChanges;
+
+  /// No description provided for @selectRecurrence.
+  ///
+  /// In en, this message translates to:
+  /// **'Select recurrence'**
+  String get selectRecurrence;
+
+  /// No description provided for @recurrenceFrequency.
+  ///
+  /// In en, this message translates to:
+  /// **'Frequency'**
+  String get recurrenceFrequency;
+
+  /// No description provided for @recurrenceSecondly.
+  ///
+  /// In en, this message translates to:
+  /// **'Secondly'**
+  String get recurrenceSecondly;
+
+  /// No description provided for @recurrenceMinutely.
+  ///
+  /// In en, this message translates to:
+  /// **'Minutely'**
+  String get recurrenceMinutely;
+
+  /// No description provided for @recurrenceHourly.
+  ///
+  /// In en, this message translates to:
+  /// **'Hourly'**
+  String get recurrenceHourly;
+
+  /// No description provided for @recurrenceDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily'**
+  String get recurrenceDaily;
+
+  /// No description provided for @recurrenceWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly'**
+  String get recurrenceWeekly;
+
+  /// No description provided for @recurrenceMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get recurrenceMonthly;
+
+  /// No description provided for @recurrenceYearly.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly'**
+  String get recurrenceYearly;
+
+  /// No description provided for @recurrenceEvery.
+  ///
+  /// In en, this message translates to:
+  /// **'Every'**
+  String get recurrenceEvery;
+
+  /// No description provided for @recurrenceUnitSeconds.
+  ///
+  /// In en, this message translates to:
+  /// **'{count,plural, =1{second}other{seconds}}'**
+  String recurrenceUnitSeconds(int count);
+
+  /// No description provided for @recurrenceUnitMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count,plural, =1{minute}other{minutes}}'**
+  String recurrenceUnitMinutes(int count);
+
+  /// No description provided for @recurrenceUnitHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{count,plural, =1{hour}other{hours}}'**
+  String recurrenceUnitHours(int count);
+
+  /// No description provided for @recurrenceUnitDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count,plural, =1{day}other{days}}'**
+  String recurrenceUnitDays(int count);
+
+  /// No description provided for @recurrenceUnitWeeks.
+  ///
+  /// In en, this message translates to:
+  /// **'{count,plural, =1{week}other{weeks}}'**
+  String recurrenceUnitWeeks(int count);
+
+  /// No description provided for @recurrenceUnitMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'{count,plural, =1{month}other{months}}'**
+  String recurrenceUnitMonths(int count);
+
+  /// No description provided for @recurrenceUnitYears.
+  ///
+  /// In en, this message translates to:
+  /// **'{count,plural, =1{year}other{years}}'**
+  String recurrenceUnitYears(int count);
+
+  /// No description provided for @recurrenceOnDay.
+  ///
+  /// In en, this message translates to:
+  /// **'On day'**
+  String get recurrenceOnDay;
+
+  /// No description provided for @recurrenceOnThe.
+  ///
+  /// In en, this message translates to:
+  /// **'On the'**
+  String get recurrenceOnThe;
+
+  /// No description provided for @recurrenceLastDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Last day'**
+  String get recurrenceLastDay;
+
+  /// No description provided for @recurrenceNthFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'First'**
+  String get recurrenceNthFirst;
+
+  /// No description provided for @recurrenceNthSecond.
+  ///
+  /// In en, this message translates to:
+  /// **'Second'**
+  String get recurrenceNthSecond;
+
+  /// No description provided for @recurrenceNthThird.
+  ///
+  /// In en, this message translates to:
+  /// **'Third'**
+  String get recurrenceNthThird;
+
+  /// No description provided for @recurrenceNthFourth.
+  ///
+  /// In en, this message translates to:
+  /// **'Fourth'**
+  String get recurrenceNthFourth;
+
+  /// No description provided for @recurrenceNthLast.
+  ///
+  /// In en, this message translates to:
+  /// **'Last'**
+  String get recurrenceNthLast;
+
+  /// No description provided for @recurrenceEnds.
+  ///
+  /// In en, this message translates to:
+  /// **'Ends'**
+  String get recurrenceEnds;
+
+  /// No description provided for @recurrenceEndsNever.
+  ///
+  /// In en, this message translates to:
+  /// **'Never'**
+  String get recurrenceEndsNever;
+
+  /// No description provided for @recurrenceEndsOn.
+  ///
+  /// In en, this message translates to:
+  /// **'On date'**
+  String get recurrenceEndsOn;
+
+  /// No description provided for @recurrenceEndsAfter.
+  ///
+  /// In en, this message translates to:
+  /// **'After'**
+  String get recurrenceEndsAfter;
+
+  /// No description provided for @recurrenceOccurrences.
+  ///
+  /// In en, this message translates to:
+  /// **'{count,plural, =1{occurrence}other{occurrences}}'**
+  String recurrenceOccurrences(int count);
+
+  /// No description provided for @recurrenceNextOccurrences.
+  ///
+  /// In en, this message translates to:
+  /// **'Next occurrences'**
+  String get recurrenceNextOccurrences;
+
+  /// No description provided for @recurrenceUnsupportedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'This rule has parts this picker cannot edit. Saving will drop those parts.'**
+  String get recurrenceUnsupportedHint;
+
+  /// No description provided for @recurrenceOn.
+  ///
+  /// In en, this message translates to:
+  /// **'on'**
+  String get recurrenceOn;
+
+  /// No description provided for @recurrenceIn.
+  ///
+  /// In en, this message translates to:
+  /// **'in'**
+  String get recurrenceIn;
+
+  /// No description provided for @recurrenceUntil.
+  ///
+  /// In en, this message translates to:
+  /// **'until'**
+  String get recurrenceUntil;
+
+  /// No description provided for @recurrenceTimes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count,plural, =1{once}other{{count} times}}'**
+  String recurrenceTimes(int count);
+
+  /// No description provided for @recurrenceLastOccurrence.
+  ///
+  /// In en, this message translates to:
+  /// **'Last occurrence'**
+  String get recurrenceLastOccurrence;
+
+  /// No description provided for @recurrenceViewAllOccurrences.
+  ///
+  /// In en, this message translates to:
+  /// **'View all occurrences'**
+  String get recurrenceViewAllOccurrences;
+
+  /// No description provided for @recurrenceAllOccurrences.
+  ///
+  /// In en, this message translates to:
+  /// **'All occurrences'**
+  String get recurrenceAllOccurrences;
+
+  /// No description provided for @recurrenceShowingFirstN.
+  ///
+  /// In en, this message translates to:
+  /// **'Showing the first {count} occurrences'**
+  String recurrenceShowingFirstN(int count);
 }
 
 class _LiquidLocalizationsDelegate extends LocalizationsDelegate<LiquidLocalizations> {

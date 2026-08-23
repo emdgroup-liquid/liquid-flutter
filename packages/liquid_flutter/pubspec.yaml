@@ -29,6 +29,7 @@ dependencies:
   meta: ^1.9.0
   args: ^2.4.0
   path: ^1.9.0
+  rrule: ^0.2.18
 
 dev_dependencies:
   flutter_test:
