@@ -8,6 +8,7 @@ List<LdSortOption<Task, int>> taskSortOptions = [
     name: "order",
     label: (context) => "Manual order",
     icon: (context) => const Icon(LucideIcons.gripVertical),
+    isOn: true,
     supportsReorder: true,
     affectedByUpdate: (before, after) => before?.order != after?.order,
   ),

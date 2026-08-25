@@ -67,6 +67,16 @@ class LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType>
   // This keeps UI updates responsive while the router delegate catches up.
   LdMonkeySortAndFilterState<T, IdType>? _latestSortAndFilterState;
 
+  /// Whether builder `isOn` defaults have been considered for this definition
+  /// generation. Reset when filter/sort structure changes.
+  bool _definitionDefaultsSeeded = false;
+
+  /// True while a post-frame URL write for seeded defaults is in flight.
+  ///
+  /// Keeps optimistic seeded state until the router query catches up (parse
+  /// still treats missing keys as off).
+  bool _awaitingDefaultsUrlSync = false;
+
   /// URI written by the most recent [router.replace] within the current frame.
   ///
   /// `GoRouter.replace` does not update `router.state.uri` synchronously, so
@@ -81,11 +91,6 @@ class LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType>
   void didUpdateWidget(covariant LdMonkeyRouterAdapter<T, IdType> oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    final latestState = _latestSortAndFilterState;
-    if (latestState == null) {
-      return;
-    }
-
     final filterDefinitionsChanged =
         !ldMonkeyHasSameFilterStructure(oldWidget.filters, widget.filters);
     final sortDefinitionsChanged = !ldMonkeyHasSameSortStructure(
@@ -98,6 +103,8 @@ class LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType>
     // Structural filter/sort definition changes mean cached state may reference
     // stale objects. Drop cache and rebuild from fresh route definitions.
     _latestSortAndFilterState = null;
+    _definitionDefaultsSeeded = false;
+    _awaitingDefaultsUrlSync = false;
   }
 
   LdMonkeySortAndFilterState<T, IdType> _resolveSortAndFilterState(
@@ -112,6 +119,72 @@ class LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType>
   void _replaceUri(GoRouter router, Uri uri) {
     _baseUri = uri;
     router.replace(uri.toString());
+  }
+
+  void _scheduleDefaultsUrlSync(LdMonkeySortAndFilterState<T, IdType> seeded) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_awaitingDefaultsUrlSync) {
+        return;
+      }
+      final current = _latestSortAndFilterState ?? seeded;
+      final router = GoRouter.of(context);
+      final baseUri = _baseUri ?? router.state.uri;
+      final queryParameters = ldMonkeyCurrentQueryParameters(
+        context,
+        routeConfig: widget.routeConfig,
+        baseUri: baseUri,
+        sortAndFilterState: current,
+      );
+      final nextUri = baseUri.replace(queryParameters: queryParameters);
+      if (nextUri.toString() == baseUri.toString()) {
+        _awaitingDefaultsUrlSync = false;
+        return;
+      }
+      _replaceUri(router, nextUri);
+    });
+  }
+
+  LdMonkeySortAndFilterState<T, IdType> _hydrateSortAndFilterState({
+    required Map<String, String> query,
+  }) {
+    final baseSortAndFilterState = _latestSortAndFilterState;
+    var sortAndFilterState =
+        LdMonkeyRouteStateParser.parseSortAndFilter<T, IdType>(
+      routeConfig: widget.routeConfig,
+      baseFilters: baseSortAndFilterState?.filters ?? widget.filters,
+      baseSortOptions:
+          baseSortAndFilterState?.sortOptions ?? widget.sortOptions,
+      query: query,
+    );
+
+    if (!_definitionDefaultsSeeded) {
+      _definitionDefaultsSeeded = true;
+      final seeded = ldMonkeySeedDefinitionDefaults(
+        routeConfig: widget.routeConfig,
+        parsed: sortAndFilterState,
+        query: query,
+        definitionFilters: widget.filters,
+        definitionSortOptions: widget.sortOptions,
+      );
+      if (seeded != null) {
+        sortAndFilterState = seeded;
+        _awaitingDefaultsUrlSync = true;
+        _scheduleDefaultsUrlSync(seeded);
+      }
+    } else if (_awaitingDefaultsUrlSync && _latestSortAndFilterState != null) {
+      final latest = _latestSortAndFilterState!;
+      if (ldMonkeyDefaultsReflectedInQuery(
+        routeConfig: widget.routeConfig,
+        query: query,
+        state: latest,
+      )) {
+        _awaitingDefaultsUrlSync = false;
+      } else {
+        sortAndFilterState = latest;
+      }
+    }
+
+    return sortAndFilterState;
   }
 
   @override
@@ -331,15 +404,7 @@ class LdMonkeyRouterAdapterState<T extends Identifiable<IdType>, IdType>
             query: query,
             pathParameters: state.pathParameters,
           );
-          final baseSortAndFilterState = _latestSortAndFilterState;
-          final sortAndFilterState =
-              LdMonkeyRouteStateParser.parseSortAndFilter<T, IdType>(
-            routeConfig: widget.routeConfig,
-            baseFilters: baseSortAndFilterState?.filters ?? widget.filters,
-            baseSortOptions:
-                baseSortAndFilterState?.sortOptions ?? widget.sortOptions,
-            query: query,
-          );
+          final sortAndFilterState = _hydrateSortAndFilterState(query: query);
           _latestSortAndFilterState = sortAndFilterState;
           _baseUri = state.uri;
 

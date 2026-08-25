@@ -9,6 +9,11 @@ import 'package:liquid_flutter/src/monkey/monkey_sort_and_filter_state.dart';
 import 'package:liquid_flutter/src/monkey/sort/sort_option.dart';
 import 'package:provider/provider.dart';
 
+/// Resolves filter/sort builders into route definitions.
+///
+/// Builder [LdFilterOption.isOn] / [LdSortOption.isOn] values are preserved so
+/// [LdMonkeyRouterAdapter] can seed them into the URL on first hydrate. URL
+/// overrides are applied later by [LdMonkeyRouteStateParser.parseSortAndFilter].
 Future<LdMonkeyResolvedRouteDefinitions<T, IdType>> resolveMonkeyRouteDefinitions<
     T extends Identifiable<IdType>,
     IdType>({
@@ -21,46 +26,9 @@ Future<LdMonkeyResolvedRouteDefinitions<T, IdType>> resolveMonkeyRouteDefinition
     sortOptionsBuilder(context),
   ]);
 
-  if (!context.mounted) {
-    return LdMonkeyResolvedRouteDefinitions<T, IdType>(
-      filters: (results[0] as List<LdFilterOption<T, IdType>>).toSet(),
-      sortOptions: results[1] as List<LdSortOption<T, IdType>>,
-    );
-  }
-
-  final filtersList = results[0] as List<LdFilterOption<T, IdType>>;
-  final sortOptions = results[1] as List<LdSortOption<T, IdType>>;
-
-  LdMonkeyRouteConfig<T, IdType>? routeConfig;
-  Map<String, String> query = {};
-  try {
-    routeConfig = context.read<LdMonkeyRouteConfig<T, IdType>>();
-    final router = GoRouter.maybeOf(context);
-    if (router != null) {
-      query = router.state.uri.queryParameters;
-    }
-  } on ProviderNotFoundException {
-    routeConfig = null;
-  }
-
-  var filters = filtersList.toSet();
-
-  if (routeConfig != null) {
-    filters = filters
-        .map((filter) {
-          final queryKey = routeConfig!.filterQueryKey(filter.name);
-          final serialized = query[queryKey];
-          if (serialized == null) {
-            return filter.copyWith(isOn: false);
-          }
-          return filter.marshalSerialized(serialized);
-        })
-        .toSet();
-  }
-
   return LdMonkeyResolvedRouteDefinitions<T, IdType>(
-    filters: filters,
-    sortOptions: sortOptions,
+    filters: (results[0] as List<LdFilterOption<T, IdType>>).toSet(),
+    sortOptions: results[1] as List<LdSortOption<T, IdType>>,
   );
 }
 

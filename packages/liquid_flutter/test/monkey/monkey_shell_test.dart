@@ -108,7 +108,7 @@ void main() {
         expect(activeFilter.isOn, isTrue);
       });
 
-      testWidgets('disables filters not in query parameters', (WidgetTester tester) async {
+      testWidgets('seeds initially-on filters into query when absent', (WidgetTester tester) async {
         final filter = LdFilterBool<TestItem, int>(
           name: 'active',
           label: (context) => 'Active',
@@ -148,11 +148,127 @@ void main() {
 
         await tester.pumpAndSettle();
 
-        // With no query param, the initially-on filter should be off
         final ctx = tester.element(find.byType(LdMonkeyShell<TestItem, int>).last);
         final sortAndFilterState = ctx.read<LdMonkeySortAndFilterState<TestItem, int>>();
         final activeFilter = sortAndFilterState.filters.firstWhere((f) => f.name == 'active');
-        expect(activeFilter.isOn, isFalse);
+        expect(activeFilter.isOn, isTrue);
+        expect(
+          router.state.uri.queryParameters[routeConfig.filterQueryKey('active')],
+          isNotNull,
+        );
+      });
+
+      testWidgets('cleared default filter stays off', (WidgetTester tester) async {
+        final filter = LdFilterBool<TestItem, int>(
+          name: 'active',
+          label: (context) => 'Active',
+          icon: (context) => const Icon(Icons.check),
+          isOn: true,
+        );
+
+        final routeConfig = LdMonkeyRouteConfig.identifiableInt<TestItem>(itemName: 'item');
+
+        final router = GoRouter(
+          initialLocation: '/test',
+          routes: buildMonkeyRoutes<TestItem, int>(
+            masterPath: '/test',
+            routeConfig: routeConfig,
+            modelBuilder: (context, state) => createTestModel(),
+            filtersBuilder: (_) async => [filter],
+            sortOptionsBuilder: (_) async => [],
+            actions: const [],
+            masterPage: const SizedBox(),
+            detailPage: LdMonkeyScrollableDetailPage<TestItem, int>(
+              builder: (context, items) =>
+                  items.map((item) => Text(item.value.toString())).toList(),
+            ),
+          ),
+        );
+
+        await tester.pumpWidget(
+          LdThemeProvider(
+            child: MaterialApp.router(
+              localizationsDelegates: const [
+                ...LiquidLocalizations.localizationsDelegates,
+              ],
+              routerConfig: router,
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        final ctx = tester.element(find.byType(LdMonkeyShell<TestItem, int>).last);
+        final active = ctx
+            .read<LdMonkeySortAndFilterState<TestItem, int>>()
+            .filters
+            .firstWhere((f) => f.name == 'active');
+        expect(active.isOn, isTrue);
+
+        LdMonkeySortAndFilterState.updateFilter(
+          ctx,
+          active.copyWith(isOn: false),
+        );
+        await tester.pumpAndSettle();
+
+        final afterClear = ctx
+            .read<LdMonkeySortAndFilterState<TestItem, int>>()
+            .filters
+            .firstWhere((f) => f.name == 'active');
+        expect(afterClear.isOn, isFalse);
+        expect(
+          router.state.uri.queryParameters.containsKey(routeConfig.filterQueryKey('active')),
+          isFalse,
+        );
+      });
+
+      testWidgets('seeds initially-on sort into query when absent', (WidgetTester tester) async {
+        final sort = LdSortOption<TestItem, int>(
+          name: 'name',
+          label: (context) => 'Name',
+          icon: (context) => const Icon(Icons.sort),
+          isOn: true,
+        );
+
+        final routeConfig = LdMonkeyRouteConfig.identifiableInt<TestItem>(itemName: 'item');
+
+        final router = GoRouter(
+          initialLocation: '/test',
+          routes: buildMonkeyRoutes<TestItem, int>(
+            masterPath: '/test',
+            routeConfig: routeConfig,
+            modelBuilder: (context, state) => createTestModel(),
+            filtersBuilder: (_) async => [],
+            sortOptionsBuilder: (_) async => [sort],
+            actions: const [],
+            masterPage: const SizedBox(),
+            detailPage: LdMonkeyScrollableDetailPage<TestItem, int>(
+              builder: (context, items) =>
+                  items.map((item) => Text(item.value.toString())).toList(),
+            ),
+          ),
+        );
+
+        await tester.pumpWidget(
+          LdThemeProvider(
+            child: MaterialApp.router(
+              localizationsDelegates: const [
+                ...LiquidLocalizations.localizationsDelegates,
+              ],
+              routerConfig: router,
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+
+        final ctx = tester.element(find.byType(LdMonkeyShell<TestItem, int>).last);
+        final sortAndFilterState = ctx.read<LdMonkeySortAndFilterState<TestItem, int>>();
+        expect(sortAndFilterState.activeSortOptions.single.name, equals('name'));
+        expect(
+          router.state.uri.queryParameters[routeConfig.sortQueryKey],
+          equals('name-asc'),
+        );
       });
 
       testWidgets('calls initWithSelection when selected items exist', (WidgetTester tester) async {
