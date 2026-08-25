@@ -123,7 +123,7 @@ void main() {
       ]);
     });
 
-    test('addTime expands the cartesian product', () {
+    test('addTime appends a pair without cartesian expansion', () {
       final draft = LdRecurrenceDraft(
         frequency: Frequency.daily,
         times: const [LdRecurrenceTime(hour: 13, minute: 0)],
@@ -140,12 +140,38 @@ void main() {
           const LdRecurrenceTime(hour: 13, minute: 0),
           const LdRecurrenceTime(hour: 13, minute: 30),
           const LdRecurrenceTime(hour: 17, minute: 0),
-          const LdRecurrenceTime(hour: 17, minute: 30),
         ],
       );
     });
 
-    test('removeTime drops an hour or a minute from the cartesian grid', () {
+    test('addTime ignores duplicates', () {
+      const time = LdRecurrenceTime(hour: 13, minute: 0);
+      final draft = LdRecurrenceDraft(
+        frequency: Frequency.daily,
+        times: const [time],
+      );
+
+      expect(draft.addTime(time).times, [time]);
+    });
+
+    test('fromRule expands independent pairs stored as BYHOUR/BYMINUTE', () {
+      final draft = LdRecurrenceDraft(
+        frequency: Frequency.daily,
+        times: const [
+          LdRecurrenceTime(hour: 13, minute: 0),
+          LdRecurrenceTime(hour: 17, minute: 30),
+        ],
+      );
+
+      expect(LdRecurrenceDraft.fromRule(draft.toRule()).times, [
+        const LdRecurrenceTime(hour: 13, minute: 0),
+        const LdRecurrenceTime(hour: 13, minute: 30),
+        const LdRecurrenceTime(hour: 17, minute: 0),
+        const LdRecurrenceTime(hour: 17, minute: 30),
+      ]);
+    });
+
+    test('removeTime drops only that pair', () {
       expect(
         const LdRecurrenceDraft(
           frequency: Frequency.daily,
@@ -163,22 +189,12 @@ void main() {
           times: [
             LdRecurrenceTime(hour: 13, minute: 0),
             LdRecurrenceTime(hour: 13, minute: 30),
-          ],
-        ).removeTime(const LdRecurrenceTime(hour: 13, minute: 30)).times,
-        [const LdRecurrenceTime(hour: 13, minute: 0)],
-      );
-
-      expect(
-        const LdRecurrenceDraft(
-          frequency: Frequency.daily,
-          times: [
-            LdRecurrenceTime(hour: 13, minute: 0),
-            LdRecurrenceTime(hour: 13, minute: 30),
             LdRecurrenceTime(hour: 17, minute: 0),
             LdRecurrenceTime(hour: 17, minute: 30),
           ],
         ).removeTime(const LdRecurrenceTime(hour: 13, minute: 30)).times,
         [
+          const LdRecurrenceTime(hour: 13, minute: 0),
           const LdRecurrenceTime(hour: 17, minute: 0),
           const LdRecurrenceTime(hour: 17, minute: 30),
         ],

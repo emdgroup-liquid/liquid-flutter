@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'utils.dart';
 
@@ -294,6 +295,7 @@ void main() {
     expect(find.text('At'), findsOneWidget);
     expect(find.text('13:00'), findsOneWidget);
     expect(find.text('17:00'), findsOneWidget);
+    expect(find.byIcon(LucideIcons.x), findsNWidgets(2));
     expect(find.byKey(const Key('recurrence_add_time')), findsOneWidget);
   });
 
@@ -343,5 +345,44 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('time_picker_sheet')), findsOneWidget);
+  });
+
+  testWidgets('parent echo does not cartesian-expand added times', (tester) async {
+    var rule = RecurrenceRule(
+      frequency: Frequency.daily,
+      byHours: const [13],
+      byMinutes: const [0],
+    );
+
+    await tester.pumpWidget(
+      withLiquidTheme(
+        StatefulBuilder(
+          builder: (context, setState) {
+            return LdRecurrenceForm(
+              value: rule,
+              start: DateTime(2024, 1, 15, 9),
+              config: const LdRecurrenceConfig(
+                showPreview: false,
+                endModes: {},
+              ),
+              onChanged: (next) => setState(() => rule = next),
+            );
+          },
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(const Key('recurrence_add_time')));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('time_picker_sheet')), findsOneWidget);
+    Navigator.of(
+      tester.element(find.byKey(const Key('time_picker_sheet'))),
+    ).pop(const TimeOfDay(hour: 17, minute: 30));
+    await tester.pumpAndSettle();
+
+    expect(find.text('13:00'), findsOneWidget);
+    expect(find.text('17:30'), findsOneWidget);
+    expect(find.text('13:30'), findsNothing);
+    expect(find.text('17:00'), findsNothing);
   });
 }

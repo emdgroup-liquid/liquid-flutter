@@ -56,13 +56,20 @@ class _LdRecurrenceFormState extends State<LdRecurrenceForm> {
   @override
   void didUpdateWidget(covariant LdRecurrenceForm oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.value != oldWidget.value) {
-      _draft = widget.value != null
-          ? LdRecurrenceDraft.fromRule(widget.value!, start: widget.start)
-          : LdRecurrenceDraft.initial(start: widget.start);
-      _intervalController.text = _draft.interval.toString();
-      _countController.text = _draft.count.toString();
+    if (widget.value == oldWidget.value) {
+      return;
     }
+    // Keep the in-progress times list when the parent echoes the rule we just
+    // emitted. `toRule` stores BYHOUR/BYMINUTE as a cartesian product, so
+    // rebuilding from that rule would duplicate chips.
+    if (widget.value != null && widget.value == _draft.toRule()) {
+      return;
+    }
+    _draft = widget.value != null
+        ? LdRecurrenceDraft.fromRule(widget.value!, start: widget.start)
+        : LdRecurrenceDraft.initial(start: widget.start);
+    _intervalController.text = _draft.interval.toString();
+    _countController.text = _draft.count.toString();
   }
 
   @override
@@ -187,6 +194,7 @@ class _LdRecurrenceFormState extends State<LdRecurrenceForm> {
                   key: Key('recurrence_time_${time.hour}_${time.minute}'),
                   size: LdSize.s,
                   disabled: widget.disabled,
+                  trailing: const Icon(LucideIcons.x),
                   onPressed: () => _emit(_draft.removeTime(time)),
                   child: Text(time.label),
                 ),

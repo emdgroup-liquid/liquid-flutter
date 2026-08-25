@@ -263,34 +263,19 @@ class LdRecurrenceDraft {
   }
 
   LdRecurrenceDraft addTime(LdRecurrenceTime time) {
-    return copyWith(
-      times: ldRecurrenceTimesFromParts(
-        hours: [...times.map((entry) => entry.hour), time.hour],
-        minutes: [...times.map((entry) => entry.minute), time.minute],
-      ),
-    );
+    if (times.contains(time)) {
+      return this;
+    }
+    final next = [...times, time]..sort();
+    return copyWith(times: next);
   }
 
   LdRecurrenceDraft removeTime(LdRecurrenceTime time) {
-    if (!times.contains(time) || times.length <= 1) {
-      return copyWith(times: const []);
-    }
-    final hours = times.map((entry) => entry.hour).toSet();
-    final minutes = times.map((entry) => entry.minute).toSet();
-    final hourCount = times.where((entry) => entry.hour == time.hour).length;
-    final minuteCount = times.where((entry) => entry.minute == time.minute).length;
-    if (hourCount == 1) {
-      hours.remove(time.hour);
-    } else if (minuteCount == 1) {
-      minutes.remove(time.minute);
-    } else {
-      hours.remove(time.hour);
-    }
     return copyWith(
-      times: ldRecurrenceTimesFromParts(
-        hours: hours,
-        minutes: minutes,
-      ),
+      times: [
+        for (final entry in times)
+          if (entry != time) entry,
+      ],
     );
   }
 
