@@ -145,12 +145,22 @@ void main() {
                     ),
                   ],
                   sortOptionsBuilder: (_) async => [],
-                  child: (context, resolved) {
-                    final gold = resolved.filters
-                        .whereType<LdFilterOneOf<TestItem, int, String>>()
-                        .first;
-                    return Text('selected:${gold.selectedValue}');
-                  },
+                  // URL hydration is applied by LdMonkeyRouterAdapter (not the
+                  // resolver), so that builder isOn defaults can be seeded.
+                  child: (context, resolved) => LdMonkeyRouterAdapter<TestItem, int>(
+                    routeConfig: routeConfig,
+                    filters: resolved.filters.toList(),
+                    sortOptions: resolved.sortOptions,
+                    child: Builder(
+                      builder: (context) {
+                        final gold = LdMonkeySortAndFilterState.of<TestItem, int>(context)
+                            .filters
+                            .whereType<LdFilterOneOf<TestItem, int, String>>()
+                            .first;
+                        return Text('selected:${gold.selectedValue}');
+                      },
+                    ),
+                  ),
                 ),
               ),
             ),
