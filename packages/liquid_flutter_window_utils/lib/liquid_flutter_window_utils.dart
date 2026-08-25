@@ -11,8 +11,12 @@ class LiquidFlutterWindowUtils implements WindowStateEventApi {
       LiquidFlutterWindowUtils._();
 
   LiquidFlutterWindowUtils._() {
-    if (defaultTargetPlatform == TargetPlatform.macOS ||
-        defaultTargetPlatform == TargetPlatform.android) {
+    // `defaultTargetPlatform` is macOS/Windows/etc even in Chrome, so native
+    // pigeon channels must not be set up on web.
+    if (!kIsWeb &&
+        !kIsWasm &&
+        (defaultTargetPlatform == TargetPlatform.macOS ||
+            defaultTargetPlatform == TargetPlatform.android)) {
       _api = WindowUtilsApi();
       if (defaultTargetPlatform == TargetPlatform.macOS) {
         _setupFlutterApi();

@@ -154,13 +154,10 @@ class _LdSpringState extends State<LdSpring> with SingleTickerProviderStateMixin
             );
           }
         });
-        return;
-      } else {
-        if (_ticker?.isActive != true) {
-          _ticker?.start();
-        }
       }
     }
+
+    _syncTicker();
 
     if (oldWidget.child != widget.child) {
       setState(() {});
@@ -169,8 +166,31 @@ class _LdSpringState extends State<LdSpring> with SingleTickerProviderStateMixin
 
   Ticker? _ticker;
 
+  bool get _shouldTick => !ldDisableAnimations && !widget.paused && !widget.overriden && _spring.active;
+
+  void _syncTicker() {
+    if (_shouldTick) {
+      _ticker ??= createTicker(_onTick);
+      if (_ticker?.isActive != true) {
+        _ticker!.start();
+      }
+      return;
+    }
+    if (_ticker?.isActive == true) {
+      _ticker!.stop();
+    }
+  }
+
+  void _onTick(Duration elapsed) {
+    update(elapsed.inMilliseconds);
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
   void update([int? elapsedTime]) {
     if (widget.paused) {
+      _ticker?.stop();
       return;
     }
     _spring.update(elapsedTime);
@@ -187,21 +207,8 @@ class _LdSpringState extends State<LdSpring> with SingleTickerProviderStateMixin
 
   @override
   void initState() {
-    if (!ldDisableAnimations) {
-      _ticker ??= createTicker((elapsed) {
-        update(elapsed.inMilliseconds);
-
-        if (mounted) {
-          setState(() {});
-        }
-      });
-
-      if (_ticker?.isActive != true) {
-        _ticker?.start();
-      }
-    }
-
     super.initState();
+    _syncTicker();
   }
 
   @override
@@ -279,21 +286,8 @@ class _LdChainedSpringsState extends State<LdChainedSprings> with SingleTickerPr
   void initState() {
     _createSprings();
 
-    if (!ldDisableAnimations) {
-      _ticker ??= createTicker((elapsed) {
-        update(elapsed.inMilliseconds);
-
-        if (mounted) {
-          setState(() {});
-        }
-      });
-
-      if (_ticker?.isActive != true) {
-        _ticker?.start();
-      }
-    }
-
     super.initState();
+    _syncChainedTicker();
   }
 
   void _createSprings() {
@@ -338,29 +332,39 @@ class _LdChainedSpringsState extends State<LdChainedSprings> with SingleTickerPr
       _springs[i].dampingCoefficient = widget.dampingCoefficient;
     }
 
-    if (oldWidget.targetPosition != widget.targetPosition) {
-      if (!ldDisableAnimations) {
-        _ticker ??= createTicker((elapsed) {
-          update(elapsed.inMilliseconds);
-          if (mounted) {
-            setState(() {});
-          }
-        });
-        if (_ticker?.isActive != true) {
-          _ticker?.start();
-        }
-      }
-    }
-
     if (oldWidget.child != widget.child) {
       setState(() {});
     }
 
     super.didUpdateWidget(oldWidget);
+    _syncChainedTicker();
+  }
+
+  bool get _chainedShouldTick => !ldDisableAnimations && _springs.any((spring) => spring.active);
+
+  void _syncChainedTicker() {
+    if (_chainedShouldTick) {
+      _ticker ??= createTicker(_onChainedTick);
+      if (_ticker?.isActive != true) {
+        _ticker!.start();
+      }
+      return;
+    }
+    if (_ticker?.isActive == true) {
+      _ticker!.stop();
+    }
+  }
+
+  void _onChainedTick(Duration elapsed) {
+    update(elapsed.inMilliseconds);
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   void update([int? elapsedMs]) {
     if (_springs.isEmpty) {
+      _ticker?.stop();
       return;
     }
 
@@ -390,10 +394,6 @@ class _LdChainedSpringsState extends State<LdChainedSprings> with SingleTickerPr
           }).toList(),
         );
       }
-    }
-
-    if (mounted) {
-      setState(() {});
     }
   }
 

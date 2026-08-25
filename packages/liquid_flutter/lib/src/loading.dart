@@ -1,7 +1,7 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-
-import 'dart:math';
 
 /// a loading indicator (indeterminate)
 class LdLoader extends StatefulWidget {
@@ -24,6 +24,7 @@ class _LdLoaderState extends State<LdLoader> with SingleTickerProviderStateMixin
 
   @override
   void initState() {
+    super.initState();
     _animationController = AnimationController(
       vsync: this,
       duration: widget.speed,
@@ -31,8 +32,17 @@ class _LdLoaderState extends State<LdLoader> with SingleTickerProviderStateMixin
     if (!ldDisableAnimations) {
       _animationController.repeat();
     }
+  }
 
-    super.initState();
+  @override
+  void didUpdateWidget(covariant LdLoader oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.speed != widget.speed) {
+      _animationController.duration = widget.speed;
+      if (_animationController.isAnimating) {
+        _animationController.repeat();
+      }
+    }
   }
 
   @override
@@ -50,85 +60,111 @@ class _LdLoaderState extends State<LdLoader> with SingleTickerProviderStateMixin
     final accentColor2 = widget.neutral ? theme.neutralShade(2) : theme.secondaryColor;
 
     return SizedBox(
-        height: widget.size,
-        width: widget.size,
-        child: AnimatedBuilder(
+      height: widget.size,
+      width: widget.size,
+      child: RepaintBoundary(
+        child: CustomPaint(
+          size: Size.square(widget.size),
+          painter: _LoadingPainter(
             animation: _animationController,
-            builder: (context, child) => Transform.rotate(
-                  angle: _animationController.value * 4 * pi,
-                  child: CustomPaint(
-                    painter: _LoadingPainter(
-                        CurvedAnimation(curve: Curves.linear, parent: _animationController), widget.size,
-                        baseColor: baseColor, accentColor: accentColor, accentColor2: accentColor2),
-                  ),
-                )));
+            loaderSize: widget.size,
+            baseColor: baseColor,
+            accentColor: accentColor,
+            accentColor2: accentColor2,
+          ),
+        ),
+      ),
+    );
   }
 }
 
 class _LoadingPainter extends CustomPainter {
-  Animation<double> animation;
-  double loaderSize;
+  final Animation<double> animation;
+  final double loaderSize;
   final Color baseColor;
   final Color accentColor;
   final Color accentColor2;
 
-  _LoadingPainter(
-    this.animation,
-    this.loaderSize, {
+  _LoadingPainter({
+    required this.animation,
+    required this.loaderSize,
     required this.baseColor,
     required this.accentColor,
     required this.accentColor2,
-  });
+  }) : super(repaint: animation);
 
   @override
   void paint(Canvas canvas, Size size) {
-    Offset middle = Offset(loaderSize / 2, loaderSize / 2);
-
-    var oscilatorB = sin(2 * animation.value * pi) * 0.5 + 0.5;
-
-    Paint paint = Paint()..color = baseColor;
-
+    final value = animation.value;
+    final middle = Offset(loaderSize / 2, loaderSize / 2);
+    final oscilatorB = sin(2 * value * pi) * 0.5 + 0.5;
+    final startAngle = value * 2 * pi;
     final blend = Color.lerp(accentColor, accentColor2, oscilatorB)!;
 
-    Paint accent3 = Paint()
+    final paint = Paint()..color = baseColor;
+    final accent = Paint()
       ..color = blend
       ..strokeWidth = loaderSize / 8
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
 
-    var startAngle = animation.value * 2 * pi;
+    canvas.save();
+    canvas.translate(middle.dx, middle.dy);
+    canvas.rotate(value * 4 * pi);
+    canvas.translate(-middle.dx, -middle.dy);
 
     canvas.saveLayer(Offset.zero & size, Paint());
 
-    canvas.clipRRect(RRect.fromRectAndRadius(
-        Rect.fromCenter(center: middle, width: loaderSize, height: loaderSize), Radius.circular(loaderSize / 2)));
+    canvas.clipRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromCenter(center: middle, width: loaderSize, height: loaderSize),
+        Radius.circular(loaderSize / 2),
+      ),
+    );
 
     canvas.drawArc(
-        Rect.fromCenter(center: middle, width: loaderSize, height: loaderSize), startAngle, 2 * pi, false, paint);
+      Rect.fromCenter(center: middle, width: loaderSize, height: loaderSize),
+      startAngle,
+      2 * pi,
+      false,
+      paint,
+    );
+
+    final arcRect = Rect.fromCenter(
+      center: middle,
+      width: loaderSize / 2 + (loaderSize / 4),
+      height: loaderSize / 2 + (loaderSize / 4),
+    );
 
     canvas.drawArc(
-        Rect.fromCenter(
-            center: middle, width: loaderSize / 2 + (loaderSize / 4), height: loaderSize / 2 + (loaderSize / 4)),
-        oscilatorB,
-        oscilatorB,
-        false,
-        accent3);
-
+      arcRect,
+      oscilatorB,
+      oscilatorB,
+      false,
+      accent,
+    );
     canvas.drawArc(
-        Rect.fromCenter(
-            center: middle, width: loaderSize / 2 + (loaderSize / 4), height: loaderSize / 2 + (loaderSize / 4)),
-        pow(oscilatorB, 4) + pi,
-        oscilatorB + 0.8 * pi,
-        false,
-        accent3);
+      arcRect,
+      pow(oscilatorB, 4) + pi,
+      oscilatorB + 0.8 * pi,
+      false,
+      accent,
+    );
 
     canvas.drawCircle(middle, loaderSize / 4, Paint()..blendMode = BlendMode.clear);
 
     canvas.restore();
+    canvas.restore();
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return true;
+  bool shouldRepaint(covariant _LoadingPainter oldDelegate) {
+    return oldDelegate.loaderSize != loaderSize ||
+        oldDelegate.baseColor != baseColor ||
+        oldDelegate.accentColor != accentColor ||
+        oldDelegate.accentColor2 != accentColor2;
   }
+
+  @override
+  bool shouldRebuildSemantics(covariant CustomPainter oldDelegate) => false;
 }

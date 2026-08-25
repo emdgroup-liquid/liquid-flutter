@@ -205,6 +205,14 @@ class LdAppBarWidget extends StatefulWidget {
 
 class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObserver {
   final FocusScopeNode _focusScopeNode = FocusScopeNode();
+  bool? _barHasFocusedInputCache;
+  ({
+    Size physicalSize,
+    double devicePixelRatio,
+    EdgeInsets viewInsets,
+    EdgeInsets padding,
+    EdgeInsets viewPadding,
+  })? _lastViewMetrics;
 
   @override
   void dispose() {
@@ -225,18 +233,52 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObse
 
   @override
   void didChangeMetrics() {
-    if (mounted) {
-      setState(() {});
+    if (!mounted) {
+      return;
     }
+    final view = View.maybeOf(context);
+    if (view == null) {
+      return;
+    }
+    final dpr = view.devicePixelRatio;
+    final next = (
+      physicalSize: Size(
+        view.physicalSize.width.roundToDouble(),
+        view.physicalSize.height.roundToDouble(),
+      ),
+      devicePixelRatio: dpr,
+      viewInsets: _snappedInsets(EdgeInsets.fromViewPadding(view.viewInsets, dpr)),
+      padding: _snappedInsets(EdgeInsets.fromViewPadding(view.padding, dpr)),
+      viewPadding: _snappedInsets(EdgeInsets.fromViewPadding(view.viewPadding, dpr)),
+    );
+    if (_lastViewMetrics == next) {
+      return;
+    }
+    _lastViewMetrics = next;
+    setState(() {});
   }
 
   void _handleFocusChange() {
+    final next = ldAppBarFocusScopeHasInputFocus(_focusScopeNode);
+    if (_barHasFocusedInputCache == next) {
+      return;
+    }
+    _barHasFocusedInputCache = next;
     if (mounted) {
       setState(() {});
     }
   }
 
   bool get _barHasFocusedInput => ldAppBarFocusScopeHasInputFocus(_focusScopeNode);
+
+  static EdgeInsets _snappedInsets(EdgeInsets insets) {
+    return EdgeInsets.fromLTRB(
+      insets.left.roundToDouble(),
+      insets.top.roundToDouble(),
+      insets.right.roundToDouble(),
+      insets.bottom.roundToDouble(),
+    );
+  }
 
   LdAppBarPosition get _effectivePosition {
     return switch (widget.positionMode) {

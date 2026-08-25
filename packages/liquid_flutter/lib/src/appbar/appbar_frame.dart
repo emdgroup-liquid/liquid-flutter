@@ -176,7 +176,14 @@ class _AppBarFrameState extends State<AppBarFrame> {
     FocusManager.instance.addListener(_handleFocusChange);
   }
 
+  bool? _barFocused;
+
   void _handleFocusChange() {
+    final next = ldAppBarFocusScopeHasInputFocus(_focusScopeNode);
+    if (_barFocused == next) {
+      return;
+    }
+    _barFocused = next;
     if (mounted) {
       setState(() {});
     }
@@ -323,9 +330,10 @@ class _AppBarFrameState extends State<AppBarFrame> {
   }
 
   void _onInnerSizeChange(Size size) {
-    if (_innerHeight != size.height) {
-      setState(() => _innerHeight = size.height);
+    if ((_innerHeight - size.height).abs() < 0.5) {
+      return;
     }
+    setState(() => _innerHeight = size.height);
   }
 
   // ── Scroll-hide logic ────────────────────────────────────────────────────
@@ -703,6 +711,7 @@ class _AppBarFrameState extends State<AppBarFrame> {
             initialPosition: _visualTarget,
             overriden: _snapOverriding,
             springConstant: 10,
+            child: widget.wrappedChild,
             builder: (springContext, springState, child) {
               _springLivePosition = springState.position;
 
@@ -732,7 +741,7 @@ class _AppBarFrameState extends State<AppBarFrame> {
                     children: [
                       MediaQuery(
                         data: _buildBodyMediaQuery(metrics),
-                        child: widget.wrappedChild,
+                        child: child!,
                       ),
                       Positioned(
                         top: widget.position == LdAppBarPosition.top ? 0 : null,

@@ -117,6 +117,12 @@ class _QuantityState extends State<_Quantity> with TickerProviderStateMixin {
   }
 
   @override
+  void dispose() {
+    _quantityController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final header = LdAutoSpace(
       crossAxisAlignment: CrossAxisAlignment.start,

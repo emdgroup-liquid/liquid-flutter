@@ -304,7 +304,7 @@ class LdSearchSuggestionsOverlay extends StatefulWidget {
 
 class _LdSearchSuggestionsOverlayState extends State<LdSearchSuggestionsOverlay> with SingleTickerProviderStateMixin {
   late final AnimationController _fadeController;
-  late final Animation<double> _fadeAnimation;
+  late final CurvedAnimation _fadeAnimation;
 
   // Stale-while-revalidate: the last successful list stays visible while a
   // re-fetch is in flight so the overlay never flashes empty.
@@ -324,6 +324,7 @@ class _LdSearchSuggestionsOverlayState extends State<LdSearchSuggestionsOverlay>
 
   @override
   void dispose() {
+    _fadeAnimation.dispose();
     _fadeController.dispose();
     widget.inputRectNotifier.removeListener(_onInputRectChanged);
     super.dispose();

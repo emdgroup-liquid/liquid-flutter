@@ -500,24 +500,17 @@ class LdContextMenuRoute extends ModalRoute<void> {
         return AnimatedBuilder(
           animation: animation,
           builder: (context, child) {
-            Rect animatedRect = endRect;
-
-            animatedRect = RectTween(
+            // Evaluate curves against [animation.value] — do not construct
+            // [CurvedAnimation] here; each instance registers a status listener
+            // on [animation] and would leak for the lifetime of the route.
+            final moveT = Curves.easeInOut.transform(animation.value);
+            final animatedRect = RectTween(
               begin: triggerRect,
               end: endRect,
-            ).evaluate(
-              CurvedAnimation(
-                parent: animation,
-                curve: Curves.easeInOut,
-              ),
-            )!;
+            ).transform(moveT)!;
 
-            // Use Interval curve to stagger the content reveal after shape transformation
-            // Content starts revealing at 70% of the animation
-            final revealAnimation = CurvedAnimation(
-              parent: animation,
-              curve: const Interval(0.7, 1.0, curve: Curves.decelerate),
-            );
+            // Content starts revealing at 70% of the animation.
+            final revealT = const Interval(0.7, 1.0, curve: Curves.decelerate).transform(animation.value);
 
             return Positioned(
               left: animatedRect.left,
@@ -536,7 +529,7 @@ class LdContextMenuRoute extends ModalRoute<void> {
                         maxConstraints,
                         animation,
                         Opacity(
-                          opacity: revealAnimation.value,
+                          opacity: revealT,
                           child: child,
                         ),
                       ),
@@ -598,14 +591,8 @@ class LdContextMenuRoute extends ModalRoute<void> {
             color: ColorTween(
               begin: LdTheme.of(context).surface.withAlpha(0),
               end: LdTheme.of(context).surface,
-            ).evaluate(
-              CurvedAnimation(
-                parent: animation,
-                curve: Interval(
-                  0.1,
-                  0.8,
-                ),
-              ),
+            ).transform(
+              const Interval(0.1, 0.8).transform(animation.value),
             ),
             borderRadius: scaleFromTrigger
                 ? BorderRadius.circular(

@@ -48,31 +48,29 @@ class _CodeBlockState extends State<CodeBlock> {
     bool isDesktop = LdTheme.of(context).platform.isDesktop;
     final tr = LiquidLocalizations.of(context);
 
-    return LayoutBuilder(
-      builder: (context, _) => LdWrapConditional(
-        condition: widget.wrapCard,
-        builder: (context, child) => LdCard(child: child),
-        child: Stack(
-          children: [
-            SourceCode(code: widget.code),
-            if (isDesktop && widget.showCopyButton)
-              Align(
-                alignment: Alignment.topRight,
-                child: LdButton(
-                  color: shadSky,
-                  size: LdSize.s,
-                  mode: LdButtonMode.outline,
-                  onPressed: () {
-                    Clipboard.setData(ClipboardData(text: widget.code));
-                    LdNotificationsController.of(
-                      context,
-                    ).addNotification(LdNotification(message: tr.copiedToClipboard, type: LdNotificationType.success));
-                  },
-                  child: Text(tr.copy),
-                ),
+    return LdWrapConditional(
+      condition: widget.wrapCard,
+      builder: (context, child) => LdCard(child: child),
+      child: Stack(
+        children: [
+          SourceCode(code: widget.code, language: widget.language),
+          if (isDesktop && widget.showCopyButton)
+            Align(
+              alignment: Alignment.topRight,
+              child: LdButton(
+                color: shadSky,
+                size: LdSize.s,
+                mode: LdButtonMode.outline,
+                onPressed: () {
+                  Clipboard.setData(ClipboardData(text: widget.code));
+                  LdNotificationsController.of(
+                    context,
+                  ).addNotification(LdNotification(message: tr.copiedToClipboard, type: LdNotificationType.success));
+                },
+                child: Text(tr.copy),
               ),
-          ],
-        ),
+            ),
+        ],
       ),
     );
   }

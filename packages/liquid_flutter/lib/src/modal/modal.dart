@@ -352,16 +352,25 @@ class LdModalRoute<T> extends PageRoute<T> {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    final CurvedAnimation curvedAnimation = CurvedAnimation(
+    // Drive tweens then dispose: [CurvedAnimation] adds a status listener on
+    // [animation], and [buildTransitions] can run every frame.
+    final curvedAnimation = CurvedAnimation(
       parent: animation,
       curve: Curves.easeOut,
       reverseCurve: Curves.easeIn,
     );
+    final Animation<double> opacityAnimation = curvedAnimation.drive(
+      Tween<double>(begin: 0, end: 1),
+    );
+    final Animation<double> scaleAnimation = curvedAnimation.drive(
+      Tween<double>(begin: 0.8, end: 1.0),
+    );
+    curvedAnimation.dispose();
 
     return FadeTransition(
-      opacity: curvedAnimation,
+      opacity: opacityAnimation,
       child: ScaleTransition(
-        scale: Tween<double>(begin: 0.8, end: 1.0).animate(curvedAnimation),
+        scale: scaleAnimation,
         child: child,
       ),
     );

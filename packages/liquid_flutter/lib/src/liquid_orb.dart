@@ -18,23 +18,19 @@ class LdOrb extends StatefulWidget {
 
 class _LdOrbState extends State<LdOrb> with TickerProviderStateMixin {
   late AnimationController _animationController;
-  final Tween<double> _tween = Tween(begin: 0.0, end: 1);
-  late Animation<double> _animation;
 
   double get _fill => 1 - ((widget.filling * 0.9) + 0.1);
 
   @override
   void initState() {
+    super.initState();
     _animationController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 10),
     );
-
-    _animation = _tween.animate(_animationController);
-
-    _animationController.repeat();
-
-    super.initState();
+    if (!ldDisableAnimations) {
+      _animationController.repeat();
+    }
   }
 
   @override
@@ -45,35 +41,41 @@ class _LdOrbState extends State<LdOrb> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    var theme = Provider.of<LdTheme>(context, listen: true);
+    final theme = Provider.of<LdTheme>(context, listen: true);
+    final size = Size.square(widget.size);
 
-    return Stack(
-      children: [
-        Container(
-          clipBehavior: Clip.hardEdge,
-          decoration: BoxDecoration(boxShadow: const [], borderRadius: BorderRadius.circular(widget.size / 2)),
-          height: widget.size,
-          width: widget.size,
-          child: LdSpring(
-            position: _fill,
-            initialPosition: 0,
-            builder: (context, spring, _) => AnimatedBuilder(
-                animation: _animation,
-                builder: (context, child) {
+    return RepaintBoundary(
+      child: SizedBox(
+        height: widget.size,
+        width: widget.size,
+        child: Stack(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(widget.size / 2),
+              child: LdSpring(
+                position: _fill,
+                initialPosition: 0,
+                builder: (context, spring, _) {
                   return CustomPaint(
+                    size: size,
                     painter: _OrbPainter(
-                      Size(widget.size, widget.size),
-                      spring.position,
-                      _animation.value + spring.velocity,
-                      widget.paintBackground,
-                      theme,
+                      animation: _animationController,
+                      orbSize: size,
+                      fillPercentage: spring.position,
+                      paintBackground: widget.paintBackground,
+                      theme: theme,
                     ),
                   );
-                }),
-          ),
+                },
+              ),
+            ),
+            CustomPaint(
+              size: size,
+              painter: ReflectionPainter(theme, size),
+            ),
+          ],
         ),
-        CustomPaint(painter: ReflectionPainter(theme, Size(widget.size, widget.size)))
-      ],
+      ),
     );
   }
 }
@@ -86,8 +88,8 @@ class ReflectionPainter extends CustomPainter {
   ReflectionPainter(this.theme, this.orbSize);
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false;
+  bool shouldRepaint(covariant ReflectionPainter oldDelegate) {
+    return oldDelegate.theme != theme || oldDelegate.orbSize != orbSize;
   }
 
   @override
@@ -97,38 +99,47 @@ class ReflectionPainter extends CustomPainter {
 
     var center = Offset(orbSize.height / 2, orbSize.width / 2);
     canvas.drawArc(
-        Rect.fromCenter(center: center, width: width - 30, height: height - 30),
-        3.5 * pi,
-        pi / 5,
-        false,
-        Paint()
-          ..color = shadZinc.shades[3]
-          ..strokeCap = StrokeCap.round
-          ..strokeWidth = 4
-          ..style = PaintingStyle.stroke);
+      Rect.fromCenter(center: center, width: width - 30, height: height - 30),
+      3.5 * pi,
+      pi / 5,
+      false,
+      Paint()
+        ..color = shadZinc.shades[3]
+        ..strokeCap = StrokeCap.round
+        ..strokeWidth = 4
+        ..style = PaintingStyle.stroke,
+    );
 
     canvas.drawArc(
-        Rect.fromCenter(center: center, width: width - 30, height: height - 30),
-        3.75 * pi,
-        pi / 15,
-        false,
-        Paint()
-          ..color = shadZinc.shades[3]
-          ..strokeCap = StrokeCap.round
-          ..strokeWidth = 4
-          ..style = PaintingStyle.stroke);
+      Rect.fromCenter(center: center, width: width - 30, height: height - 30),
+      3.75 * pi,
+      pi / 15,
+      false,
+      Paint()
+        ..color = shadZinc.shades[3]
+        ..strokeCap = StrokeCap.round
+        ..strokeWidth = 4
+        ..style = PaintingStyle.stroke,
+    );
   }
 }
 
 class _OrbPainter extends CustomPainter {
+  final Animation<double> animation;
   final Size _orbSize;
   final double fillPercentage;
   final bool paintBackground;
-  final double animationProgress;
   final LdTheme theme;
   final double inset = 5.0;
 
-  _OrbPainter(this._orbSize, this.fillPercentage, this.animationProgress, this.paintBackground, this.theme);
+  _OrbPainter({
+    required this.animation,
+    required Size orbSize,
+    required this.fillPercentage,
+    required this.paintBackground,
+    required this.theme,
+  })  : _orbSize = orbSize,
+        super(repaint: animation);
 
   double get width => _orbSize.width - 2 * inset;
 
@@ -139,16 +150,21 @@ class _OrbPainter extends CustomPainter {
     double offset = 0,
   }) {
     if (left) {
-      return Offset(cos(pi * (1 - (fillPercentage - offset)) + 0.5 * pi) * width / 2 + width / 2 + inset,
-          sin(pi * (1 - (fillPercentage - offset)) + 0.5 * pi) * height / 2 + height / 2 + inset);
+      return Offset(
+        cos(pi * (1 - (fillPercentage - offset)) + 0.5 * pi) * width / 2 + width / 2 + inset,
+        sin(pi * (1 - (fillPercentage - offset)) + 0.5 * pi) * height / 2 + height / 2 + inset,
+      );
     } else {
-      return Offset(sin(pi * (1 - max((fillPercentage - offset), 0))) * width / 2 + width / 2 + inset,
-          cos(pi * (1 - max((fillPercentage - offset), 0))) * height / 2 + height / 2 + inset);
+      return Offset(
+        sin(pi * (1 - max((fillPercentage - offset), 0))) * width / 2 + width / 2 + inset,
+        cos(pi * (1 - max((fillPercentage - offset), 0))) * height / 2 + height / 2 + inset,
+      );
     }
   }
 
   @override
   void paint(Canvas canvas, Size size) {
+    final animationProgress = animation.value;
     // Inset the orb a bit to draw borders around it
     var height = _orbSize.height - 2 * inset;
     var width = _orbSize.width - 2 * inset;
@@ -204,10 +220,11 @@ class _OrbPainter extends CustomPainter {
     path.arcToPoint(waveStart, radius: Radius.circular(height / 2));
 
     canvas.drawPath(
-        path,
-        Paint()
-          ..color = theme.palette.primary.focus(theme.isDark)
-          ..style = PaintingStyle.fill);
+      path,
+      Paint()
+        ..color = theme.palette.primary.focus(theme.isDark)
+        ..style = PaintingStyle.fill,
+    );
 
     Path secondWave = Path();
 
@@ -269,7 +286,13 @@ class _OrbPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return true;
+  bool shouldRepaint(covariant _OrbPainter oldDelegate) {
+    return oldDelegate.fillPercentage != fillPercentage ||
+        oldDelegate._orbSize != _orbSize ||
+        oldDelegate.paintBackground != paintBackground ||
+        oldDelegate.theme != theme;
   }
+
+  @override
+  bool shouldRebuildSemantics(covariant CustomPainter oldDelegate) => false;
 }

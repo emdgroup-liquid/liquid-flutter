@@ -3,30 +3,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 void main() {
-  testWidgets('LdOrb', (WidgetTester test) async {
-    var theme = LdTheme();
-    await test.pumpWidget(
-      LdThemeProvider(
-        theme: theme,
-        child: const Directionality(
-          textDirection: TextDirection.ltr,
-          child: Center(
-            child: LdOrb(0.5),
-          ),
-        ),
-      ),
-    );
-
-    await test.pump();
-
-    expect(find.byType(LdOrb), findsOneWidget);
+  tearDown(() {
+    ldDisableAnimations = true;
   });
 
-  testWidgets('LdOrb keeps a single CustomPaint tree across frames', (tester) async {
+  testWidgets('LdLoader keeps a single CustomPaint across frames', (tester) async {
     ldDisableAnimations = false;
-    addTearDown(() {
-      ldDisableAnimations = true;
-    });
 
     await tester.pumpWidget(
       LdThemeProvider(
@@ -34,14 +16,14 @@ void main() {
         child: const Directionality(
           textDirection: TextDirection.ltr,
           child: Center(
-            child: LdOrb(0.5),
+            child: LdLoader(),
           ),
         ),
       ),
     );
 
-    expect(find.byType(LdOrb), findsOneWidget);
-    expect(find.byType(RepaintBoundary), findsWidgets);
+    expect(find.byType(LdLoader), findsOneWidget);
+    expect(find.byType(CustomPaint), findsOneWidget);
 
     final elementCount = collectAllElementsFrom(
       tester.binding.rootElement!,
@@ -52,7 +34,8 @@ void main() {
       await tester.pump(const Duration(milliseconds: 16));
     }
 
-    expect(find.byType(LdOrb), findsOneWidget);
+    expect(find.byType(LdLoader), findsOneWidget);
+    expect(find.byType(CustomPaint), findsOneWidget);
     expect(
       collectAllElementsFrom(tester.binding.rootElement!, skipOffstage: false).length,
       elementCount,
