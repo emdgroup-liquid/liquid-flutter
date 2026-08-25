@@ -88,6 +88,75 @@ Set<LdFilterOption<T, IdType>> ldMonkeyReplaceFilterByName<T extends Identifiabl
   return byName.values.toSet();
 }
 
+/// When the URL has no matching keys, re-applies builder defaults that have
+/// [LdFilterOption.isOn] / [LdSortOption.isOn] set.
+///
+/// Returns `null` when the parsed state already matches (nothing to seed).
+LdMonkeySortAndFilterState<T, IdType>? ldMonkeySeedDefinitionDefaults<T extends Identifiable<IdType>, IdType>({
+  required LdMonkeyRouteConfig<T, IdType> routeConfig,
+  required LdMonkeySortAndFilterState<T, IdType> parsed,
+  required Map<String, String> query,
+  required Iterable<LdFilterOption<T, IdType>> definitionFilters,
+  required Iterable<LdSortOption<T, IdType>> definitionSortOptions,
+}) {
+  final filtersByName = <String, LdFilterOption<T, IdType>>{
+    for (final filter in parsed.filters) filter.name: filter,
+  };
+  var filtersChanged = false;
+
+  for (final definition in definitionFilters) {
+    final queryKey = routeConfig.filterQueryKey(definition.name);
+    if (query.containsKey(queryKey) || !definition.isOn) {
+      continue;
+    }
+    filtersByName[definition.name] = definition;
+    filtersChanged = true;
+  }
+
+  var sortOptions = parsed.sortOptions.toList(growable: false);
+  var sortsChanged = false;
+  final sortQuery = query[routeConfig.sortQueryKey];
+  if ((sortQuery == null || sortQuery.isEmpty) &&
+      definitionSortOptions.any((sortOption) => sortOption.isOn)) {
+    sortOptions = definitionSortOptions.toList(growable: false);
+    sortsChanged = true;
+  }
+
+  if (!filtersChanged && !sortsChanged) {
+    return null;
+  }
+
+  return LdMonkeySortAndFilterState<T, IdType>(
+    filters: filtersByName.values.toSet(),
+    sortOptions: sortOptions,
+  );
+}
+
+/// Whether every active filter/sort in [state] is already represented in [query].
+bool ldMonkeyDefaultsReflectedInQuery<T extends Identifiable<IdType>, IdType>({
+  required LdMonkeyRouteConfig<T, IdType> routeConfig,
+  required Map<String, String> query,
+  required LdMonkeySortAndFilterState<T, IdType> state,
+}) {
+  for (final filter in state.filters) {
+    if (!filter.isOn) {
+      continue;
+    }
+    if (!query.containsKey(routeConfig.filterQueryKey(filter.name))) {
+      return false;
+    }
+  }
+
+  if (state.sortOptions.any((sortOption) => sortOption.isOn)) {
+    final sortQuery = query[routeConfig.sortQueryKey];
+    if (sortQuery == null || sortQuery.isEmpty) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 /// Rebuilds the current query parameter map from the active sort and
 /// filter state so that subsequent overrides operate on a normalised view.
 Map<String, dynamic> ldMonkeyCurrentQueryParameters<T extends Identifiable<IdType>, IdType>(
