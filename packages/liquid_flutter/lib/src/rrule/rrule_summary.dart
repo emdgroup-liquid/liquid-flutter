@@ -195,10 +195,11 @@ String ldRecurrenceRuleSummary(
     }
   }
 
-  if (draft.times.isNotEmpty) {
+  final times = ldRecurrenceTimesFromRule(rule, DateTime.now());
+  if (times.isNotEmpty) {
     buffer.write(' ');
     buffer.write(
-      l10n.recurrenceAtTimes(draft.times.map((time) => time.label).join(', ')),
+      l10n.recurrenceAtTimes(times.map((time) => time.label).join(', ')),
     );
   }
 

@@ -168,7 +168,9 @@
     }
   },
   "recurrenceAt": "At",
-  "recurrenceAddTime": "Add time",
+  "recurrenceHours": "Hours",
+  "recurrenceMinutes": "Minutes",
+  "recurrenceTimesMatrixHint": "Every selected hour combines with every selected minute.",
   "recurrenceAtTimes": "at {times}",
   "@recurrenceAtTimes": {
     "placeholders": {

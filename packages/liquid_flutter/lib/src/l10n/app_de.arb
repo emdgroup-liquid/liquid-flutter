@@ -126,7 +126,9 @@
     }
   },
   "recurrenceAt": "Um",
-  "recurrenceAddTime": "Zeit hinzufügen",
+  "recurrenceHours": "Stunden",
+  "recurrenceMinutes": "Minuten",
+  "recurrenceTimesMatrixHint": "Jede gewählte Stunde kombiniert sich mit jeder gewählten Minute.",
   "recurrenceAtTimes": "um {times}",
   "@recurrenceAtTimes": {
     "placeholders": {

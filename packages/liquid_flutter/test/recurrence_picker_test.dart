@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'utils.dart';
 
@@ -277,7 +276,7 @@ void main() {
     expect(find.text('Next occurrences'), findsNothing);
   });
 
-  testWidgets('shows time chips for daily by-hours', (tester) async {
+  testWidgets('shows hour and minute chips for daily by-hours', (tester) async {
     await tester.pumpWidget(
       withLiquidTheme(
         LdRecurrenceForm(
@@ -287,16 +286,30 @@ void main() {
             byMinutes: const [0],
           ),
           start: DateTime(2024, 1, 15, 9),
+          config: const LdRecurrenceConfig(
+            timesMode: LdRecurrenceTimesMode.linear,
+            showPreview: false,
+            endModes: {},
+          ),
           onChanged: (_) {},
         ),
       ),
     );
 
     expect(find.text('At'), findsOneWidget);
-    expect(find.text('13:00'), findsOneWidget);
-    expect(find.text('17:00'), findsOneWidget);
-    expect(find.byIcon(LucideIcons.x), findsNWidgets(2));
-    expect(find.byKey(const Key('recurrence_add_time')), findsOneWidget);
+    expect(find.byKey(const Key('recurrence_hours')), findsOneWidget);
+    expect(find.byKey(const Key('recurrence_minutes')), findsOneWidget);
+    expect(find.byKey(const Key('recurrence_hour_13')), findsOneWidget);
+    expect(find.byKey(const Key('recurrence_hour_17')), findsOneWidget);
+    expect(find.byKey(const Key('recurrence_minute_0')), findsOneWidget);
+    expect(
+      tester.widget<LdButton>(find.byKey(const Key('recurrence_hour_13'))).active,
+      isTrue,
+    );
+    expect(
+      tester.widget<LdButton>(find.byKey(const Key('recurrence_hour_17'))).active,
+      isTrue,
+    );
   });
 
   testWidgets('hides times for hourly frequency', (tester) async {
@@ -310,7 +323,7 @@ void main() {
       ),
     );
 
-    expect(find.byKey(const Key('recurrence_add_time')), findsNothing);
+    expect(find.byKey(const Key('recurrence_hours')), findsNothing);
     expect(find.text('At'), findsNothing);
   });
 
@@ -326,28 +339,10 @@ void main() {
       ),
     );
 
-    expect(find.byKey(const Key('recurrence_add_time')), findsNothing);
+    expect(find.byKey(const Key('recurrence_hours')), findsNothing);
   });
 
-  testWidgets('opens the time picker from add time', (tester) async {
-    await tester.pumpWidget(
-      withLiquidTheme(
-        LdRecurrenceForm(
-          value: RecurrenceRule(frequency: Frequency.daily),
-          start: DateTime(2024, 1, 15, 9),
-          config: const LdRecurrenceConfig(showPreview: false),
-          onChanged: (_) {},
-        ),
-      ),
-    );
-
-    await tester.tap(find.byKey(const Key('recurrence_add_time')));
-    await tester.pumpAndSettle();
-
-    expect(find.byKey(const Key('time_picker_sheet')), findsOneWidget);
-  });
-
-  testWidgets('parent echo does not cartesian-expand added times', (tester) async {
+  testWidgets('single mode replaces the selected hour', (tester) async {
     var rule = RecurrenceRule(
       frequency: Frequency.daily,
       byHours: const [13],
@@ -362,6 +357,7 @@ void main() {
               value: rule,
               start: DateTime(2024, 1, 15, 9),
               config: const LdRecurrenceConfig(
+                timesMode: LdRecurrenceTimesMode.single,
                 showPreview: false,
                 endModes: {},
               ),
@@ -372,17 +368,45 @@ void main() {
       ),
     );
 
-    await tester.tap(find.byKey(const Key('recurrence_add_time')));
-    await tester.pumpAndSettle();
-    expect(find.byKey(const Key('time_picker_sheet')), findsOneWidget);
-    Navigator.of(
-      tester.element(find.byKey(const Key('time_picker_sheet'))),
-    ).pop(const TimeOfDay(hour: 17, minute: 30));
+    await tester.ensureVisible(find.byKey(const Key('recurrence_hour_17')));
+    await tester.tap(find.byKey(const Key('recurrence_hour_17')));
     await tester.pumpAndSettle();
 
-    expect(find.text('13:00'), findsOneWidget);
-    expect(find.text('17:30'), findsOneWidget);
-    expect(find.text('13:30'), findsNothing);
-    expect(find.text('17:00'), findsNothing);
+    expect(rule.byHours, [17]);
+    expect(rule.byMinutes, [0]);
+    expect(
+      tester.widget<LdButton>(find.byKey(const Key('recurrence_hour_13'))).active,
+      isFalse,
+    );
+    expect(
+      tester.widget<LdButton>(find.byKey(const Key('recurrence_hour_17'))).active,
+      isTrue,
+    );
+  });
+
+  testWidgets('matrix mode shows cartesian hint when both axes are multi', (tester) async {
+    await tester.pumpWidget(
+      withLiquidTheme(
+        LdRecurrenceForm(
+          value: RecurrenceRule(
+            frequency: Frequency.daily,
+            byHours: const [13, 17],
+            byMinutes: const [0, 30],
+          ),
+          start: DateTime(2024, 1, 15, 9),
+          config: const LdRecurrenceConfig(
+            timesMode: LdRecurrenceTimesMode.matrix,
+            showPreview: false,
+            endModes: {},
+          ),
+          onChanged: (_) {},
+        ),
+      ),
+    );
+
+    expect(
+      find.text('Every selected hour combines with every selected minute.'),
+      findsOneWidget,
+    );
   });
 }

@@ -14,6 +14,7 @@ class _RecurrencePickerDemoState extends State<RecurrencePickerDemo> {
   RecurrenceRule? _pickerRule;
   RecurrenceRule _formRule = RecurrenceRule(frequency: Frequency.weekly);
   RecurrenceRule _restrictedRule = RecurrenceRule(frequency: Frequency.weekly);
+  RecurrenceRule _matrixRule = RecurrenceRule(frequency: Frequency.daily);
   DateTime _start = DateTime.now();
 
   @override
@@ -54,6 +55,9 @@ class _RecurrencePickerDemoState extends State<RecurrencePickerDemo> {
             child: LdRecurrenceForm(
               value: _formRule,
               start: _start,
+              config: const LdRecurrenceConfig(
+                timesMode: LdRecurrenceTimesMode.linear,
+              ),
               onChanged: (rule) {
                 setState(() {
                   _formRule = rule;
@@ -77,6 +81,26 @@ class _RecurrencePickerDemoState extends State<RecurrencePickerDemo> {
               },
             ),
           ),
+
+          ComponentWell(
+            title: Text("Matrix times"),
+            description: Text("Advanced: hours × minutes cartesian product."),
+            child: LdRecurrenceForm(
+              value: _matrixRule,
+              start: _start,
+              config: const LdRecurrenceConfig(
+                timesMode: LdRecurrenceTimesMode.matrix,
+                endModes: {},
+                showPreview: true,
+              ),
+              onChanged: (rule) {
+                setState(() {
+                  _matrixRule = rule;
+                });
+              },
+            ),
+          ),
+          LdText.l(_matrixRule.toString()),
         ],
       ),
     );

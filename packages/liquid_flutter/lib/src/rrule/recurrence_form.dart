@@ -4,7 +4,6 @@ import 'package:liquid_flutter/src/rrule/recurrence_occurrences.dart';
 import 'package:liquid_flutter/src/rrule/recurrence_timeline.dart';
 import 'package:liquid_flutter/src/rrule/rrule_draft.dart';
 import 'package:liquid_flutter/src/rrule/rrule_summary.dart';
-import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 const _nthOccurrences = [1, 2, 3, 4, -1];
 
@@ -59,12 +58,6 @@ class _LdRecurrenceFormState extends State<LdRecurrenceForm> {
     if (widget.value == oldWidget.value) {
       return;
     }
-    // Keep the in-progress times list when the parent echoes the rule we just
-    // emitted. `toRule` stores BYHOUR/BYMINUTE as a cartesian product, so
-    // rebuilding from that rule would duplicate chips.
-    if (widget.value != null && widget.value == _draft.toRule()) {
-      return;
-    }
     _draft = widget.value != null
         ? LdRecurrenceDraft.fromRule(widget.value!, start: widget.start)
         : LdRecurrenceDraft.initial(start: widget.start);
@@ -102,7 +95,7 @@ class _LdRecurrenceFormState extends State<LdRecurrenceForm> {
     final preview = ldRecurrenceOccurrencePreview(rule: rule, start: start);
     final previewFormat = ldRecurrenceOccurrenceFormat(
       localeName,
-      includeTime: draft.isSubDaily || draft.times.isNotEmpty,
+      includeTime: draft.isSubDaily || draft.hasTimes,
     );
     final timelineEntries = ldRecurrenceTimelineEntries(
       occurrences: preview.next,
@@ -183,33 +176,7 @@ class _LdRecurrenceFormState extends State<LdRecurrenceForm> {
           ),
         if ((draft.isMonthly || draft.isYearly) && widget.config.showMonthlyOptions)
           ..._buildMonthlyYearly(context, l10n, localeName),
-        if (!draft.isSubDaily && widget.config.showTimes) ...[
-          LdText.l(l10n.recurrenceAt),
-          Wrap(
-            spacing: theme.pad(size: LdSize.s).left,
-            runSpacing: theme.pad(size: LdSize.s).left,
-            children: [
-              for (final time in draft.times)
-                LdButton.outline(
-                  key: Key('recurrence_time_${time.hour}_${time.minute}'),
-                  size: LdSize.s,
-                  disabled: widget.disabled,
-                  trailing: const Icon(LucideIcons.x),
-                  onPressed: () => _emit(_draft.removeTime(time)),
-                  child: Text(time.label),
-                ),
-              LdButton.ghost(
-                key: const Key('recurrence_add_time'),
-                size: LdSize.s,
-                disabled: widget.disabled,
-                autoLoading: false,
-                leading: const Icon(LucideIcons.plus),
-                onPressed: _addTime,
-                child: Text(l10n.recurrenceAddTime),
-              ),
-            ],
-          ),
-        ],
+        if (!draft.isSubDaily && widget.config.showTimes) ..._buildTimes(context, l10n, draft),
         if (widget.config.showEnding) ...[
           LdText.l(l10n.recurrenceEnds),
           if (endModes.contains(LdRecurrenceEndMode.never) && showEndRadios)
@@ -456,7 +423,7 @@ class _LdRecurrenceFormState extends State<LdRecurrenceForm> {
     final all = ldRecurrenceAllOccurrences(rule: _draft.toRule(), start: start);
     final dateFormat = ldRecurrenceOccurrenceFormat(
       localeName,
-      includeTime: _draft.isSubDaily || _draft.times.isNotEmpty,
+      includeTime: _draft.isSubDaily || _draft.hasTimes,
     );
     final last = switch (all.truncated || all.instances.isEmpty) {
       true => null,
@@ -506,32 +473,63 @@ class _LdRecurrenceFormState extends State<LdRecurrenceForm> {
     );
   }
 
-  Future<void> _addTime() async {
-    if (widget.disabled) {
-      return;
-    }
-    final start = widget.start ?? DateTime.now();
-    final last = _draft.times.isEmpty ? null : _draft.times.last;
-    final selected = await Navigator.of(context).push<TimeOfDay>(
-      LdModalRoute(
-        context: context,
-        pageBuilder: (context) => LdTimePickerModal(
-          initialTime: TimeOfDay(
-            hour: last?.hour ?? start.hour,
-            minute: last?.minute ?? start.minute,
-          ),
-          minutePrecision: 1,
+  List<Widget> _buildTimes(
+    BuildContext context,
+    LiquidLocalizations l10n,
+    LdRecurrenceDraft draft,
+  ) {
+    final mode = widget.config.timesMode;
+    final minuteOptions = ldRecurrenceMinuteOptions(
+      precision: widget.config.minutePrecision,
+      selected: draft.minutes,
+    );
+    final showMatrixHint = mode == LdRecurrenceTimesMode.matrix &&
+        draft.hours.length > 1 &&
+        draft.minutes.length > 1;
+
+    return [
+      LdText.l(l10n.recurrenceAt),
+      LdText.caption(l10n.recurrenceHours),
+      LdHorizontalScroll(
+        key: const Key('recurrence_hours'),
+        layout: LdHorizontalScrollLayout.scroll,
+        initialPeek: false,
+        children: [
+          for (var hour = 0; hour < 24; hour++)
+            LdButton.outline(
+              key: Key('recurrence_hour_$hour'),
+              active: draft.hours.contains(hour),
+              size: LdSize.s,
+              disabled: widget.disabled,
+              onPressed: () => _emit(_draft.toggleHour(hour, mode)),
+              child: Text(hour.toString().padLeft(2, '0')),
+            ),
+        ],
+      ),
+      LdText.caption(l10n.recurrenceMinutes),
+      LdHorizontalScroll(
+        key: const Key('recurrence_minutes'),
+        layout: LdHorizontalScrollLayout.scroll,
+        initialPeek: false,
+        children: [
+          for (final minute in minuteOptions)
+            LdButton.outline(
+              key: Key('recurrence_minute_$minute'),
+              active: draft.minutes.contains(minute),
+              size: LdSize.s,
+              disabled: widget.disabled,
+              onPressed: () => _emit(_draft.toggleMinute(minute, mode)),
+              child: Text(minute.toString().padLeft(2, '0')),
+            ),
+        ],
+      ),
+      if (showMatrixHint)
+        LdHint(
+          type: LdHintType.info,
+          withBackground: true,
+          child: Text(l10n.recurrenceTimesMatrixHint),
         ),
-      ),
-    );
-    if (selected == null || !mounted) {
-      return;
-    }
-    _emit(
-      _draft.addTime(
-        LdRecurrenceTime(hour: selected.hour, minute: selected.minute),
-      ),
-    );
+    ];
   }
 
   void _toggleWeekday(int day) {

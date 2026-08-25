@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:liquid_flutter/src/rrule/rrule_draft.dart';
 import 'package:rrule/rrule.dart';
 
@@ -10,6 +11,8 @@ class LdRecurrenceConfig {
     this.showWeekdays = true,
     this.showMonthlyOptions = true,
     this.showTimes = true,
+    this.timesMode = LdRecurrenceTimesMode.single,
+    this.minutePrecision = 15,
     this.showPreview = true,
   });
 
@@ -20,6 +23,8 @@ class LdRecurrenceConfig {
     this.showWeekdays = true,
     this.showMonthlyOptions = true,
     this.showTimes = true,
+    this.timesMode = LdRecurrenceTimesMode.single,
+    this.minutePrecision = 15,
     this.showPreview = true,
   }) : frequencies = calendarFrequencies;
 
@@ -30,6 +35,8 @@ class LdRecurrenceConfig {
     this.showWeekdays = true,
     this.showMonthlyOptions = true,
     this.showTimes = true,
+    this.timesMode = LdRecurrenceTimesMode.single,
+    this.minutePrecision = 15,
     this.showPreview = true,
   }) : endModes = const {};
 
@@ -80,8 +87,18 @@ class LdRecurrenceConfig {
   /// Whether monthly/yearly day and nth-weekday controls (and yearly months) are shown.
   final bool showMonthlyOptions;
 
-  /// Whether time-of-day chips (`BYHOUR` / `BYMINUTE`) are shown for daily and coarser frequencies.
+  /// Whether hour / minute chips (`BYHOUR` / `BYMINUTE`) are shown for daily and
+  /// coarser frequencies.
   final bool showTimes;
+
+  /// How freely hour and minute chips may be multi-selected.
+  ///
+  /// Defaults to [LdRecurrenceTimesMode.single]. Use [LdRecurrenceTimesMode.matrix]
+  /// only when the app accepts RRULE's cartesian hour × minute expansion.
+  final LdRecurrenceTimesMode timesMode;
+
+  /// Step between minute chips (1–30). Selected minutes off the grid still appear.
+  final int minutePrecision;
 
   /// Whether the next-occurrence preview is shown.
   final bool showPreview;
@@ -124,14 +141,26 @@ class LdRecurrenceConfig {
       final modes when modes.contains(draft.endMode) => draft.endMode,
       final modes => modes.first,
     };
-    final times = ldRecurrenceFrequencyIsSubDaily(frequency) ? const <LdRecurrenceTime>[] : draft.times;
-    if (frequency == draft.frequency && endMode == draft.endMode && times.length == draft.times.length) {
+
+    final clearTimes = !showTimes || ldRecurrenceFrequencyIsSubDaily(frequency);
+    final clampedTimes = clearTimes
+        ? (hours: const <int>{}, minutes: const <int>{})
+        : ldClampRecurrenceTimes(
+            hours: draft.hours,
+            minutes: draft.minutes,
+            mode: timesMode,
+          );
+
+    final hoursEqual = const SetEquality<int>().equals(clampedTimes.hours, draft.hours);
+    final minutesEqual = const SetEquality<int>().equals(clampedTimes.minutes, draft.minutes);
+    if (frequency == draft.frequency && endMode == draft.endMode && hoursEqual && minutesEqual) {
       return draft;
     }
     return draft.copyWith(
       frequency: frequency,
       endMode: endMode,
-      times: times,
+      hours: clampedTimes.hours,
+      minutes: clampedTimes.minutes,
     );
   }
 }

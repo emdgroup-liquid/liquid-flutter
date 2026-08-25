@@ -450,7 +450,13 @@ class LiquidLocalizationsEn extends LiquidLocalizations {
   String get recurrenceAt => 'At';
 
   @override
-  String get recurrenceAddTime => 'Add time';
+  String get recurrenceHours => 'Hours';
+
+  @override
+  String get recurrenceMinutes => 'Minutes';
+
+  @override
+  String get recurrenceTimesMatrixHint => 'Every selected hour combines with every selected minute.';
 
   @override
   String recurrenceAtTimes(String times) {

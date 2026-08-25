@@ -773,11 +773,23 @@ abstract class LiquidLocalizations {
   /// **'At'**
   String get recurrenceAt;
 
-  /// No description provided for @recurrenceAddTime.
+  /// No description provided for @recurrenceHours.
   ///
   /// In en, this message translates to:
-  /// **'Add time'**
-  String get recurrenceAddTime;
+  /// **'Hours'**
+  String get recurrenceHours;
+
+  /// No description provided for @recurrenceMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'Minutes'**
+  String get recurrenceMinutes;
+
+  /// No description provided for @recurrenceTimesMatrixHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Every selected hour combines with every selected minute.'**
+  String get recurrenceTimesMatrixHint;
 
   /// No description provided for @recurrenceAtTimes.
   ///

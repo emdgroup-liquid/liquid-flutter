@@ -5,6 +5,23 @@ enum LdRecurrenceMonthlyMode { byMonthDay, byNthWeekday }
 
 enum LdRecurrenceEndMode { never, until, count }
 
+/// How [LdRecurrenceForm] exposes `BYHOUR` / `BYMINUTE` selection.
+///
+/// RRULE always expands hours × minutes as a cartesian product. These modes
+/// control how much of that product the UI allows in a single rule. Apps that
+/// need fully independent clock times should host multiple pickers and store
+/// multiple rules.
+enum LdRecurrenceTimesMode {
+  /// At most one hour and one minute.
+  single,
+
+  /// Multiple hours **or** multiple minutes, but not both.
+  linear,
+
+  /// Full BYHOUR × BYMINUTE matrix.
+  matrix,
+}
+
 /// Converts a local [DateTime] to a UTC [DateTime] with the same calendar fields.
 DateTime ldToRruleUtc(DateTime dateTime) {
   if (dateTime.isUtc) {
@@ -148,6 +165,48 @@ List<LdRecurrenceTime> ldRecurrenceTimesFromRule(
   );
 }
 
+/// Minute chip values for [precision], always including [selected].
+List<int> ldRecurrenceMinuteOptions({
+  required int precision,
+  Set<int> selected = const {},
+}) {
+  final step = precision.clamp(1, 30);
+  final options = <int>{
+    for (var minute = 0; minute < 60; minute += step) minute,
+    ...selected.where((minute) => minute >= 0 && minute <= 59),
+  }.toList()
+    ..sort();
+  return options;
+}
+
+({Set<int> hours, Set<int> minutes}) ldClampRecurrenceTimes({
+  required Set<int> hours,
+  required Set<int> minutes,
+  required LdRecurrenceTimesMode mode,
+}) {
+  var nextHours = Set<int>.from(hours);
+  var nextMinutes = Set<int>.from(minutes);
+  switch (mode) {
+    case LdRecurrenceTimesMode.single:
+      if (nextHours.length > 1) {
+        final sorted = nextHours.toList()..sort();
+        nextHours = {sorted.first};
+      }
+      if (nextMinutes.length > 1) {
+        final sorted = nextMinutes.toList()..sort();
+        nextMinutes = {sorted.first};
+      }
+    case LdRecurrenceTimesMode.linear:
+      if (nextHours.length > 1 && nextMinutes.length > 1) {
+        final sorted = nextMinutes.toList()..sort();
+        nextMinutes = {sorted.first};
+      }
+    case LdRecurrenceTimesMode.matrix:
+      break;
+  }
+  return (hours: nextHours, minutes: nextMinutes);
+}
+
 /// Editable subset of [RecurrenceRule] used by the recurrence picker UI.
 class LdRecurrenceDraft {
   const LdRecurrenceDraft({
@@ -162,7 +221,8 @@ class LdRecurrenceDraft {
     this.endMode = LdRecurrenceEndMode.never,
     this.until,
     this.count = 10,
-    this.times = const [],
+    this.hours = const {},
+    this.minutes = const {},
   });
 
   final Frequency frequency;
@@ -176,7 +236,18 @@ class LdRecurrenceDraft {
   final LdRecurrenceEndMode endMode;
   final DateTime? until;
   final int count;
-  final List<LdRecurrenceTime> times;
+
+  /// Selected `BYHOUR` values.
+  final Set<int> hours;
+
+  /// Selected `BYMINUTE` values.
+  final Set<int> minutes;
+
+  /// Expanded hour × minute product for display (empty unless both sides set).
+  List<LdRecurrenceTime> get times => ldRecurrenceTimesFromParts(
+        hours: hours,
+        minutes: minutes,
+      );
 
   bool get isSubDaily => ldRecurrenceFrequencyIsSubDaily(frequency);
 
@@ -185,6 +256,8 @@ class LdRecurrenceDraft {
   bool get isMonthly => frequency == Frequency.monthly;
 
   bool get isYearly => frequency == Frequency.yearly;
+
+  bool get hasTimes => hours.isNotEmpty || minutes.isNotEmpty;
 
   factory LdRecurrenceDraft.initial({DateTime? start}) {
     final seed = start ?? DateTime.now();
@@ -213,6 +286,8 @@ class LdRecurrenceDraft {
             ? LdRecurrenceEndMode.count
             : LdRecurrenceEndMode.never;
 
+    final subDaily = ldRecurrenceFrequencyIsSubDaily(rule.frequency);
+
     return LdRecurrenceDraft(
       frequency: rule.frequency,
       interval: rule.actualInterval,
@@ -225,9 +300,8 @@ class LdRecurrenceDraft {
       endMode: endMode,
       until: rule.until != null ? ldFromRruleUtc(rule.until!) : null,
       count: rule.count ?? 10,
-      times: ldRecurrenceFrequencyIsSubDaily(rule.frequency)
-          ? const []
-          : ldRecurrenceTimesFromRule(rule, seed),
+      hours: subDaily ? const {} : rule.byHours.toSet(),
+      minutes: subDaily ? const {} : rule.byMinutes.toSet(),
     );
   }
 
@@ -244,7 +318,8 @@ class LdRecurrenceDraft {
     DateTime? until,
     bool clearUntil = false,
     int? count,
-    List<LdRecurrenceTime>? times,
+    Set<int>? hours,
+    Set<int>? minutes,
   }) {
     return LdRecurrenceDraft(
       frequency: frequency ?? this.frequency,
@@ -258,25 +333,63 @@ class LdRecurrenceDraft {
       endMode: endMode ?? this.endMode,
       until: clearUntil ? null : until ?? this.until,
       count: count ?? this.count,
-      times: times ?? this.times,
+      hours: hours ?? this.hours,
+      minutes: minutes ?? this.minutes,
     );
   }
 
-  LdRecurrenceDraft addTime(LdRecurrenceTime time) {
-    if (times.contains(time)) {
-      return this;
+  LdRecurrenceDraft toggleHour(int hour, LdRecurrenceTimesMode mode) {
+    var nextHours = Set<int>.from(hours);
+    var nextMinutes = Set<int>.from(minutes);
+    if (nextHours.contains(hour)) {
+      nextHours.remove(hour);
+    } else {
+      switch (mode) {
+        case LdRecurrenceTimesMode.single:
+          nextHours = {hour};
+        case LdRecurrenceTimesMode.linear:
+          nextHours.add(hour);
+          if (nextHours.length > 1 && nextMinutes.length > 1) {
+            final sorted = nextMinutes.toList()..sort();
+            nextMinutes = {sorted.first};
+          }
+        case LdRecurrenceTimesMode.matrix:
+          nextHours.add(hour);
+      }
     }
-    final next = [...times, time]..sort();
-    return copyWith(times: next);
+    final clamped = ldClampRecurrenceTimes(
+      hours: nextHours,
+      minutes: nextMinutes,
+      mode: mode,
+    );
+    return copyWith(hours: clamped.hours, minutes: clamped.minutes);
   }
 
-  LdRecurrenceDraft removeTime(LdRecurrenceTime time) {
-    return copyWith(
-      times: [
-        for (final entry in times)
-          if (entry != time) entry,
-      ],
+  LdRecurrenceDraft toggleMinute(int minute, LdRecurrenceTimesMode mode) {
+    var nextHours = Set<int>.from(hours);
+    var nextMinutes = Set<int>.from(minutes);
+    if (nextMinutes.contains(minute)) {
+      nextMinutes.remove(minute);
+    } else {
+      switch (mode) {
+        case LdRecurrenceTimesMode.single:
+          nextMinutes = {minute};
+        case LdRecurrenceTimesMode.linear:
+          nextMinutes.add(minute);
+          if (nextMinutes.length > 1 && nextHours.length > 1) {
+            final sorted = nextHours.toList()..sort();
+            nextHours = {sorted.first};
+          }
+        case LdRecurrenceTimesMode.matrix:
+          nextMinutes.add(minute);
+      }
+    }
+    final clamped = ldClampRecurrenceTimes(
+      hours: nextHours,
+      minutes: nextMinutes,
+      mode: mode,
     );
+    return copyWith(hours: clamped.hours, minutes: clamped.minutes);
   }
 
   RecurrenceRule toRule() {
@@ -301,9 +414,9 @@ class LdRecurrenceDraft {
 
     var byHours = <int>[];
     var byMinutes = <int>[];
-    if (!isSubDaily && times.isNotEmpty) {
-      byHours = times.map((time) => time.hour).toSet().toList()..sort();
-      byMinutes = times.map((time) => time.minute).toSet().toList()..sort();
+    if (!isSubDaily && hasTimes) {
+      byHours = hours.toList()..sort();
+      byMinutes = minutes.toList()..sort();
     }
 
     DateTime? untilUtc;

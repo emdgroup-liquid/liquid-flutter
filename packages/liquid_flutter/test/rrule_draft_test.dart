@@ -91,7 +91,7 @@ void main() {
       expect(LdRecurrenceDraft.fromRule(rule).toRule(), rule);
     });
 
-    test('fills missing minutes from the start seed', () {
+    test('loads hours and minutes as separate sets', () {
       final draft = LdRecurrenceDraft.fromRule(
         RecurrenceRule(
           frequency: Frequency.daily,
@@ -100,10 +100,9 @@ void main() {
         start: DateTime(2024, 1, 15, 10, 30),
       );
 
-      expect(draft.times, [
-        const LdRecurrenceTime(hour: 13, minute: 30),
-        const LdRecurrenceTime(hour: 17, minute: 30),
-      ]);
+      expect(draft.hours, {13, 17});
+      expect(draft.minutes, isEmpty);
+      expect(draft.times, isEmpty);
     });
 
     test('expands hours and minutes as a cartesian product', () {
@@ -115,6 +114,8 @@ void main() {
         ),
       );
 
+      expect(draft.hours, {13, 17});
+      expect(draft.minutes, {0, 30});
       expect(draft.times, [
         const LdRecurrenceTime(hour: 13, minute: 0),
         const LdRecurrenceTime(hour: 13, minute: 30),
@@ -123,82 +124,56 @@ void main() {
       ]);
     });
 
-    test('addTime appends a pair without cartesian expansion', () {
-      final draft = LdRecurrenceDraft(
+    test('toggleHour in single mode replaces the hour', () {
+      final draft = const LdRecurrenceDraft(
         frequency: Frequency.daily,
-        times: const [LdRecurrenceTime(hour: 13, minute: 0)],
-      ).addTime(const LdRecurrenceTime(hour: 17, minute: 0));
+        hours: {13},
+        minutes: {0},
+      ).toggleHour(17, LdRecurrenceTimesMode.single);
 
-      expect(draft.times, [
-        const LdRecurrenceTime(hour: 13, minute: 0),
-        const LdRecurrenceTime(hour: 17, minute: 0),
-      ]);
-
-      expect(
-        draft.addTime(const LdRecurrenceTime(hour: 13, minute: 30)).times,
-        [
-          const LdRecurrenceTime(hour: 13, minute: 0),
-          const LdRecurrenceTime(hour: 13, minute: 30),
-          const LdRecurrenceTime(hour: 17, minute: 0),
-        ],
-      );
+      expect(draft.hours, {17});
+      expect(draft.minutes, {0});
     });
 
-    test('addTime ignores duplicates', () {
-      const time = LdRecurrenceTime(hour: 13, minute: 0);
-      final draft = LdRecurrenceDraft(
+    test('toggleHour in linear mode collapses minutes when both axes grow', () {
+      final draft = const LdRecurrenceDraft(
         frequency: Frequency.daily,
-        times: const [time],
-      );
+        hours: {13},
+        minutes: {0, 30},
+      ).toggleHour(17, LdRecurrenceTimesMode.linear);
 
-      expect(draft.addTime(time).times, [time]);
+      expect(draft.hours, {13, 17});
+      expect(draft.minutes, {0});
     });
 
-    test('fromRule expands independent pairs stored as BYHOUR/BYMINUTE', () {
-      final draft = LdRecurrenceDraft(
+    test('toggleMinute in matrix mode keeps the full product', () {
+      final draft = const LdRecurrenceDraft(
         frequency: Frequency.daily,
-        times: const [
-          LdRecurrenceTime(hour: 13, minute: 0),
-          LdRecurrenceTime(hour: 17, minute: 30),
-        ],
-      );
+        hours: {13, 17},
+        minutes: {0},
+      ).toggleMinute(30, LdRecurrenceTimesMode.matrix);
 
-      expect(LdRecurrenceDraft.fromRule(draft.toRule()).times, [
-        const LdRecurrenceTime(hour: 13, minute: 0),
-        const LdRecurrenceTime(hour: 13, minute: 30),
-        const LdRecurrenceTime(hour: 17, minute: 0),
-        const LdRecurrenceTime(hour: 17, minute: 30),
-      ]);
+      expect(draft.hours, {13, 17});
+      expect(draft.minutes, {0, 30});
+      expect(draft.times, hasLength(4));
     });
 
-    test('removeTime drops only that pair', () {
-      expect(
-        const LdRecurrenceDraft(
-          frequency: Frequency.daily,
-          times: [
-            LdRecurrenceTime(hour: 13, minute: 0),
-            LdRecurrenceTime(hour: 17, minute: 0),
-          ],
-        ).removeTime(const LdRecurrenceTime(hour: 13, minute: 0)).times,
-        [const LdRecurrenceTime(hour: 17, minute: 0)],
+    test('ldClampRecurrenceTimes enforces single and linear modes', () {
+      final single = ldClampRecurrenceTimes(
+        hours: {13, 17},
+        minutes: {0, 30},
+        mode: LdRecurrenceTimesMode.single,
       );
+      expect(single.hours, {13});
+      expect(single.minutes, {0});
 
-      expect(
-        const LdRecurrenceDraft(
-          frequency: Frequency.daily,
-          times: [
-            LdRecurrenceTime(hour: 13, minute: 0),
-            LdRecurrenceTime(hour: 13, minute: 30),
-            LdRecurrenceTime(hour: 17, minute: 0),
-            LdRecurrenceTime(hour: 17, minute: 30),
-          ],
-        ).removeTime(const LdRecurrenceTime(hour: 13, minute: 30)).times,
-        [
-          const LdRecurrenceTime(hour: 13, minute: 0),
-          const LdRecurrenceTime(hour: 17, minute: 0),
-          const LdRecurrenceTime(hour: 17, minute: 30),
-        ],
+      final linear = ldClampRecurrenceTimes(
+        hours: {13, 17},
+        minutes: {0, 30},
+        mode: LdRecurrenceTimesMode.linear,
       );
+      expect(linear.hours, {13, 17});
+      expect(linear.minutes, {0});
     });
 
     test('detects unsupported by-seconds', () {
