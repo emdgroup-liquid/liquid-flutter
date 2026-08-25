@@ -81,10 +81,131 @@ void main() {
       expect(LdRecurrenceDraft.fromRule(countRule).toRule(), countRule);
     });
 
-    test('detects unsupported by-hours', () {
+    test('round-trips daily by-hours and by-minutes', () {
+      final rule = RecurrenceRule(
+        frequency: Frequency.daily,
+        byHours: const [13, 17],
+        byMinutes: const [0],
+      );
+
+      expect(LdRecurrenceDraft.fromRule(rule).toRule(), rule);
+    });
+
+    test('fills missing minutes from the start seed', () {
+      final draft = LdRecurrenceDraft.fromRule(
+        RecurrenceRule(
+          frequency: Frequency.daily,
+          byHours: const [13, 17],
+        ),
+        start: DateTime(2024, 1, 15, 10, 30),
+      );
+
+      expect(draft.times, [
+        const LdRecurrenceTime(hour: 13, minute: 30),
+        const LdRecurrenceTime(hour: 17, minute: 30),
+      ]);
+    });
+
+    test('expands hours and minutes as a cartesian product', () {
+      final draft = LdRecurrenceDraft.fromRule(
+        RecurrenceRule(
+          frequency: Frequency.daily,
+          byHours: const [13, 17],
+          byMinutes: const [0, 30],
+        ),
+      );
+
+      expect(draft.times, [
+        const LdRecurrenceTime(hour: 13, minute: 0),
+        const LdRecurrenceTime(hour: 13, minute: 30),
+        const LdRecurrenceTime(hour: 17, minute: 0),
+        const LdRecurrenceTime(hour: 17, minute: 30),
+      ]);
+    });
+
+    test('addTime expands the cartesian product', () {
+      final draft = LdRecurrenceDraft(
+        frequency: Frequency.daily,
+        times: const [LdRecurrenceTime(hour: 13, minute: 0)],
+      ).addTime(const LdRecurrenceTime(hour: 17, minute: 0));
+
+      expect(draft.times, [
+        const LdRecurrenceTime(hour: 13, minute: 0),
+        const LdRecurrenceTime(hour: 17, minute: 0),
+      ]);
+
+      expect(
+        draft.addTime(const LdRecurrenceTime(hour: 13, minute: 30)).times,
+        [
+          const LdRecurrenceTime(hour: 13, minute: 0),
+          const LdRecurrenceTime(hour: 13, minute: 30),
+          const LdRecurrenceTime(hour: 17, minute: 0),
+          const LdRecurrenceTime(hour: 17, minute: 30),
+        ],
+      );
+    });
+
+    test('removeTime drops an hour or a minute from the cartesian grid', () {
+      expect(
+        const LdRecurrenceDraft(
+          frequency: Frequency.daily,
+          times: [
+            LdRecurrenceTime(hour: 13, minute: 0),
+            LdRecurrenceTime(hour: 17, minute: 0),
+          ],
+        ).removeTime(const LdRecurrenceTime(hour: 13, minute: 0)).times,
+        [const LdRecurrenceTime(hour: 17, minute: 0)],
+      );
+
+      expect(
+        const LdRecurrenceDraft(
+          frequency: Frequency.daily,
+          times: [
+            LdRecurrenceTime(hour: 13, minute: 0),
+            LdRecurrenceTime(hour: 13, minute: 30),
+          ],
+        ).removeTime(const LdRecurrenceTime(hour: 13, minute: 30)).times,
+        [const LdRecurrenceTime(hour: 13, minute: 0)],
+      );
+
+      expect(
+        const LdRecurrenceDraft(
+          frequency: Frequency.daily,
+          times: [
+            LdRecurrenceTime(hour: 13, minute: 0),
+            LdRecurrenceTime(hour: 13, minute: 30),
+            LdRecurrenceTime(hour: 17, minute: 0),
+            LdRecurrenceTime(hour: 17, minute: 30),
+          ],
+        ).removeTime(const LdRecurrenceTime(hour: 13, minute: 30)).times,
+        [
+          const LdRecurrenceTime(hour: 17, minute: 0),
+          const LdRecurrenceTime(hour: 17, minute: 30),
+        ],
+      );
+    });
+
+    test('detects unsupported by-seconds', () {
+      final rule = RecurrenceRule(
+        frequency: Frequency.daily,
+        bySeconds: const [0],
+      );
+      expect(ldRecurrenceRuleHasUnsupportedParts(rule), isTrue);
+    });
+
+    test('treats daily by-hours as supported', () {
       final rule = RecurrenceRule(
         frequency: Frequency.daily,
         byHours: const [9, 17],
+        byMinutes: const [0],
+      );
+      expect(ldRecurrenceRuleHasUnsupportedParts(rule), isFalse);
+    });
+
+    test('treats hourly by-hours as unsupported', () {
+      final rule = RecurrenceRule(
+        frequency: Frequency.hourly,
+        byHours: const [9],
       );
       expect(ldRecurrenceRuleHasUnsupportedParts(rule), isTrue);
     });

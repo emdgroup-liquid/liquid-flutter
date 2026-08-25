@@ -4,13 +4,15 @@ import 'package:liquid_flutter/src/rrule/recurrence_occurrences.dart';
 import 'package:liquid_flutter/src/rrule/recurrence_timeline.dart';
 import 'package:liquid_flutter/src/rrule/rrule_draft.dart';
 import 'package:liquid_flutter/src/rrule/rrule_summary.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 const _nthOccurrences = [1, 2, 3, 4, -1];
 
 /// Inline editor for an RFC 5545 [RecurrenceRule].
 ///
 /// Supports secondly through yearly frequencies, interval, weekly weekdays,
-/// monthly/yearly day or nth-weekday, and never / until / count endings.
+/// monthly/yearly day or nth-weekday, times of day (`BYHOUR` / `BYMINUTE`),
+/// and never / until / count endings.
 /// Restrict available parts with [config].
 class LdRecurrenceForm extends StatefulWidget {
   const LdRecurrenceForm({
@@ -93,7 +95,7 @@ class _LdRecurrenceFormState extends State<LdRecurrenceForm> {
     final preview = ldRecurrenceOccurrencePreview(rule: rule, start: start);
     final previewFormat = ldRecurrenceOccurrenceFormat(
       localeName,
-      includeTime: draft.isSubDaily,
+      includeTime: draft.isSubDaily || draft.times.isNotEmpty,
     );
     final timelineEntries = ldRecurrenceTimelineEntries(
       occurrences: preview.next,
@@ -174,6 +176,32 @@ class _LdRecurrenceFormState extends State<LdRecurrenceForm> {
           ),
         if ((draft.isMonthly || draft.isYearly) && widget.config.showMonthlyOptions)
           ..._buildMonthlyYearly(context, l10n, localeName),
+        if (!draft.isSubDaily && widget.config.showTimes) ...[
+          LdText.l(l10n.recurrenceAt),
+          Wrap(
+            spacing: theme.pad(size: LdSize.s).left,
+            runSpacing: theme.pad(size: LdSize.s).left,
+            children: [
+              for (final time in draft.times)
+                LdButton.outline(
+                  key: Key('recurrence_time_${time.hour}_${time.minute}'),
+                  size: LdSize.s,
+                  disabled: widget.disabled,
+                  onPressed: () => _emit(_draft.removeTime(time)),
+                  child: Text(time.label),
+                ),
+              LdButton.ghost(
+                key: const Key('recurrence_add_time'),
+                size: LdSize.s,
+                disabled: widget.disabled,
+                autoLoading: false,
+                leading: const Icon(LucideIcons.plus),
+                onPressed: _addTime,
+                child: Text(l10n.recurrenceAddTime),
+              ),
+            ],
+          ),
+        ],
         if (widget.config.showEnding) ...[
           LdText.l(l10n.recurrenceEnds),
           if (endModes.contains(LdRecurrenceEndMode.never) && showEndRadios)
@@ -420,7 +448,7 @@ class _LdRecurrenceFormState extends State<LdRecurrenceForm> {
     final all = ldRecurrenceAllOccurrences(rule: _draft.toRule(), start: start);
     final dateFormat = ldRecurrenceOccurrenceFormat(
       localeName,
-      includeTime: _draft.isSubDaily,
+      includeTime: _draft.isSubDaily || _draft.times.isNotEmpty,
     );
     final last = switch (all.truncated || all.instances.isEmpty) {
       true => null,
@@ -466,6 +494,34 @@ class _LdRecurrenceFormState extends State<LdRecurrenceForm> {
             ),
           );
         },
+      ),
+    );
+  }
+
+  Future<void> _addTime() async {
+    if (widget.disabled) {
+      return;
+    }
+    final start = widget.start ?? DateTime.now();
+    final last = _draft.times.isEmpty ? null : _draft.times.last;
+    final selected = await Navigator.of(context).push<TimeOfDay>(
+      LdModalRoute(
+        context: context,
+        pageBuilder: (context) => LdTimePickerModal(
+          initialTime: TimeOfDay(
+            hour: last?.hour ?? start.hour,
+            minute: last?.minute ?? start.minute,
+          ),
+          minutePrecision: 1,
+        ),
+      ),
+    );
+    if (selected == null || !mounted) {
+      return;
+    }
+    _emit(
+      _draft.addTime(
+        LdRecurrenceTime(hour: selected.hour, minute: selected.minute),
       ),
     );
   }

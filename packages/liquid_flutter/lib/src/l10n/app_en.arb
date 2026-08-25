@@ -166,6 +166,16 @@
     "placeholders": {
       "count": {"type": "int"}
     }
+  },
+  "recurrenceAt": "At",
+  "recurrenceAddTime": "Add time",
+  "recurrenceAtTimes": "at {times}",
+  "@recurrenceAtTimes": {
+    "placeholders": {
+      "times": {
+        "type": "String"
+      }
+    }
   }
 
 }

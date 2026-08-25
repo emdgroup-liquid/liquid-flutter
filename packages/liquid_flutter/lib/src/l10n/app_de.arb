@@ -124,5 +124,15 @@
     "placeholders": {
       "count": {"type": "int"}
     }
+  },
+  "recurrenceAt": "Um",
+  "recurrenceAddTime": "Zeit hinzufügen",
+  "recurrenceAtTimes": "um {times}",
+  "@recurrenceAtTimes": {
+    "placeholders": {
+      "times": {
+        "type": "String"
+      }
+    }
   }
 }

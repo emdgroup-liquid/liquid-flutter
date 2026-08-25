@@ -36,11 +36,15 @@ DateTime ldFromRruleUtc(DateTime dateTime) {
   );
 }
 
+bool ldRecurrenceFrequencyIsSubDaily(Frequency frequency) {
+  return frequency == Frequency.hourly ||
+      frequency == Frequency.minutely ||
+      frequency == Frequency.secondly;
+}
+
 /// Whether [rule] uses RRULE parts that [LdRecurrenceForm] cannot edit.
 bool ldRecurrenceRuleHasUnsupportedParts(RecurrenceRule rule) {
   if (rule.bySeconds.isNotEmpty ||
-      rule.byMinutes.isNotEmpty ||
-      rule.byHours.isNotEmpty ||
       rule.byYearDays.isNotEmpty ||
       rule.byWeeks.isNotEmpty ||
       rule.bySetPositions.isNotEmpty) {
@@ -48,6 +52,11 @@ bool ldRecurrenceRuleHasUnsupportedParts(RecurrenceRule rule) {
   }
 
   final frequency = rule.frequency;
+  if (ldRecurrenceFrequencyIsSubDaily(frequency) &&
+      (rule.byHours.isNotEmpty || rule.byMinutes.isNotEmpty)) {
+    return true;
+  }
+
   if (frequency == Frequency.weekly ||
       frequency == Frequency.daily ||
       frequency == Frequency.hourly ||
@@ -78,6 +87,67 @@ int ldNthWeekdayOccurrence(DateTime date) {
   return nth.clamp(1, 4);
 }
 
+/// A time of day encoded as RRULE `BYHOUR` / `BYMINUTE`.
+class LdRecurrenceTime implements Comparable<LdRecurrenceTime> {
+  const LdRecurrenceTime({
+    required this.hour,
+    required this.minute,
+  })  : assert(hour >= 0 && hour <= 23),
+        assert(minute >= 0 && minute <= 59);
+
+  final int hour;
+  final int minute;
+
+  String get label => '$hour:${minute.toString().padLeft(2, '0')}';
+
+  @override
+  int compareTo(LdRecurrenceTime other) {
+    final byHour = hour.compareTo(other.hour);
+    if (byHour != 0) {
+      return byHour;
+    }
+    return minute.compareTo(other.minute);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is LdRecurrenceTime && hour == other.hour && minute == other.minute;
+  }
+
+  @override
+  int get hashCode => Object.hash(hour, minute);
+}
+
+/// Cartesian product of [hours] × [minutes], sorted.
+List<LdRecurrenceTime> ldRecurrenceTimesFromParts({
+  required Iterable<int> hours,
+  required Iterable<int> minutes,
+}) {
+  if (hours.isEmpty || minutes.isEmpty) {
+    return const [];
+  }
+  final uniqueHours = hours.toSet().toList()..sort();
+  final uniqueMinutes = minutes.toSet().toList()..sort();
+  return [
+    for (final hour in uniqueHours)
+      for (final minute in uniqueMinutes)
+        LdRecurrenceTime(hour: hour, minute: minute),
+  ];
+}
+
+List<LdRecurrenceTime> ldRecurrenceTimesFromRule(
+  RecurrenceRule rule,
+  DateTime seed,
+) {
+  if (rule.byHours.isEmpty && rule.byMinutes.isEmpty) {
+    return const [];
+  }
+  return ldRecurrenceTimesFromParts(
+    hours: rule.byHours.isNotEmpty ? rule.byHours : [seed.hour],
+    minutes: rule.byMinutes.isNotEmpty ? rule.byMinutes : [seed.minute],
+  );
+}
+
 /// Editable subset of [RecurrenceRule] used by the recurrence picker UI.
 class LdRecurrenceDraft {
   const LdRecurrenceDraft({
@@ -92,6 +162,7 @@ class LdRecurrenceDraft {
     this.endMode = LdRecurrenceEndMode.never,
     this.until,
     this.count = 10,
+    this.times = const [],
   });
 
   final Frequency frequency;
@@ -105,9 +176,9 @@ class LdRecurrenceDraft {
   final LdRecurrenceEndMode endMode;
   final DateTime? until;
   final int count;
+  final List<LdRecurrenceTime> times;
 
-  bool get isSubDaily =>
-      frequency == Frequency.hourly || frequency == Frequency.minutely || frequency == Frequency.secondly;
+  bool get isSubDaily => ldRecurrenceFrequencyIsSubDaily(frequency);
 
   bool get isWeekly => frequency == Frequency.weekly;
 
@@ -154,6 +225,9 @@ class LdRecurrenceDraft {
       endMode: endMode,
       until: rule.until != null ? ldFromRruleUtc(rule.until!) : null,
       count: rule.count ?? 10,
+      times: ldRecurrenceFrequencyIsSubDaily(rule.frequency)
+          ? const []
+          : ldRecurrenceTimesFromRule(rule, seed),
     );
   }
 
@@ -170,6 +244,7 @@ class LdRecurrenceDraft {
     DateTime? until,
     bool clearUntil = false,
     int? count,
+    List<LdRecurrenceTime>? times,
   }) {
     return LdRecurrenceDraft(
       frequency: frequency ?? this.frequency,
@@ -183,6 +258,39 @@ class LdRecurrenceDraft {
       endMode: endMode ?? this.endMode,
       until: clearUntil ? null : until ?? this.until,
       count: count ?? this.count,
+      times: times ?? this.times,
+    );
+  }
+
+  LdRecurrenceDraft addTime(LdRecurrenceTime time) {
+    return copyWith(
+      times: ldRecurrenceTimesFromParts(
+        hours: [...times.map((entry) => entry.hour), time.hour],
+        minutes: [...times.map((entry) => entry.minute), time.minute],
+      ),
+    );
+  }
+
+  LdRecurrenceDraft removeTime(LdRecurrenceTime time) {
+    if (!times.contains(time) || times.length <= 1) {
+      return copyWith(times: const []);
+    }
+    final hours = times.map((entry) => entry.hour).toSet();
+    final minutes = times.map((entry) => entry.minute).toSet();
+    final hourCount = times.where((entry) => entry.hour == time.hour).length;
+    final minuteCount = times.where((entry) => entry.minute == time.minute).length;
+    if (hourCount == 1) {
+      hours.remove(time.hour);
+    } else if (minuteCount == 1) {
+      minutes.remove(time.minute);
+    } else {
+      hours.remove(time.hour);
+    }
+    return copyWith(
+      times: ldRecurrenceTimesFromParts(
+        hours: hours,
+        minutes: minutes,
+      ),
     );
   }
 
@@ -206,6 +314,13 @@ class LdRecurrenceDraft {
       }
     }
 
+    var byHours = <int>[];
+    var byMinutes = <int>[];
+    if (!isSubDaily && times.isNotEmpty) {
+      byHours = times.map((time) => time.hour).toSet().toList()..sort();
+      byMinutes = times.map((time) => time.minute).toSet().toList()..sort();
+    }
+
     DateTime? untilUtc;
     int? ruleCount;
     switch (endMode) {
@@ -226,6 +341,8 @@ class LdRecurrenceDraft {
       byWeekDays: byWeekDays,
       byMonthDays: byMonthDays,
       byMonths: byMonths,
+      byHours: byHours,
+      byMinutes: byMinutes,
       until: untilUtc,
       count: ruleCount,
     );

@@ -445,4 +445,15 @@ class LiquidLocalizationsDe extends LiquidLocalizations {
   String recurrenceShowingFirstN(int count) {
     return 'Zeigt die ersten $count Termine';
   }
+
+  @override
+  String get recurrenceAt => 'Um';
+
+  @override
+  String get recurrenceAddTime => 'Zeit hinzufügen';
+
+  @override
+  String recurrenceAtTimes(String times) {
+    return 'um $times';
+  }
 }

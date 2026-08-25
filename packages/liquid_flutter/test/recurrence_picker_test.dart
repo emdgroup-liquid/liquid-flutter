@@ -98,7 +98,7 @@ void main() {
         LdRecurrenceForm(
           value: RecurrenceRule(
             frequency: Frequency.daily,
-            byHours: const [9],
+            bySeconds: const [0],
           ),
           onChanged: (_) {},
         ),
@@ -274,5 +274,74 @@ void main() {
     );
 
     expect(find.text('Next occurrences'), findsNothing);
+  });
+
+  testWidgets('shows time chips for daily by-hours', (tester) async {
+    await tester.pumpWidget(
+      withLiquidTheme(
+        LdRecurrenceForm(
+          value: RecurrenceRule(
+            frequency: Frequency.daily,
+            byHours: const [13, 17],
+            byMinutes: const [0],
+          ),
+          start: DateTime(2024, 1, 15, 9),
+          onChanged: (_) {},
+        ),
+      ),
+    );
+
+    expect(find.text('At'), findsOneWidget);
+    expect(find.text('13:00'), findsOneWidget);
+    expect(find.text('17:00'), findsOneWidget);
+    expect(find.byKey(const Key('recurrence_add_time')), findsOneWidget);
+  });
+
+  testWidgets('hides times for hourly frequency', (tester) async {
+    await tester.pumpWidget(
+      withLiquidTheme(
+        LdRecurrenceForm(
+          value: RecurrenceRule(frequency: Frequency.hourly),
+          start: DateTime(2024, 1, 15, 9),
+          onChanged: (_) {},
+        ),
+      ),
+    );
+
+    expect(find.byKey(const Key('recurrence_add_time')), findsNothing);
+    expect(find.text('At'), findsNothing);
+  });
+
+  testWidgets('hides times when configured to', (tester) async {
+    await tester.pumpWidget(
+      withLiquidTheme(
+        LdRecurrenceForm(
+          value: RecurrenceRule(frequency: Frequency.daily),
+          start: DateTime(2024, 1, 15, 9),
+          config: const LdRecurrenceConfig(showTimes: false),
+          onChanged: (_) {},
+        ),
+      ),
+    );
+
+    expect(find.byKey(const Key('recurrence_add_time')), findsNothing);
+  });
+
+  testWidgets('opens the time picker from add time', (tester) async {
+    await tester.pumpWidget(
+      withLiquidTheme(
+        LdRecurrenceForm(
+          value: RecurrenceRule(frequency: Frequency.daily),
+          start: DateTime(2024, 1, 15, 9),
+          config: const LdRecurrenceConfig(showPreview: false),
+          onChanged: (_) {},
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(const Key('recurrence_add_time')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('time_picker_sheet')), findsOneWidget);
   });
 }

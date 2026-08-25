@@ -766,6 +766,24 @@ abstract class LiquidLocalizations {
   /// In en, this message translates to:
   /// **'Showing the first {count} occurrences'**
   String recurrenceShowingFirstN(int count);
+
+  /// No description provided for @recurrenceAt.
+  ///
+  /// In en, this message translates to:
+  /// **'At'**
+  String get recurrenceAt;
+
+  /// No description provided for @recurrenceAddTime.
+  ///
+  /// In en, this message translates to:
+  /// **'Add time'**
+  String get recurrenceAddTime;
+
+  /// No description provided for @recurrenceAtTimes.
+  ///
+  /// In en, this message translates to:
+  /// **'at {times}'**
+  String recurrenceAtTimes(String times);
 }
 
 class _LiquidLocalizationsDelegate extends LocalizationsDelegate<LiquidLocalizations> {

@@ -195,6 +195,13 @@ String ldRecurrenceRuleSummary(
     }
   }
 
+  if (draft.times.isNotEmpty) {
+    buffer.write(' ');
+    buffer.write(
+      l10n.recurrenceAtTimes(draft.times.map((time) => time.label).join(', ')),
+    );
+  }
+
   switch (draft.endMode) {
     case LdRecurrenceEndMode.until:
       if (draft.until != null) {

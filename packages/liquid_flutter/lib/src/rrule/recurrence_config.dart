@@ -9,6 +9,7 @@ class LdRecurrenceConfig {
     this.showInterval = true,
     this.showWeekdays = true,
     this.showMonthlyOptions = true,
+    this.showTimes = true,
     this.showPreview = true,
   });
 
@@ -18,6 +19,7 @@ class LdRecurrenceConfig {
     this.showInterval = true,
     this.showWeekdays = true,
     this.showMonthlyOptions = true,
+    this.showTimes = true,
     this.showPreview = true,
   }) : frequencies = calendarFrequencies;
 
@@ -27,6 +29,7 @@ class LdRecurrenceConfig {
     this.showInterval = true,
     this.showWeekdays = true,
     this.showMonthlyOptions = true,
+    this.showTimes = true,
     this.showPreview = true,
   }) : endModes = const {};
 
@@ -77,6 +80,9 @@ class LdRecurrenceConfig {
   /// Whether monthly/yearly day and nth-weekday controls (and yearly months) are shown.
   final bool showMonthlyOptions;
 
+  /// Whether time-of-day chips (`BYHOUR` / `BYMINUTE`) are shown for daily and coarser frequencies.
+  final bool showTimes;
+
   /// Whether the next-occurrence preview is shown.
   final bool showPreview;
 
@@ -118,12 +124,14 @@ class LdRecurrenceConfig {
       final modes when modes.contains(draft.endMode) => draft.endMode,
       final modes => modes.first,
     };
-    if (frequency == draft.frequency && endMode == draft.endMode) {
+    final times = ldRecurrenceFrequencyIsSubDaily(frequency) ? const <LdRecurrenceTime>[] : draft.times;
+    if (frequency == draft.frequency && endMode == draft.endMode && times.length == draft.times.length) {
       return draft;
     }
     return draft.copyWith(
       frequency: frequency,
       endMode: endMode,
+      times: times,
     );
   }
 }
