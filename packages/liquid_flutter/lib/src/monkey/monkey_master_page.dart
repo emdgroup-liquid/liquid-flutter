@@ -179,13 +179,8 @@ class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends S
         child: LdMonkeyMultiShortcuts(
           actions: actions,
           child: LdScaffold(
-            body: LdListItemConfigProvider(
-              config: LdListItemConfig(
-                padding: MediaQuery.of(context).padding,
-              ),
-              child: _buildAppBarWrappedBody(
-                _buildList(context, repository, actions),
-              ),
+            body: _buildAppBarWrappedBody(
+              _buildList(context, repository, actions),
             ),
           ),
         ),
