@@ -112,3 +112,114 @@ LdRecurrenceOccurrenceList ldRecurrenceAllOccurrences({
     truncated: truncated,
   );
 }
+
+/// Merged, sorted, de-duplicated instances across [rules].
+List<DateTime> _ldRecurrenceMergedInstances({
+  required List<RecurrenceRule> rules,
+  required DateTime start,
+  required int maxAll,
+}) {
+  if (rules.isEmpty) {
+    return const [];
+  }
+
+  final utcStart = ldToRruleUtc(start);
+  final merged = <DateTime>{};
+
+  for (final rule in rules) {
+    var count = 0;
+    try {
+      for (final instance in rule.getInstances(start: utcStart)) {
+        merged.add(ldFromRruleUtc(instance));
+        count++;
+        if (count >= maxAll) {
+          break;
+        }
+      }
+    } catch (_) {
+      // Skip rules that cannot expand.
+    }
+  }
+
+  final sorted = merged.toList()..sort();
+  if (sorted.length <= maxAll) {
+    return sorted;
+  }
+  return sorted.sublist(0, maxAll);
+}
+
+/// Compact preview of upcoming instances across multiple rules.
+///
+/// [last] is only set when every rule is finite (has `COUNT` or `UNTIL`).
+LdRecurrenceOccurrencePreview ldRecurrenceMergedOccurrencePreview({
+  required List<RecurrenceRule> rules,
+  required DateTime start,
+  int nextCount = ldRecurrencePreviewCount,
+  int maxAll = ldRecurrenceMaxOccurrences,
+}) {
+  if (rules.isEmpty) {
+    return const LdRecurrenceOccurrencePreview(
+      next: [],
+      finite: false,
+      lastTruncated: false,
+    );
+  }
+
+  final finite = rules.every(ldRecurrenceRuleIsFinite);
+  final all = _ldRecurrenceMergedInstances(
+    rules: rules,
+    start: start,
+    maxAll: maxAll,
+  );
+
+  if (all.isEmpty) {
+    return LdRecurrenceOccurrencePreview(
+      next: const [],
+      finite: finite,
+      lastTruncated: false,
+    );
+  }
+
+  final next = all.take(nextCount).toList();
+  if (!finite) {
+    return LdRecurrenceOccurrencePreview(
+      next: next,
+      finite: false,
+      lastTruncated: false,
+    );
+  }
+
+  final truncated = all.length >= maxAll;
+  return LdRecurrenceOccurrencePreview(
+    next: next,
+    last: truncated ? null : all.last,
+    finite: true,
+    lastTruncated: truncated,
+  );
+}
+
+/// Full merged occurrence list across multiple rules (capped).
+LdRecurrenceOccurrenceList ldRecurrenceMergedAllOccurrences({
+  required List<RecurrenceRule> rules,
+  required DateTime start,
+  int maxAll = ldRecurrenceMaxOccurrences,
+}) {
+  if (rules.isEmpty) {
+    return const LdRecurrenceOccurrenceList(
+      instances: [],
+      truncated: false,
+    );
+  }
+
+  final finite = rules.every(ldRecurrenceRuleIsFinite);
+  final all = _ldRecurrenceMergedInstances(
+    rules: rules,
+    start: start,
+    maxAll: maxAll,
+  );
+
+  return LdRecurrenceOccurrenceList(
+    instances: all,
+    truncated: !finite || all.length >= maxAll,
+  );
+}

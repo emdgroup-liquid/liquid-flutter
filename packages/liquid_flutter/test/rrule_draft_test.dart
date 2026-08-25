@@ -243,4 +243,64 @@ void main() {
       expect(preview.next, hasLength(3));
     });
   });
+
+  group('ldRecurrenceMergedOccurrencePreview', () {
+    test('returns empty for no rules', () {
+      final preview = ldRecurrenceMergedOccurrencePreview(
+        rules: const [],
+        start: DateTime(2024, 1, 15),
+      );
+
+      expect(preview.next, isEmpty);
+      expect(preview.finite, isFalse);
+      expect(preview.last, isNull);
+    });
+
+    test('merges overlapping rules and dedupes', () {
+      final preview = ldRecurrenceMergedOccurrencePreview(
+        rules: [
+          RecurrenceRule(
+            frequency: Frequency.daily,
+            byHours: const [9],
+            byMinutes: const [0],
+            count: 3,
+          ),
+          RecurrenceRule(
+            frequency: Frequency.daily,
+            byHours: const [17],
+            byMinutes: const [0],
+            count: 3,
+          ),
+        ],
+        start: DateTime(2024, 1, 15, 9),
+        nextCount: 4,
+      );
+
+      expect(preview.finite, isTrue);
+      expect(preview.next, [
+        DateTime(2024, 1, 15, 9),
+        DateTime(2024, 1, 15, 17),
+        DateTime(2024, 1, 16, 9),
+        DateTime(2024, 1, 16, 17),
+      ]);
+      expect(preview.last, DateTime(2024, 1, 17, 17));
+    });
+
+    test('omits last when any rule is open-ended', () {
+      final preview = ldRecurrenceMergedOccurrencePreview(
+        rules: [
+          RecurrenceRule(
+            frequency: Frequency.daily,
+            count: 5,
+          ),
+          RecurrenceRule(frequency: Frequency.weekly),
+        ],
+        start: DateTime(2024, 1, 15),
+      );
+
+      expect(preview.finite, isFalse);
+      expect(preview.last, isNull);
+      expect(preview.next, hasLength(3));
+    });
+  });
 }

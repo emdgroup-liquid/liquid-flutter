@@ -136,5 +136,13 @@
         "type": "String"
       }
     }
+  },
+  "selectRecurrences": "Wiederholungen auswählen",
+  "recurrenceAddRule": "Regel hinzufügen",
+  "recurrenceRulesCount": "{count,plural, =0{Keine Regeln}=1{1 Regel}other{{count} Regeln}}",
+  "@recurrenceRulesCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
   }
 }

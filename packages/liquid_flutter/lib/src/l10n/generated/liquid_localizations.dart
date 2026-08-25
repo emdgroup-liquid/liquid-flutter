@@ -796,6 +796,24 @@ abstract class LiquidLocalizations {
   /// In en, this message translates to:
   /// **'at {times}'**
   String recurrenceAtTimes(String times);
+
+  /// No description provided for @selectRecurrences.
+  ///
+  /// In en, this message translates to:
+  /// **'Select recurrences'**
+  String get selectRecurrences;
+
+  /// No description provided for @recurrenceAddRule.
+  ///
+  /// In en, this message translates to:
+  /// **'Add rule'**
+  String get recurrenceAddRule;
+
+  /// No description provided for @recurrenceRulesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count,plural, =0{No rules}=1{1 rule}other{{count} rules}}'**
+  String recurrenceRulesCount(int count);
 }
 
 class _LiquidLocalizationsDelegate extends LocalizationsDelegate<LiquidLocalizations> {

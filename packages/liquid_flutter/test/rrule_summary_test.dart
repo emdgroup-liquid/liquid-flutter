@@ -1,10 +1,15 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:liquid_flutter/src/l10n/generated/liquid_localizations_en.dart';
 import 'package:liquid_flutter/src/rrule/rrule_summary.dart';
 import 'package:rrule/rrule.dart';
 
 void main() {
   final l10n = LiquidLocalizationsEn();
+
+  setUpAll(() async {
+    await initializeDateFormatting('en');
+  });
 
   group('ldRecurrenceDeltaLabel', () {
     test('uses one day between adjacent weekdays', () {
@@ -40,6 +45,17 @@ void main() {
       );
     });
 
+    test('composes hours and minutes for long gaps', () {
+      expect(
+        ldRecurrenceDeltaLabel(
+          DateTime(2024, 1, 15, 9),
+          DateTime(2024, 1, 15, 12, 50),
+          l10n,
+        ),
+        '3 hours 50 minutes',
+      );
+    });
+
     test('uses months when the calendar day matches', () {
       expect(
         ldRecurrenceDeltaLabel(
@@ -49,6 +65,17 @@ void main() {
         ),
         '3 months',
       );
+    });
+  });
+
+  group('ldRecurrenceOccurrenceFormat', () {
+    test('formats weekday, date, and time with spaces', () {
+      final formatted = ldRecurrenceOccurrenceFormat(
+        'en',
+        includeTime: true,
+      ).format(DateTime(2024, 1, 15, 9, 30, 0));
+
+      expect(formatted, 'Mon, Jan 15, 2024 09:30:00');
     });
   });
 

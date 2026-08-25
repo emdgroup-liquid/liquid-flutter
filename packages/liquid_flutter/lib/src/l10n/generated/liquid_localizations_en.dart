@@ -462,4 +462,22 @@ class LiquidLocalizationsEn extends LiquidLocalizations {
   String recurrenceAtTimes(String times) {
     return 'at $times';
   }
+
+  @override
+  String get selectRecurrences => 'Select recurrences';
+
+  @override
+  String get recurrenceAddRule => 'Add rule';
+
+  @override
+  String recurrenceRulesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count rules',
+      one: '1 rule',
+      zero: 'No rules',
+    );
+    return '$_temp0';
+  }
 }

@@ -178,6 +178,14 @@
         "type": "String"
       }
     }
+  },
+  "selectRecurrences": "Select recurrences",
+  "recurrenceAddRule": "Add rule",
+  "recurrenceRulesCount": "{count,plural, =0{No rules}=1{1 rule}other{{count} rules}}",
+  "@recurrenceRulesCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
   }
 
 }

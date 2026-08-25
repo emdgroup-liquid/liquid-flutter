@@ -296,7 +296,7 @@ void main() {
       ),
     );
 
-    expect(find.text('At'), findsOneWidget);
+    expect(find.text('AT'), findsOneWidget);
     expect(find.byKey(const Key('recurrence_hours')), findsOneWidget);
     expect(find.byKey(const Key('recurrence_minutes')), findsOneWidget);
     expect(find.byKey(const Key('recurrence_hour_13')), findsOneWidget);
@@ -324,7 +324,7 @@ void main() {
     );
 
     expect(find.byKey(const Key('recurrence_hours')), findsNothing);
-    expect(find.text('At'), findsNothing);
+    expect(find.text('AT'), findsNothing);
   });
 
   testWidgets('hides times when configured to', (tester) async {
