@@ -27,6 +27,7 @@ export 'src/color/tokens/zinc.dart';
 export 'src/container.dart';
 export 'src/context_menu.dart';
 export 'src/date_picker.dart';
+export 'src/duration_picker.dart';
 export 'src/emoji_picker/emoji_picker.dart';
 export 'src/divider.dart';
 export 'src/emoji/emoji.dart';

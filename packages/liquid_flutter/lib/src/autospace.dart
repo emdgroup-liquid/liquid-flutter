@@ -105,6 +105,7 @@ bool _isInputLike(Widget child) {
       child is LdChoose ||
       child is LdDatePicker ||
       child is LdTimePicker ||
+      child is LdDurationPicker ||
       child is LdSelect ||
       child is LdSwitch;
 }

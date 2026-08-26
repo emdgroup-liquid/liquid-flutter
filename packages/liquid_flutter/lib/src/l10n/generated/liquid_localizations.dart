@@ -826,6 +826,138 @@ abstract class LiquidLocalizations {
   /// In en, this message translates to:
   /// **'{count,plural, =0{No rules}=1{1 rule}other{{count} rules}}'**
   String recurrenceRulesCount(int count);
+
+  /// No description provided for @selectDuration.
+  ///
+  /// In en, this message translates to:
+  /// **'Select duration'**
+  String get selectDuration;
+
+  /// No description provided for @durationHintYears.
+  ///
+  /// In en, this message translates to:
+  /// **'y'**
+  String get durationHintYears;
+
+  /// No description provided for @durationHintMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'mo'**
+  String get durationHintMonths;
+
+  /// No description provided for @durationHintWeeks.
+  ///
+  /// In en, this message translates to:
+  /// **'w'**
+  String get durationHintWeeks;
+
+  /// No description provided for @durationHintDays.
+  ///
+  /// In en, this message translates to:
+  /// **'d'**
+  String get durationHintDays;
+
+  /// No description provided for @durationHintHours.
+  ///
+  /// In en, this message translates to:
+  /// **'h'**
+  String get durationHintHours;
+
+  /// No description provided for @durationHintMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'m'**
+  String get durationHintMinutes;
+
+  /// No description provided for @durationHintSeconds.
+  ///
+  /// In en, this message translates to:
+  /// **'s'**
+  String get durationHintSeconds;
+
+  /// No description provided for @durationCompactYears.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}y'**
+  String durationCompactYears(int count);
+
+  /// No description provided for @durationCompactMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}mo'**
+  String durationCompactMonths(int count);
+
+  /// No description provided for @durationCompactWeeks.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}w'**
+  String durationCompactWeeks(int count);
+
+  /// No description provided for @durationCompactDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}d'**
+  String durationCompactDays(int count);
+
+  /// No description provided for @durationCompactHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}h'**
+  String durationCompactHours(int count);
+
+  /// No description provided for @durationCompactMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}m'**
+  String durationCompactMinutes(int count);
+
+  /// No description provided for @durationCompactSeconds.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}s'**
+  String durationCompactSeconds(int count);
+
+  /// No description provided for @durationUnitYears.
+  ///
+  /// In en, this message translates to:
+  /// **'{count,plural, =1{year}other{years}}'**
+  String durationUnitYears(int count);
+
+  /// No description provided for @durationUnitMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'{count,plural, =1{month}other{months}}'**
+  String durationUnitMonths(int count);
+
+  /// No description provided for @durationUnitWeeks.
+  ///
+  /// In en, this message translates to:
+  /// **'{count,plural, =1{week}other{weeks}}'**
+  String durationUnitWeeks(int count);
+
+  /// No description provided for @durationUnitDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count,plural, =1{day}other{days}}'**
+  String durationUnitDays(int count);
+
+  /// No description provided for @durationUnitHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{count,plural, =1{hour}other{hours}}'**
+  String durationUnitHours(int count);
+
+  /// No description provided for @durationUnitMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{count,plural, =1{minute}other{minutes}}'**
+  String durationUnitMinutes(int count);
+
+  /// No description provided for @durationUnitSeconds.
+  ///
+  /// In en, this message translates to:
+  /// **'{count,plural, =1{second}other{seconds}}'**
+  String durationUnitSeconds(int count);
 }
 
 class _LiquidLocalizationsDelegate extends LocalizationsDelegate<LiquidLocalizations> {

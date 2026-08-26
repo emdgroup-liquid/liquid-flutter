@@ -3,6 +3,7 @@ import 'package:liquid_flutter_reactive_forms/documentation.g.dart';
 export 'src/form_widgets/ld_form_checkbox.dart';
 export 'src/form_widgets/ld_form_choose.dart';
 export 'src/form_widgets/ld_form_date_picker.dart';
+export 'src/form_widgets/ld_form_duration_picker.dart';
 export 'src/form_widgets/ld_form_emoji_picker.dart';
 export 'src/form_widgets/ld_form_field_base.dart';
 export 'src/form_widgets/ld_form_input.dart';

@@ -15,7 +15,7 @@
   "moreInfo": "Weitere Informationen",
   "networkError": "Netzwerkfehler. Bitte stellen Sie sicher, dass Sie mit dem Internet verbunden sind und versuchen Sie es erneut.",
   "noItemsFound": "Keine Elemente gefunden",
-  "ok": "OK", 
+  "ok": "OK",
   "refresh": "Aktualisieren",
   "retry": "Erneut versuchen",
   "retryIn": "Erneuter Versuch in {seconds}s...",
@@ -48,43 +48,57 @@
   "recurrenceUnitSeconds": "{count,plural, =1{Sekunde}other{Sekunden}}",
   "@recurrenceUnitSeconds": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "recurrenceUnitMinutes": "{count,plural, =1{Minute}other{Minuten}}",
   "@recurrenceUnitMinutes": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "recurrenceUnitHours": "{count,plural, =1{Stunde}other{Stunden}}",
   "@recurrenceUnitHours": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "recurrenceUnitDays": "{count,plural, =1{Tag}other{Tage}}",
   "@recurrenceUnitDays": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "recurrenceUnitWeeks": "{count,plural, =1{Woche}other{Wochen}}",
   "@recurrenceUnitWeeks": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "recurrenceUnitMonths": "{count,plural, =1{Monat}other{Monate}}",
   "@recurrenceUnitMonths": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "recurrenceUnitYears": "{count,plural, =1{Jahr}other{Jahre}}",
   "@recurrenceUnitYears": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "recurrenceOnDay": "Am Tag",
@@ -102,7 +116,9 @@
   "recurrenceOccurrences": "{count,plural, =1{Wiederholung}other{Wiederholungen}}",
   "@recurrenceOccurrences": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "recurrenceNextOccurrences": "Nächste Termine",
@@ -113,7 +129,9 @@
   "recurrenceTimes": "{count,plural, =1{einmal}other{{count} Mal}}",
   "@recurrenceTimes": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "recurrenceNthOccurrence": "{ordinal} Termin",
@@ -139,7 +157,9 @@
   "recurrenceShowingFirstN": "Zeigt die ersten {count} Termine",
   "@recurrenceShowingFirstN": {
     "placeholders": {
-      "count": {"type": "int"}
+      "count": {
+        "type": "int"
+      }
     }
   },
   "recurrenceNMore": "{count} weitere",
@@ -166,6 +186,126 @@
   "@recurrenceRulesCount": {
     "placeholders": {
       "count": {"type": "int"}
+    }
+  },
+  "selectDuration": "Dauer auswählen",
+  "durationHintYears": "J",
+  "durationHintMonths": "Mo",
+  "durationHintWeeks": "W",
+  "durationHintDays": "T",
+  "durationHintHours": "Std",
+  "durationHintMinutes": "Min",
+  "durationHintSeconds": "Sek",
+  "durationCompactYears": "{count} J.",
+  "@durationCompactYears": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "durationCompactMonths": "{count} Mo.",
+  "@durationCompactMonths": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "durationCompactWeeks": "{count} Wo.",
+  "@durationCompactWeeks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "durationCompactDays": "{count} T.",
+  "@durationCompactDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "durationCompactHours": "{count} Std.",
+  "@durationCompactHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "durationCompactMinutes": "{count} Min.",
+  "@durationCompactMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "durationCompactSeconds": "{count} Sek.",
+  "@durationCompactSeconds": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "durationUnitYears": "{count,plural, =1{Jahr}other{Jahre}}",
+  "@durationUnitYears": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "durationUnitMonths": "{count,plural, =1{Monat}other{Monate}}",
+  "@durationUnitMonths": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "durationUnitWeeks": "{count,plural, =1{Woche}other{Wochen}}",
+  "@durationUnitWeeks": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "durationUnitDays": "{count,plural, =1{Tag}other{Tage}}",
+  "@durationUnitDays": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "durationUnitHours": "{count,plural, =1{Stunde}other{Stunden}}",
+  "@durationUnitHours": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "durationUnitMinutes": "{count,plural, =1{Minute}other{Minuten}}",
+  "@durationUnitMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "durationUnitSeconds": "{count,plural, =1{Sekunde}other{Sekunden}}",
+  "@durationUnitSeconds": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
     }
   }
 }

@@ -47,6 +47,7 @@ The Liquid Flutter design system provides a comprehensive set of components and 
 - **LdSlider**: Slider input
 - **LdDatePicker**: Date picker
 - **LdTimePicker**: Time picker
+- **LdDurationPicker**: Duration picker (`LdDuration`, ISO 8601)
 
 ### List Components
 - **LdList**: List container

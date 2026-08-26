@@ -88,6 +88,18 @@ LdFormDatePicker(
 )
 ```
 
+### `LdFormDurationPicker`
+
+Binds `FormControl<LdDuration>`.
+
+```dart
+LdFormDurationPicker(
+  formKey: 'timeout',
+  label: 'Timeout',
+  config: const LdDurationConfig.timer(),
+)
+```
+
 ### `LdFormSlider`
 
 ```dart

@@ -492,4 +492,140 @@ class LiquidLocalizationsEn extends LiquidLocalizations {
     );
     return '$_temp0';
   }
+
+  @override
+  String get selectDuration => 'Select duration';
+
+  @override
+  String get durationHintYears => 'y';
+
+  @override
+  String get durationHintMonths => 'mo';
+
+  @override
+  String get durationHintWeeks => 'w';
+
+  @override
+  String get durationHintDays => 'd';
+
+  @override
+  String get durationHintHours => 'h';
+
+  @override
+  String get durationHintMinutes => 'm';
+
+  @override
+  String get durationHintSeconds => 's';
+
+  @override
+  String durationCompactYears(int count) {
+    return '${count}y';
+  }
+
+  @override
+  String durationCompactMonths(int count) {
+    return '${count}mo';
+  }
+
+  @override
+  String durationCompactWeeks(int count) {
+    return '${count}w';
+  }
+
+  @override
+  String durationCompactDays(int count) {
+    return '${count}d';
+  }
+
+  @override
+  String durationCompactHours(int count) {
+    return '${count}h';
+  }
+
+  @override
+  String durationCompactMinutes(int count) {
+    return '${count}m';
+  }
+
+  @override
+  String durationCompactSeconds(int count) {
+    return '${count}s';
+  }
+
+  @override
+  String durationUnitYears(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'years',
+      one: 'year',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String durationUnitMonths(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'months',
+      one: 'month',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String durationUnitWeeks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'weeks',
+      one: 'week',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String durationUnitDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'days',
+      one: 'day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String durationUnitHours(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'hours',
+      one: 'hour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String durationUnitMinutes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'minutes',
+      one: 'minute',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String durationUnitSeconds(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'seconds',
+      one: 'second',
+    );
+    return '$_temp0';
+  }
 }
