@@ -433,7 +433,14 @@ class LiquidLocalizationsEn extends LiquidLocalizations {
   }
 
   @override
-  String get recurrenceLastOccurrence => 'Last occurrence';
+  String recurrenceNthOccurrence(String ordinal) {
+    return '$ordinal occurrence';
+  }
+
+  @override
+  String recurrenceLastNthOccurrence(String ordinal) {
+    return 'Last ($ordinal)';
+  }
 
   @override
   String get recurrenceViewAllOccurrences => 'View all occurrences';
@@ -444,6 +451,11 @@ class LiquidLocalizationsEn extends LiquidLocalizations {
   @override
   String recurrenceShowingFirstN(int count) {
     return 'Showing the first $count occurrences';
+  }
+
+  @override
+  String recurrenceNMore(int count) {
+    return '$count more';
   }
 
   @override
@@ -461,5 +473,23 @@ class LiquidLocalizationsEn extends LiquidLocalizations {
   @override
   String recurrenceAtTimes(String times) {
     return 'at $times';
+  }
+
+  @override
+  String get selectRecurrences => 'Select recurrences';
+
+  @override
+  String get recurrenceAddRule => 'Add rule';
+
+  @override
+  String recurrenceRulesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count rules',
+      one: '1 rule',
+      zero: 'No rules',
+    );
+    return '$_temp0';
   }
 }

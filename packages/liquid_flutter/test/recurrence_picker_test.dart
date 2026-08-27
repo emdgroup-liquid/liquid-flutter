@@ -125,7 +125,7 @@ void main() {
       ),
     );
 
-    expect(find.text('Last occurrence'), findsOneWidget);
+    expect(find.text('Last (5th)'), findsOneWidget);
     expect(find.text('View all occurrences'), findsOneWidget);
     expect(find.text('1 day'), findsWidgets);
     expect(find.textContaining('Mon'), findsWidgets);
@@ -205,6 +205,29 @@ void main() {
 
     expect(find.byKey(const Key('recurrence_all_occurrences_sheet')), findsOneWidget);
     expect(find.text('All occurrences'), findsOneWidget);
+  });
+
+  testWidgets('shows truncation hint when the series exceeds the cap', (tester) async {
+    await tester.pumpWidget(
+      withLiquidTheme(
+        LdRecurrenceForm(
+          value: RecurrenceRule(
+            frequency: Frequency.daily,
+            until: DateTime.utc(2030, 1, 1),
+          ),
+          start: DateTime(2024, 1, 15),
+          onChanged: (_) {},
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(const Key('recurrence_view_all')));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('Showing the first 500 occurrences'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('hides disallowed frequencies', (tester) async {
@@ -296,7 +319,7 @@ void main() {
       ),
     );
 
-    expect(find.text('At'), findsOneWidget);
+    expect(find.text('AT'), findsOneWidget);
     expect(find.byKey(const Key('recurrence_hours')), findsOneWidget);
     expect(find.byKey(const Key('recurrence_minutes')), findsOneWidget);
     expect(find.byKey(const Key('recurrence_hour_13')), findsOneWidget);
@@ -324,7 +347,7 @@ void main() {
     );
 
     expect(find.byKey(const Key('recurrence_hours')), findsNothing);
-    expect(find.text('At'), findsNothing);
+    expect(find.text('AT'), findsNothing);
   });
 
   testWidgets('hides times when configured to', (tester) async {

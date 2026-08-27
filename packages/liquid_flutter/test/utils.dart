@@ -19,10 +19,13 @@ Widget withLiquidTheme(Widget child, {LdTheme? theme}) {
         body: Directionality(
           textDirection: TextDirection.ltr,
           child: MediaQuery(
-              data: const MediaQueryData(
-                size: Size(800, 800),
-              ),
-              child: child),
+            data: const MediaQueryData(
+              size: Size(800, 1200),
+            ),
+            child: SingleChildScrollView(
+              child: child,
+            ),
+          ),
         ),
       ),
     ),
@@ -50,9 +53,7 @@ Future<void> performPanGesture(
 
   // Upward mouse drags do not reliably trigger vertical drag recognizers in
   // widget tests; touch pointers behave correctly for both directions.
-  final effectiveKind = kind == PointerDeviceKind.mouse && targetOffset.dy < 0
-      ? PointerDeviceKind.touch
-      : kind;
+  final effectiveKind = kind == PointerDeviceKind.mouse && targetOffset.dy < 0 ? PointerDeviceKind.touch : kind;
 
   // Start pan gesture
   final gesture = await tester.startGesture(

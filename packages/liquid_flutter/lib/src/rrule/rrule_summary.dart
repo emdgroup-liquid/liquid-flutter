@@ -4,28 +4,6 @@ import 'package:liquid_flutter/src/l10n/generated/liquid_localizations.dart';
 import 'package:liquid_flutter/src/rrule/rrule_draft.dart';
 import 'package:rrule/rrule.dart';
 
-String ldRecurrenceFrequencyLabel(Frequency frequency, LiquidLocalizations l10n) {
-  if (frequency == Frequency.secondly) {
-    return l10n.recurrenceSecondly;
-  }
-  if (frequency == Frequency.minutely) {
-    return l10n.recurrenceMinutely;
-  }
-  if (frequency == Frequency.hourly) {
-    return l10n.recurrenceHourly;
-  }
-  if (frequency == Frequency.daily) {
-    return l10n.recurrenceDaily;
-  }
-  if (frequency == Frequency.weekly) {
-    return l10n.recurrenceWeekly;
-  }
-  if (frequency == Frequency.monthly) {
-    return l10n.recurrenceMonthly;
-  }
-  return l10n.recurrenceYearly;
-}
-
 String ldRecurrenceUnitLabel(
   Frequency frequency,
   int count,
@@ -92,14 +70,26 @@ String ldRecurrenceDeltaLabel(
   }
 
   final delta = end.difference(start);
-  if (delta.inHours > 0 && delta.inMinutes % 60 == 0) {
-    return ldRecurrenceIntervalLabel(Frequency.hourly, delta.inHours, l10n);
+  final days = delta.inDays;
+  final hours = delta.inHours.remainder(24);
+  final minutes = delta.inMinutes.remainder(60);
+  final seconds = delta.inSeconds.remainder(60);
+
+  final parts = <String>[];
+  if (days > 0) {
+    parts.add(ldRecurrenceIntervalLabel(Frequency.daily, days, l10n));
   }
-  if (delta.inMinutes > 0 && delta.inSeconds % 60 == 0) {
-    return ldRecurrenceIntervalLabel(Frequency.minutely, delta.inMinutes, l10n);
+  if (hours > 0) {
+    parts.add(ldRecurrenceIntervalLabel(Frequency.hourly, hours, l10n));
   }
-  final seconds = delta.inSeconds < 1 ? 1 : delta.inSeconds;
-  return ldRecurrenceIntervalLabel(Frequency.secondly, seconds, l10n);
+  if (minutes > 0) {
+    parts.add(ldRecurrenceIntervalLabel(Frequency.minutely, minutes, l10n));
+  }
+  if (parts.isEmpty) {
+    final secs = seconds < 1 ? 1 : seconds;
+    parts.add(ldRecurrenceIntervalLabel(Frequency.secondly, secs, l10n));
+  }
+  return parts.join(' ');
 }
 
 String ldRecurrenceNthLabel(int occurrence, LiquidLocalizations l10n) {
@@ -110,6 +100,26 @@ String ldRecurrenceNthLabel(int occurrence, LiquidLocalizations l10n) {
     4 => l10n.recurrenceNthFourth,
     _ => l10n.recurrenceNthLast,
   };
+}
+
+/// Locale-aware ordinal for open-ended indices (e.g. timeline rows).
+///
+/// English: `1st`, `2nd`, `3rd`, `23rd`. German: `1.`, `2.`, `23.`.
+String ldRecurrenceOrdinal(int n, String locale) {
+  final language = Intl.shortLocale(locale);
+  if (language == 'en') {
+    final mod100 = n % 100;
+    final mod10 = n % 10;
+    final suffix = switch ((mod100 >= 11 && mod100 <= 13, mod10)) {
+      (true, _) => 'th',
+      (_, 1) => 'st',
+      (_, 2) => 'nd',
+      (_, 3) => 'rd',
+      _ => 'th',
+    };
+    return '$n$suffix';
+  }
+  return '$n.';
 }
 
 String ldRecurrenceWeekdayLabel(int weekday, String locale) {
@@ -134,10 +144,13 @@ DateFormat ldRecurrenceOccurrenceFormat(
   String localeName, {
   required bool includeTime,
 }) {
-  final format = DateFormat('EEE, yMMMd', localeName);
+  // Use ICU skeletons (`yMMMEd` / `Hms`), not a custom `yMMMd` pattern string.
+  // `DateFormat('EEE, yMMMd')` treats those letters literally and yields
+  // jammed output like `Mon, 2024Jan15`.
+  final date = DateFormat.yMMMEd(localeName);
   return switch (includeTime) {
-    true => format.add_Hms(),
-    false => format,
+    true => date.addPattern(DateFormat.Hms(localeName).pattern!),
+    false => date,
   };
 }
 

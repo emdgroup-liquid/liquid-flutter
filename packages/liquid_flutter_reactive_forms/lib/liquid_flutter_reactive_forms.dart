@@ -10,6 +10,7 @@ export 'src/form_widgets/ld_form_markdown_editor.dart';
 export 'src/form_widgets/ld_form_radio.dart';
 export 'src/form_widgets/ld_form_range_slider.dart';
 export 'src/form_widgets/ld_form_recurrence_picker.dart';
+export 'src/form_widgets/ld_form_recurrence_multi_picker.dart';
 export 'src/form_widgets/ld_form_select.dart';
 export 'src/form_widgets/ld_form_slider.dart';
 export 'src/form_widgets/ld_form_switch.dart';

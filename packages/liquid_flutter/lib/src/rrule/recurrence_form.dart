@@ -97,11 +97,6 @@ class _LdRecurrenceFormState extends State<LdRecurrenceForm> {
       localeName,
       includeTime: draft.isSubDaily || draft.hasTimes,
     );
-    final timelineEntries = ldRecurrenceTimelineEntries(
-      occurrences: preview.next,
-      last: preview.last,
-      l10n: l10n,
-    );
     final frequencies = widget.config.enabledFrequencies;
     final endModes = widget.config.enabledEndModes;
     final showEndRadios = endModes.length > 1;
@@ -178,7 +173,8 @@ class _LdRecurrenceFormState extends State<LdRecurrenceForm> {
           ..._buildMonthlyYearly(context, l10n, localeName),
         if (!draft.isSubDaily && widget.config.showTimes) ..._buildTimes(context, l10n, draft),
         if (widget.config.showEnding) ...[
-          LdText.l(l10n.recurrenceEnds),
+          LdDivider(),
+          LdText.caption(l10n.recurrenceEnds),
           if (endModes.contains(LdRecurrenceEndMode.never) && showEndRadios)
             LdRadio(
               key: const Key('recurrence_end_never'),
@@ -251,20 +247,27 @@ class _LdRecurrenceFormState extends State<LdRecurrenceForm> {
               ),
           ],
         ],
-        if (widget.config.showPreview && timelineEntries.isNotEmpty) ...[
-          LdText.l(l10n.recurrenceNextOccurrences),
-          LdRecurrenceTimeline(
-            entries: timelineEntries,
-            dateFormat: previewFormat,
-            lastOccurrenceLabel: l10n.recurrenceLastOccurrence,
+        if (widget.config.showPreview && (preview.next.isNotEmpty || preview.last != null)) ...[
+          Row(
+            children: [
+              Expanded(child: LdText.caption(l10n.recurrenceNextOccurrences)),
+              if (preview.finite)
+                LdButton.ghost(
+                  key: const Key('recurrence_view_all'),
+                  size: LdSize.s,
+                  onPressed: () => _openAllOccurrences(context),
+                  child: Text(l10n.recurrenceViewAllOccurrences),
+                ),
+            ],
           ),
-          if (preview.finite)
-            LdButton.ghost(
-              key: const Key('recurrence_view_all'),
-              size: LdSize.s,
-              onPressed: () => _openAllOccurrences(context),
-              child: Text(l10n.recurrenceViewAllOccurrences),
+          LdCard(
+            child: LdRecurrenceTimeline(
+              occurrences: preview.next,
+              last: preview.last,
+              lastOccurrenceNumber: preview.lastOccurrenceNumber,
+              dateFormat: previewFormat,
             ),
+          ),
         ],
       ],
     );
@@ -417,59 +420,18 @@ class _LdRecurrenceFormState extends State<LdRecurrenceForm> {
   }
 
   void _openAllOccurrences(BuildContext context) {
-    final l10n = LiquidLocalizations.of(context);
     final localeName = Localizations.localeOf(context).toString();
     final start = widget.start ?? DateTime.now();
     final all = ldRecurrenceAllOccurrences(rule: _draft.toRule(), start: start);
-    final dateFormat = ldRecurrenceOccurrenceFormat(
-      localeName,
-      includeTime: _draft.isSubDaily || _draft.hasTimes,
-    );
-    final last = switch (all.truncated || all.instances.isEmpty) {
-      true => null,
-      false => all.instances.last,
-    };
-    final entries = ldRecurrenceTimelineEntries(
-      occurrences: all.instances,
-      last: last,
-      l10n: l10n,
-    );
-    final truncatedHintCount = switch (all.truncated) {
-      true => 1,
-      false => 0,
-    };
-
-    Navigator.of(context).push<void>(
-      LdModalRoute(
-        context: context,
-        pageBuilder: (context) {
-          return LdScaffold(
-            key: const Key('recurrence_all_occurrences_sheet'),
-            body: LdAppBar.top(
-              title: Text(l10n.recurrenceAllOccurrences),
-              child: LdScaffoldBody(
-                itemCount: truncatedHintCount + entries.length,
-                itemBuilder: (context, index) {
-                  if (all.truncated && index == 0) {
-                    return LdHint(
-                      type: LdHintType.info,
-                      withBackground: true,
-                      child: Text(l10n.recurrenceShowingFirstN(all.instances.length)),
-                    );
-                  }
-                  final entryIndex = all.truncated ? index - 1 : index;
-                  return LdRecurrenceTimelineItem(
-                    entry: entries[entryIndex],
-                    dateFormat: dateFormat,
-                    lastOccurrenceLabel: l10n.recurrenceLastOccurrence,
-                    isLastItem: entryIndex == entries.length - 1,
-                  );
-                },
-              ),
-            ),
-          );
-        },
+    ldRecurrenceShowAllOccurrencesSheet(
+      context,
+      instances: all.instances,
+      truncated: all.truncated,
+      dateFormat: ldRecurrenceOccurrenceFormat(
+        localeName,
+        includeTime: _draft.isSubDaily || _draft.hasTimes,
       ),
+      scaffoldKey: const Key('recurrence_all_occurrences_sheet'),
     );
   }
 
@@ -483,16 +445,15 @@ class _LdRecurrenceFormState extends State<LdRecurrenceForm> {
       precision: widget.config.minutePrecision,
       selected: draft.minutes,
     );
-    final showMatrixHint = mode == LdRecurrenceTimesMode.matrix &&
-        draft.hours.length > 1 &&
-        draft.minutes.length > 1;
+    final showMatrixHint = mode == LdRecurrenceTimesMode.matrix && draft.hours.length > 1 && draft.minutes.length > 1;
 
     return [
-      LdText.l(l10n.recurrenceAt),
-      LdText.caption(l10n.recurrenceHours),
+      LdDivider(),
+      LdText.caption(l10n.recurrenceAt),
+      LdText.l(l10n.recurrenceHours),
       LdHorizontalScroll(
         key: const Key('recurrence_hours'),
-        layout: LdHorizontalScrollLayout.scroll,
+        layout: LdHorizontalScrollLayout.adaptive,
         initialPeek: false,
         children: [
           for (var hour = 0; hour < 24; hour++)
@@ -506,10 +467,10 @@ class _LdRecurrenceFormState extends State<LdRecurrenceForm> {
             ),
         ],
       ),
-      LdText.caption(l10n.recurrenceMinutes),
+      LdText.l(l10n.recurrenceMinutes),
       LdHorizontalScroll(
         key: const Key('recurrence_minutes'),
-        layout: LdHorizontalScrollLayout.scroll,
+        layout: LdHorizontalScrollLayout.adaptive,
         initialPeek: false,
         children: [
           for (final minute in minuteOptions)

@@ -116,11 +116,34 @@
       "count": {"type": "int"}
     }
   },
-  "recurrenceLastOccurrence": "Letzter Termin",
+  "recurrenceNthOccurrence": "{ordinal} Termin",
+  "@recurrenceNthOccurrence": {
+    "placeholders": {
+      "ordinal": {
+        "type": "String",
+        "example": "23."
+      }
+    }
+  },
+  "recurrenceLastNthOccurrence": "Letzter ({ordinal})",
+  "@recurrenceLastNthOccurrence": {
+    "placeholders": {
+      "ordinal": {
+        "type": "String",
+        "example": "23."
+      }
+    }
+  },
   "recurrenceViewAllOccurrences": "Alle Termine anzeigen",
   "recurrenceAllOccurrences": "Alle Termine",
   "recurrenceShowingFirstN": "Zeigt die ersten {count} Termine",
   "@recurrenceShowingFirstN": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "recurrenceNMore": "{count} weitere",
+  "@recurrenceNMore": {
     "placeholders": {
       "count": {"type": "int"}
     }
@@ -135,6 +158,14 @@
       "times": {
         "type": "String"
       }
+    }
+  },
+  "selectRecurrences": "Wiederholungen auswählen",
+  "recurrenceAddRule": "Regel hinzufügen",
+  "recurrenceRulesCount": "{count,plural, =0{Keine Regeln}=1{1 Regel}other{{count} Regeln}}",
+  "@recurrenceRulesCount": {
+    "placeholders": {
+      "count": {"type": "int"}
     }
   }
 }

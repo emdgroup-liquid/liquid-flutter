@@ -15,6 +15,7 @@ class _RecurrencePickerDemoState extends State<RecurrencePickerDemo> {
   RecurrenceRule _formRule = RecurrenceRule(frequency: Frequency.weekly);
   RecurrenceRule _restrictedRule = RecurrenceRule(frequency: Frequency.weekly);
   RecurrenceRule _matrixRule = RecurrenceRule(frequency: Frequency.daily);
+  List<RecurrenceRule> _multiRules = const [];
   DateTime _start = DateTime.now();
 
   @override
@@ -22,7 +23,11 @@ class _RecurrencePickerDemoState extends State<RecurrencePickerDemo> {
     return ComponentPage(
       path: "lib/components/form_elements/recurrence_picker.dart",
       title: 'Recurrence Picker',
-      apiComponents: const ["LdRecurrencePicker", "LdRecurrenceForm"],
+      apiComponents: const [
+        "LdRecurrencePicker",
+        "LdRecurrenceMultiPicker",
+        "LdRecurrenceForm",
+      ],
       demo: LdAutoSpace(
         children: [
           LdText.l('Start'),
@@ -49,6 +54,26 @@ class _RecurrencePickerDemoState extends State<RecurrencePickerDemo> {
               },
             ),
           ),
+
+          ComponentWell(
+            title: Text("Multi picker"),
+            description: Text("Independent rules (e.g. separate clock times)."),
+            child: LdRecurrenceMultiPicker(
+              value: _multiRules,
+              start: _start,
+              label: 'Recurrences',
+              useRootNavigator: true,
+              config: const LdRecurrenceConfig(
+                timesMode: LdRecurrenceTimesMode.single,
+              ),
+              onChanged: (rules) {
+                setState(() {
+                  _multiRules = rules;
+                });
+              },
+            ),
+          ),
+          LdText.l(_multiRules.map((rule) => rule.toString()).join('\n')),
 
           ComponentWell(
             title: Text("Inline form"),

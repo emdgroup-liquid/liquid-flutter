@@ -110,8 +110,7 @@
     "placeholders": {
       "count": {"type": "int"}
     }
-  },
-  "recurrenceUnitWeeks": "{count,plural, =1{week}other{weeks}}",
+  },  "recurrenceUnitWeeks": "{count,plural, =1{week}other{weeks}}",
   "@recurrenceUnitWeeks": {
     "placeholders": {
       "count": {"type": "int"}
@@ -158,11 +157,34 @@
       "count": {"type": "int"}
     }
   },
-  "recurrenceLastOccurrence": "Last occurrence",
+  "recurrenceNthOccurrence": "{ordinal} occurrence",
+  "@recurrenceNthOccurrence": {
+    "placeholders": {
+      "ordinal": {
+        "type": "String",
+        "example": "23rd"
+      }
+    }
+  },
+  "recurrenceLastNthOccurrence": "Last ({ordinal})",
+  "@recurrenceLastNthOccurrence": {
+    "placeholders": {
+      "ordinal": {
+        "type": "String",
+        "example": "23rd"
+      }
+    }
+  },
   "recurrenceViewAllOccurrences": "View all occurrences",
   "recurrenceAllOccurrences": "All occurrences",
   "recurrenceShowingFirstN": "Showing the first {count} occurrences",
   "@recurrenceShowingFirstN": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "recurrenceNMore": "{count} more",
+  "@recurrenceNMore": {
     "placeholders": {
       "count": {"type": "int"}
     }
@@ -177,6 +199,14 @@
       "times": {
         "type": "String"
       }
+    }
+  },
+  "selectRecurrences": "Select recurrences",
+  "recurrenceAddRule": "Add rule",
+  "recurrenceRulesCount": "{count,plural, =0{No rules}=1{1 rule}other{{count} rules}}",
+  "@recurrenceRulesCount": {
+    "placeholders": {
+      "count": {"type": "int"}
     }
   }
 
