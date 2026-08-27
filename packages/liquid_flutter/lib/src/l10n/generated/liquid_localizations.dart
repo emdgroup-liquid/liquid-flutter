@@ -743,11 +743,17 @@ abstract class LiquidLocalizations {
   /// **'{count,plural, =1{once}other{{count} times}}'**
   String recurrenceTimes(int count);
 
-  /// No description provided for @recurrenceLastOccurrence.
+  /// No description provided for @recurrenceNthOccurrence.
   ///
   /// In en, this message translates to:
-  /// **'Last occurrence'**
-  String get recurrenceLastOccurrence;
+  /// **'{ordinal} occurrence'**
+  String recurrenceNthOccurrence(String ordinal);
+
+  /// No description provided for @recurrenceLastNthOccurrence.
+  ///
+  /// In en, this message translates to:
+  /// **'Last ({ordinal})'**
+  String recurrenceLastNthOccurrence(String ordinal);
 
   /// No description provided for @recurrenceViewAllOccurrences.
   ///
@@ -766,6 +772,12 @@ abstract class LiquidLocalizations {
   /// In en, this message translates to:
   /// **'Showing the first {count} occurrences'**
   String recurrenceShowingFirstN(int count);
+
+  /// No description provided for @recurrenceNMore.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} more'**
+  String recurrenceNMore(int count);
 
   /// No description provided for @recurrenceAt.
   ///

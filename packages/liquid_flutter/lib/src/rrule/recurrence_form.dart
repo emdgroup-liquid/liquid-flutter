@@ -97,11 +97,6 @@ class _LdRecurrenceFormState extends State<LdRecurrenceForm> {
       localeName,
       includeTime: draft.isSubDaily || draft.hasTimes,
     );
-    final timelineEntries = ldRecurrenceTimelineEntries(
-      occurrences: preview.next,
-      last: preview.last,
-      l10n: l10n,
-    );
     final frequencies = widget.config.enabledFrequencies;
     final endModes = widget.config.enabledEndModes;
     final showEndRadios = endModes.length > 1;
@@ -252,7 +247,7 @@ class _LdRecurrenceFormState extends State<LdRecurrenceForm> {
               ),
           ],
         ],
-        if (widget.config.showPreview && timelineEntries.isNotEmpty) ...[
+        if (widget.config.showPreview && (preview.next.isNotEmpty || preview.last != null)) ...[
           Row(
             children: [
               Expanded(child: LdText.caption(l10n.recurrenceNextOccurrences)),
@@ -267,9 +262,10 @@ class _LdRecurrenceFormState extends State<LdRecurrenceForm> {
           ),
           LdCard(
             child: LdRecurrenceTimeline(
-              entries: timelineEntries,
+              occurrences: preview.next,
+              last: preview.last,
+              lastOccurrenceNumber: preview.lastOccurrenceNumber,
               dateFormat: previewFormat,
-              lastOccurrenceLabel: l10n.recurrenceLastOccurrence,
             ),
           ),
         ],
@@ -424,49 +420,18 @@ class _LdRecurrenceFormState extends State<LdRecurrenceForm> {
   }
 
   void _openAllOccurrences(BuildContext context) {
-    final l10n = LiquidLocalizations.of(context);
     final localeName = Localizations.localeOf(context).toString();
     final start = widget.start ?? DateTime.now();
     final all = ldRecurrenceAllOccurrences(rule: _draft.toRule(), start: start);
-    final dateFormat = ldRecurrenceOccurrenceFormat(
-      localeName,
-      includeTime: _draft.isSubDaily || _draft.hasTimes,
-    );
-    final last = switch (all.truncated || all.instances.isEmpty) {
-      true => null,
-      false => all.instances.last,
-    };
-    final entries = ldRecurrenceTimelineEntries(
-      occurrences: all.instances,
-      last: last,
-      l10n: l10n,
-    );
-    final truncatedHintCount = switch (all.truncated) {
-      true => 1,
-      false => 0,
-    };
-
-    Navigator.of(context).push<void>(
-      LdModalRoute(
-        context: context,
-        pageBuilder: (context) {
-          return LdScaffold(
-            key: const Key('recurrence_all_occurrences_sheet'),
-            body: LdAppBar.top(
-              title: Text(l10n.recurrenceAllOccurrences),
-              child: LdScaffoldBody(
-                children: [
-                  LdRecurrenceTimeline(
-                    entries: entries,
-                    dateFormat: dateFormat,
-                    lastOccurrenceLabel: l10n.recurrenceLastOccurrence,
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
+    ldRecurrenceShowAllOccurrencesSheet(
+      context,
+      instances: all.instances,
+      truncated: all.truncated,
+      dateFormat: ldRecurrenceOccurrenceFormat(
+        localeName,
+        includeTime: _draft.isSubDaily || _draft.hasTimes,
       ),
+      scaffoldKey: const Key('recurrence_all_occurrences_sheet'),
     );
   }
 

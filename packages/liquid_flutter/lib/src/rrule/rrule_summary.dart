@@ -4,28 +4,6 @@ import 'package:liquid_flutter/src/l10n/generated/liquid_localizations.dart';
 import 'package:liquid_flutter/src/rrule/rrule_draft.dart';
 import 'package:rrule/rrule.dart';
 
-String ldRecurrenceFrequencyLabel(Frequency frequency, LiquidLocalizations l10n) {
-  if (frequency == Frequency.secondly) {
-    return l10n.recurrenceSecondly;
-  }
-  if (frequency == Frequency.minutely) {
-    return l10n.recurrenceMinutely;
-  }
-  if (frequency == Frequency.hourly) {
-    return l10n.recurrenceHourly;
-  }
-  if (frequency == Frequency.daily) {
-    return l10n.recurrenceDaily;
-  }
-  if (frequency == Frequency.weekly) {
-    return l10n.recurrenceWeekly;
-  }
-  if (frequency == Frequency.monthly) {
-    return l10n.recurrenceMonthly;
-  }
-  return l10n.recurrenceYearly;
-}
-
 String ldRecurrenceUnitLabel(
   Frequency frequency,
   int count,
@@ -122,6 +100,26 @@ String ldRecurrenceNthLabel(int occurrence, LiquidLocalizations l10n) {
     4 => l10n.recurrenceNthFourth,
     _ => l10n.recurrenceNthLast,
   };
+}
+
+/// Locale-aware ordinal for open-ended indices (e.g. timeline rows).
+///
+/// English: `1st`, `2nd`, `3rd`, `23rd`. German: `1.`, `2.`, `23.`.
+String ldRecurrenceOrdinal(int n, String locale) {
+  final language = Intl.shortLocale(locale);
+  if (language == 'en') {
+    final mod100 = n % 100;
+    final mod10 = n % 10;
+    final suffix = switch ((mod100 >= 11 && mod100 <= 13, mod10)) {
+      (true, _) => 'th',
+      (_, 1) => 'st',
+      (_, 2) => 'nd',
+      (_, 3) => 'rd',
+      _ => 'th',
+    };
+    return '$n$suffix';
+  }
+  return '$n.';
 }
 
 String ldRecurrenceWeekdayLabel(int weekday, String locale) {

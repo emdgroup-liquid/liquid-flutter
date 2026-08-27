@@ -106,6 +106,7 @@ class LdRecurrencePicker extends StatelessWidget {
   }
 }
 
+/// Modal host for [LdRecurrenceForm]. Not exported from the package barrel.
 class LdRecurrencePickerModal extends StatefulWidget {
   const LdRecurrencePickerModal({
     super.key,

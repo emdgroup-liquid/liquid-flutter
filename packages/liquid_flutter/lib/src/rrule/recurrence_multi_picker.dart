@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/rrule/recurrence_occurrences.dart';
+import 'package:liquid_flutter/src/rrule/recurrence_picker.dart';
 import 'package:liquid_flutter/src/rrule/recurrence_timeline.dart';
 import 'package:liquid_flutter/src/rrule/rrule_draft.dart';
 import 'package:liquid_flutter/src/rrule/rrule_summary.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-/// Human-readable summary for a list of recurrence rules.
-String ldRecurrenceRulesSummary(
+String _recurrenceRulesSummary(
   List<RecurrenceRule> rules, {
   required LiquidLocalizations l10n,
   required String localeName,
@@ -23,6 +23,13 @@ String ldRecurrenceRulesSummary(
     );
   }
   return l10n.recurrenceRulesCount(rules.length);
+}
+
+bool _rulesIncludeTime(List<RecurrenceRule> rules, DateTime start) {
+  return rules.any((rule) {
+    final draft = LdRecurrenceDraft.fromRule(rule, start: start);
+    return draft.isSubDaily || draft.hasTimes;
+  });
 }
 
 /// A labeled field that opens a modal to edit multiple [RecurrenceRule]s.
@@ -57,7 +64,7 @@ class LdRecurrenceMultiPicker extends StatelessWidget {
     final l10n = LiquidLocalizations.of(context);
     final theme = LdTheme.of(context, listen: true);
     final localeName = Localizations.localeOf(context).toString();
-    final summary = ldRecurrenceRulesSummary(
+    final summary = _recurrenceRulesSummary(
       value,
       l10n: l10n,
       localeName: localeName,
@@ -81,7 +88,7 @@ class LdRecurrenceMultiPicker extends StatelessWidget {
             final result = await navigator.push<List<RecurrenceRule>?>(
               LdModalRoute(
                 context: context,
-                pageBuilder: (context) => LdRecurrenceMultiPickerModal(
+                pageBuilder: (context) => _LdRecurrenceMultiPickerModal(
                   initialValue: value,
                   start: start,
                   title: label ?? l10n.selectRecurrences,
@@ -131,9 +138,8 @@ class LdRecurrenceMultiPicker extends StatelessWidget {
 }
 
 /// List modal for managing multiple recurrence rules (tier 1).
-class LdRecurrenceMultiPickerModal extends StatefulWidget {
-  const LdRecurrenceMultiPickerModal({
-    super.key,
+class _LdRecurrenceMultiPickerModal extends StatefulWidget {
+  const _LdRecurrenceMultiPickerModal({
     this.initialValue = const [],
     this.start,
     required this.title,
@@ -146,10 +152,10 @@ class LdRecurrenceMultiPickerModal extends StatefulWidget {
   final LdRecurrenceConfig config;
 
   @override
-  State<LdRecurrenceMultiPickerModal> createState() => _LdRecurrenceMultiPickerModalState();
+  State<_LdRecurrenceMultiPickerModal> createState() => _LdRecurrenceMultiPickerModalState();
 }
 
-class _LdRecurrenceMultiPickerModalState extends State<LdRecurrenceMultiPickerModal> {
+class _LdRecurrenceMultiPickerModalState extends State<_LdRecurrenceMultiPickerModal> {
   late List<RecurrenceRule> _rules = List<RecurrenceRule>.from(widget.initialValue);
 
   DateTime get _start => widget.start ?? DateTime.now();
@@ -205,51 +211,18 @@ class _LdRecurrenceMultiPickerModalState extends State<LdRecurrenceMultiPickerMo
     });
   }
 
-  void _openAllOccurrences(BuildContext context) {
-    final l10n = LiquidLocalizations.of(context);
+  void _openAllOccurrences(BuildContext context, {required bool includeTime}) {
     final localeName = Localizations.localeOf(context).toString();
-    final includeTime = _rules.any((rule) {
-      final draft = LdRecurrenceDraft.fromRule(rule, start: _start);
-      return draft.isSubDaily || draft.hasTimes;
-    });
     final all = ldRecurrenceMergedAllOccurrences(rules: _rules, start: _start);
-    final dateFormat = ldRecurrenceOccurrenceFormat(
-      localeName,
-      includeTime: includeTime,
-    );
-    final last = switch (all.truncated || all.instances.isEmpty) {
-      true => null,
-      false => all.instances.last,
-    };
-    final entries = ldRecurrenceTimelineEntries(
-      occurrences: all.instances,
-      last: last,
-      l10n: l10n,
-    );
-    final truncatedHintCount = switch (all.truncated) {
-      true => 1,
-      false => 0,
-    };
-
-    Navigator.of(context).push(
-      LdModalRoute(
-        context: context,
-        pageBuilder: (context) => LdScaffold(
-          key: const Key('recurrence_multi_all_occurrences_sheet'),
-          body: LdAppBar(
-            title: Text(l10n.recurrenceAllOccurrences),
-            child: LdScaffoldBody(
-              children: [
-                LdRecurrenceTimeline(
-                  entries: entries,
-                  dateFormat: dateFormat,
-                  lastOccurrenceLabel: l10n.recurrenceLastOccurrence,
-                ),
-              ],
-            ),
-          ),
-        ),
+    ldRecurrenceShowAllOccurrencesSheet(
+      context,
+      instances: all.instances,
+      truncated: all.truncated,
+      dateFormat: ldRecurrenceOccurrenceFormat(
+        localeName,
+        includeTime: includeTime,
       ),
+      scaffoldKey: const Key('recurrence_multi_all_occurrences_sheet'),
     );
   }
 
@@ -261,20 +234,12 @@ class _LdRecurrenceMultiPickerModalState extends State<LdRecurrenceMultiPickerMo
       rules: _rules,
       start: _start,
     );
-    final includeTime = _rules.any((rule) {
-      final draft = LdRecurrenceDraft.fromRule(rule, start: _start);
-      return draft.isSubDaily || draft.hasTimes;
-    });
+    final includeTime = _rulesIncludeTime(_rules, _start);
     final previewFormat = ldRecurrenceOccurrenceFormat(
       localeName,
       includeTime: includeTime,
     );
-    final timelineEntries = ldRecurrenceTimelineEntries(
-      occurrences: preview.next,
-      last: preview.last,
-      l10n: l10n,
-    );
-    final showPreview = widget.config.showPreview && timelineEntries.isNotEmpty;
+    final showPreview = widget.config.showPreview && (preview.next.isNotEmpty || preview.last != null);
 
     return LdScaffold(
       key: const Key('recurrence_multi_picker_sheet'),
@@ -344,16 +309,20 @@ class _LdRecurrenceMultiPickerModalState extends State<LdRecurrenceMultiPickerMo
                             key: const Key('recurrence_multi_view_all'),
                             size: LdSize.s,
                             trailing: const Icon(LucideIcons.chevronRight),
-                            onPressed: () => _openAllOccurrences(context),
+                            onPressed: () => _openAllOccurrences(
+                              context,
+                              includeTime: includeTime,
+                            ),
                             child: Text(l10n.recurrenceViewAllOccurrences),
                           ),
                       ],
                     ),
                     LdCard(
                       child: LdRecurrenceTimeline(
-                        entries: timelineEntries,
+                        occurrences: preview.next,
+                        last: preview.last,
+                        lastOccurrenceNumber: preview.lastOccurrenceNumber,
                         dateFormat: previewFormat,
-                        lastOccurrenceLabel: l10n.recurrenceLastOccurrence,
                       ),
                     ),
                   ],

@@ -433,7 +433,14 @@ class LiquidLocalizationsDe extends LiquidLocalizations {
   }
 
   @override
-  String get recurrenceLastOccurrence => 'Letzter Termin';
+  String recurrenceNthOccurrence(String ordinal) {
+    return '$ordinal Termin';
+  }
+
+  @override
+  String recurrenceLastNthOccurrence(String ordinal) {
+    return 'Letzter ($ordinal)';
+  }
 
   @override
   String get recurrenceViewAllOccurrences => 'Alle Termine anzeigen';
@@ -444,6 +451,11 @@ class LiquidLocalizationsDe extends LiquidLocalizations {
   @override
   String recurrenceShowingFirstN(int count) {
     return 'Zeigt die ersten $count Termine';
+  }
+
+  @override
+  String recurrenceNMore(int count) {
+    return '$count weitere';
   }
 
   @override

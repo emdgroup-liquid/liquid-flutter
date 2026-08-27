@@ -216,6 +216,7 @@ void main() {
       expect(preview.next, hasLength(3));
       expect(preview.next.first, DateTime(2024, 1, 15));
       expect(preview.last, DateTime(2024, 1, 19));
+      expect(preview.lastOccurrenceNumber, 5);
       expect(preview.lastTruncated, isFalse);
     });
 
@@ -230,6 +231,7 @@ void main() {
 
       expect(preview.next, hasLength(2));
       expect(preview.last, preview.next.last);
+      expect(preview.lastOccurrenceNumber, 2);
     });
 
     test('omits last when the rule never ends', () {
@@ -240,6 +242,7 @@ void main() {
 
       expect(preview.finite, isFalse);
       expect(preview.last, isNull);
+      expect(preview.lastOccurrenceNumber, isNull);
       expect(preview.next, hasLength(3));
     });
   });
@@ -301,6 +304,24 @@ void main() {
       expect(preview.finite, isFalse);
       expect(preview.last, isNull);
       expect(preview.next, hasLength(3));
+    });
+
+    test('keeps last when a finite series ends exactly at the cap', () {
+      final preview = ldRecurrenceMergedOccurrencePreview(
+        rules: [
+          RecurrenceRule(
+            frequency: Frequency.daily,
+            count: ldRecurrenceMaxOccurrences,
+          ),
+        ],
+        start: DateTime(2024, 1, 15),
+        maxAll: ldRecurrenceMaxOccurrences,
+      );
+
+      expect(preview.finite, isTrue);
+      expect(preview.lastTruncated, isFalse);
+      expect(preview.last, DateTime(2025, 5, 28));
+      expect(preview.lastOccurrenceNumber, ldRecurrenceMaxOccurrences);
     });
   });
 }

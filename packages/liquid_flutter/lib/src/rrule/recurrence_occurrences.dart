@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'package:liquid_flutter/src/rrule/rrule_draft.dart';
 import 'package:rrule/rrule.dart';
 
@@ -9,12 +11,16 @@ class LdRecurrenceOccurrencePreview {
   const LdRecurrenceOccurrencePreview({
     required this.next,
     this.last,
+    this.lastOccurrenceNumber,
     required this.finite,
     required this.lastTruncated,
   });
 
   final List<DateTime> next;
   final DateTime? last;
+
+  /// 1-based index of [last] in the full series (e.g. `COUNT=10` → `10`).
+  final int? lastOccurrenceNumber;
   final bool finite;
   final bool lastTruncated;
 }
@@ -29,8 +35,30 @@ class LdRecurrenceOccurrenceList {
   final bool truncated;
 }
 
+class _MergedExpansion {
+  const _MergedExpansion({
+    required this.instances,
+    required this.truncated,
+  });
+
+  final List<DateTime> instances;
+  final bool truncated;
+}
+
 bool ldRecurrenceRuleIsFinite(RecurrenceRule rule) {
   return rule.count != null || rule.until != null;
+}
+
+void _reportExpansionError(Object error, StackTrace stackTrace) {
+  assert(() {
+    developer.log(
+      'Failed to expand RecurrenceRule',
+      name: 'liquid_flutter.rrule',
+      error: error,
+      stackTrace: stackTrace,
+    );
+    return true;
+  }());
 }
 
 LdRecurrenceOccurrencePreview ldRecurrenceOccurrencePreview({
@@ -61,12 +89,14 @@ LdRecurrenceOccurrencePreview ldRecurrenceOccurrencePreview({
         return LdRecurrenceOccurrencePreview(
           next: next,
           last: exhaustedCount ? lastSeen : null,
+          lastOccurrenceNumber: exhaustedCount ? count : null,
           finite: true,
           lastTruncated: !exhaustedCount,
         );
       }
     }
-  } catch (_) {
+  } catch (error, stackTrace) {
+    _reportExpansionError(error, stackTrace);
     return const LdRecurrenceOccurrencePreview(
       next: [],
       finite: false,
@@ -77,6 +107,7 @@ LdRecurrenceOccurrencePreview ldRecurrenceOccurrencePreview({
   return LdRecurrenceOccurrencePreview(
     next: next,
     last: finite ? lastSeen : null,
+    lastOccurrenceNumber: finite ? count : null,
     finite: finite,
     lastTruncated: false,
   );
@@ -100,7 +131,8 @@ LdRecurrenceOccurrenceList ldRecurrenceAllOccurrences({
         break;
       }
     }
-  } catch (_) {
+  } catch (error, stackTrace) {
+    _reportExpansionError(error, stackTrace);
     return const LdRecurrenceOccurrenceList(
       instances: [],
       truncated: false,
@@ -114,17 +146,21 @@ LdRecurrenceOccurrenceList ldRecurrenceAllOccurrences({
 }
 
 /// Merged, sorted, de-duplicated instances across [rules].
-List<DateTime> _ldRecurrenceMergedInstances({
+///
+/// Expands each rule one past [maxAll] so a series that ends exactly at the
+/// cap is not treated as truncated.
+_MergedExpansion _ldRecurrenceMergedInstances({
   required List<RecurrenceRule> rules,
   required DateTime start,
   required int maxAll,
 }) {
   if (rules.isEmpty) {
-    return const [];
+    return const _MergedExpansion(instances: [], truncated: false);
   }
 
   final utcStart = ldToRruleUtc(start);
   final merged = <DateTime>{};
+  final peekLimit = maxAll + 1;
 
   for (final rule in rules) {
     var count = 0;
@@ -132,20 +168,26 @@ List<DateTime> _ldRecurrenceMergedInstances({
       for (final instance in rule.getInstances(start: utcStart)) {
         merged.add(ldFromRruleUtc(instance));
         count++;
-        if (count >= maxAll) {
+        if (count >= peekLimit) {
           break;
         }
       }
-    } catch (_) {
-      // Skip rules that cannot expand.
+    } catch (error, stackTrace) {
+      _reportExpansionError(error, stackTrace);
     }
   }
 
   final sorted = merged.toList()..sort();
-  if (sorted.length <= maxAll) {
-    return sorted;
+  if (sorted.length > maxAll) {
+    return _MergedExpansion(
+      instances: sorted.sublist(0, maxAll),
+      truncated: true,
+    );
   }
-  return sorted.sublist(0, maxAll);
+  return _MergedExpansion(
+    instances: sorted,
+    truncated: false,
+  );
 }
 
 /// Compact preview of upcoming instances across multiple rules.
@@ -166,13 +208,13 @@ LdRecurrenceOccurrencePreview ldRecurrenceMergedOccurrencePreview({
   }
 
   final finite = rules.every(ldRecurrenceRuleIsFinite);
-  final all = _ldRecurrenceMergedInstances(
+  final expansion = _ldRecurrenceMergedInstances(
     rules: rules,
     start: start,
     maxAll: maxAll,
   );
 
-  if (all.isEmpty) {
+  if (expansion.instances.isEmpty) {
     return LdRecurrenceOccurrencePreview(
       next: const [],
       finite: finite,
@@ -180,7 +222,7 @@ LdRecurrenceOccurrencePreview ldRecurrenceMergedOccurrencePreview({
     );
   }
 
-  final next = all.take(nextCount).toList();
+  final next = expansion.instances.take(nextCount).toList();
   if (!finite) {
     return LdRecurrenceOccurrencePreview(
       next: next,
@@ -189,10 +231,11 @@ LdRecurrenceOccurrencePreview ldRecurrenceMergedOccurrencePreview({
     );
   }
 
-  final truncated = all.length >= maxAll;
+  final truncated = expansion.truncated;
   return LdRecurrenceOccurrencePreview(
     next: next,
-    last: truncated ? null : all.last,
+    last: truncated ? null : expansion.instances.last,
+    lastOccurrenceNumber: truncated ? null : expansion.instances.length,
     finite: true,
     lastTruncated: truncated,
   );
@@ -212,14 +255,14 @@ LdRecurrenceOccurrenceList ldRecurrenceMergedAllOccurrences({
   }
 
   final finite = rules.every(ldRecurrenceRuleIsFinite);
-  final all = _ldRecurrenceMergedInstances(
+  final expansion = _ldRecurrenceMergedInstances(
     rules: rules,
     start: start,
     maxAll: maxAll,
   );
 
   return LdRecurrenceOccurrenceList(
-    instances: all,
-    truncated: !finite || all.length >= maxAll,
+    instances: expansion.instances,
+    truncated: !finite || expansion.truncated,
   );
 }
