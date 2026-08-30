@@ -853,7 +853,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Tool call'), findsOneWidget);
-    expect(find.text('{"q":"full query"}'), findsOneWidget);
+    expect(
+      find.text('{\n  "q": "full query"\n}'),
+      findsOneWidget,
+    );
     expect(find.text('found 3 docs'), findsOneWidget);
   });
 
