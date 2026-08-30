@@ -304,8 +304,8 @@ class _LdEmojiPickerModalState extends State<LdEmojiPickerModal> {
       return;
     }
     _debounce = Timer(const Duration(milliseconds: 300), () {
-      // Build a combined search text from the emoji name and all CLDR
-      // keywords so that queries like "happy", "sad", "love", or "fire"
+      // Build a combined search text from the emoji name and all keywords
+      // (CLDR + extras) so queries like "happy", "sad", "love", or "fire"
       // match by keyword even when those words don't appear in the name.
       final results = ldFuzzySearchItems<LdEmojiEntry>(
         items: _allEmojis,

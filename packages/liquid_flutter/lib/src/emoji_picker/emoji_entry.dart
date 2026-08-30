@@ -24,11 +24,12 @@ class LdEmojiEntry {
   /// Empty when the base emoji does not support skin tones.
   final List<String> skinToneVariants;
 
-  /// CLDR search keywords for this emoji, e.g. `["grin", "happy", "smile"]`.
+  /// Search keywords for this emoji, e.g. `["grin", "happy", "smile"]`.
   ///
   /// Used to improve search relevance beyond substring-matching the [name].
-  /// Populated from the Unicode CLDR English annotations file.
-  /// Empty when no annotation data is available for this emoji.
+  /// Populated from Unicode CLDR English annotations, merged with extras from
+  /// `tools/emoji_extra_keywords.json` at generation time.
+  /// Empty when no keyword data is available for this emoji.
   final List<String> keywords;
 
   const LdEmojiEntry({

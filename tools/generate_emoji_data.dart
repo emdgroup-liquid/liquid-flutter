@@ -2,12 +2,15 @@
 // ignore_for_file: avoid_print
 //
 // Generates packages/liquid_flutter/lib/src/emoji_picker/emoji_data.dart
-// from the latest Unicode emoji-test.txt and CLDR English annotations.
+// from the latest Unicode emoji-test.txt, CLDR English annotations, and
+// extra search keywords in tools/emoji_extra_keywords.json.
 //
 // Usage (from repo root):
 //   dart tools/generate_emoji_data.dart
 //
 // Re-run whenever a new Unicode Emoji version is released.
+// Extra keywords are curated search aliases (slang, ISO codes, use-cases)
+// merged on top of CLDR; edit tools/emoji_extra_keywords.json to add more.
 
 import 'dart:convert';
 import 'dart:io';
@@ -23,6 +26,12 @@ const _cldrAnnotationsUrl =
 
 const _outputPath =
     'packages/liquid_flutter/lib/src/emoji_picker/emoji_data.dart';
+
+/// Extra search keywords generated/curated on top of CLDR annotations.
+/// Keyed by emoji character. Merged with CLDR at generation time.
+///
+/// Re-generate extras with sub-agents, then re-run this script.
+const _extraKeywordsPath = 'tools/emoji_extra_keywords.json';
 
 // Skin-tone modifier code points (U+1F3FB..U+1F3FF).
 const _skinToneModifiers = {
@@ -205,7 +214,8 @@ List<_Category> _parse(String source) {
         final emojis = groupEmojis[groupName]!;
         if (emojis.isNotEmpty) {
           final icon = _groupIcons[groupName] ?? emojis.first.emoji;
-          categories.add(_Category(name: groupName, icon: icon, emojis: emojis));
+          categories
+              .add(_Category(name: groupName, icon: icon, emojis: emojis));
         }
       }
     }
@@ -229,6 +239,7 @@ String _generateDart(List<_Category> categories) {
   buf.writeln('// Sources:');
   buf.writeln('//   $_sourceUrl');
   buf.writeln('//   $_cldrAnnotationsUrl');
+  buf.writeln('//   $_extraKeywordsPath');
   buf.writeln('//');
   buf.writeln('// ignore_for_file: lines_longer_than_80_chars');
   buf.writeln();
@@ -248,8 +259,9 @@ String _generateDart(List<_Category> categories) {
         "subgroup: '${_escapeString(entry.subgroup)}'",
       );
       if (entry.skinToneVariants.isNotEmpty) {
-        final variants =
-            entry.skinToneVariants.map((v) => "'${_escapeString(v)}'").join(', ');
+        final variants = entry.skinToneVariants
+            .map((v) => "'${_escapeString(v)}'")
+            .join(', ');
         buf.write(', skinToneVariants: [$variants]');
       }
       if (entry.keywords.isNotEmpty) {
@@ -288,19 +300,57 @@ Map<String, List<String>> _parseCldrAnnotations(String json) {
   return result;
 }
 
-/// Annotates each entry in [categories] with CLDR keywords from [annotations].
+/// Loads extra keywords from [path]. Missing file → empty map.
+///
+/// JSON format: `{ "😀": ["joyful", "delighted"], ... }`
+Map<String, List<String>> _loadExtraKeywords(String path) {
+  final file = File(path);
+  if (!file.existsSync()) {
+    print('No extra keywords file at $path (skipping).');
+    return {};
+  }
+  final decoded = jsonDecode(file.readAsStringSync());
+  if (decoded is! Map) {
+    throw FormatException('Extra keywords file must be a JSON object: $path');
+  }
+  final result = <String, List<String>>{};
+  for (final MapEntry(:key, :value) in decoded.entries) {
+    if (value is List) {
+      result[key.toString()] = value.map((e) => e.toString()).toList();
+    }
+  }
+  return result;
+}
+
+/// Case-insensitive merge that preserves first-seen spelling (CLDR first).
+List<String> _mergeKeywords(List<String> primary, List<String> extra) {
+  final seen = <String>{};
+  final merged = <String>[];
+  for (final raw in [...primary, ...extra]) {
+    final keyword = raw.trim();
+    if (keyword.isEmpty) continue;
+    if (seen.add(keyword.toLowerCase())) {
+      merged.add(keyword);
+    }
+  }
+  return merged;
+}
+
+/// Annotates each entry with CLDR keywords plus extras from
+/// [tools/emoji_extra_keywords.json].
+///
 /// Keywords that duplicate the emoji name words are kept — the search layer
 /// uses the combined text, so more signals are always better.
 void _applyKeywords(
   List<_Category> categories,
   Map<String, List<String>> annotations,
+  Map<String, List<String>> extra,
 ) {
   for (final cat in categories) {
     for (final entry in cat.emojis) {
-      final kws = annotations[entry.emoji];
-      if (kws != null) {
-        entry.keywords = kws;
-      }
+      final cldr = annotations[entry.emoji] ?? const <String>[];
+      final extras = extra[entry.emoji] ?? const <String>[];
+      entry.keywords = _mergeKeywords(cldr, extras);
     }
   }
 }
@@ -322,19 +372,28 @@ Future<void> main() async {
   print('Parsing CLDR annotations …');
   final annotations = _parseCldrAnnotations(cldrJson);
 
+  print('Loading extra keywords from $_extraKeywordsPath …');
+  final extra = _loadExtraKeywords(_extraKeywordsPath);
+
   print('Applying keywords …');
-  _applyKeywords(categories, annotations);
+  _applyKeywords(categories, annotations, extra);
 
   var totalEmojis = 0;
   var withSkinTones = 0;
   var withKeywords = 0;
+  var withExtras = 0;
   for (final cat in categories) {
     print('  ${cat.name}: ${cat.emojis.length} base emojis');
     totalEmojis += cat.emojis.length;
     withSkinTones += cat.emojis.where((e) => e.hasSkinTones).length;
     withKeywords += cat.emojis.where((e) => e.keywords.isNotEmpty).length;
+    withExtras += cat.emojis.where((e) => extra.containsKey(e.emoji)).length;
   }
-  print('Total: $totalEmojis base emojis, $withSkinTones with skin tone variants, $withKeywords with CLDR keywords');
+  print(
+    'Total: $totalEmojis base emojis, $withSkinTones with skin tone variants, '
+    '$withKeywords with keywords, $withExtras with extra keywords '
+    '(${extra.length} extra entries loaded)',
+  );
 
   final dart = _generateDart(categories);
 
