@@ -187,9 +187,7 @@ class LdDurationPicker extends StatelessWidget {
     final theme = LdTheme.of(context, listen: true);
     final lineBoxHeight = theme.labelSize(size) * ldLineHeight(LdTextType.label, size: size);
     final fieldPadding = theme.controlContentPadding(size) - EdgeInsets.all(theme.borderWidth);
-    final display = value == null
-        ? l10n.selectDuration
-        : ldFormatDuration(value!, l10n: l10n, compact: true);
+    final display = value == null ? l10n.selectDuration : ldFormatDuration(value!, l10n: l10n, compact: true);
 
     return LdBundle(
       children: [
@@ -295,9 +293,7 @@ class _LdDurationPickerModalState extends State<LdDurationPickerModal> {
                 value: _value,
                 config: widget.config,
                 onChanged: (next) {
-                  setState(() {
-                    _value = next;
-                  });
+                  _value = next;
                 },
               ),
             ],
@@ -326,7 +322,7 @@ class LdDurationPickerWidget extends StatefulWidget {
 }
 
 class _LdDurationPickerWidgetState extends State<LdDurationPickerWidget> {
-  late LdDuration _value;
+  late final ValueNotifier<LdDuration> _value;
   final Map<LdDurationUnit, FixedExtentScrollController> _wheelControllers = {};
   final Map<LdDurationUnit, TextEditingController> _textControllers = {};
   final Map<LdDurationUnit, FocusNode> _focusNodes = {};
@@ -334,10 +330,12 @@ class _LdDurationPickerWidgetState extends State<LdDurationPickerWidget> {
 
   List<LdDurationUnit> get _units => widget.config.enabledUnits;
 
+  LdDuration get _current => _value.value;
+
   @override
   void initState() {
     super.initState();
-    _value = widget.config.constrain(widget.value);
+    _value = ValueNotifier(widget.config.constrain(widget.value));
     _createControllers();
     _applyText();
   }
@@ -349,18 +347,21 @@ class _LdDurationPickerWidgetState extends State<LdDurationPickerWidget> {
         oldWidget.config.minuteStep != widget.config.minuteStep ||
         oldWidget.config.secondStep != widget.config.secondStep) {
       _disposeControllers();
-      _value = widget.config.constrain(widget.value);
+      _value.value = widget.config.constrain(widget.value);
       _createControllers();
       _applyText();
-    } else if (oldWidget.value != widget.value) {
-      _value = widget.config.constrain(widget.value);
-      _applyText();
-      _jumpWheels();
+    } else if (widget.value != _current) {
+      _setValue(
+        widget.value,
+        syncWheels: true,
+        notify: false,
+      );
     }
   }
 
   @override
   void dispose() {
+    _value.dispose();
     _disposeControllers();
     super.dispose();
   }
@@ -368,7 +369,10 @@ class _LdDurationPickerWidgetState extends State<LdDurationPickerWidget> {
   void _createControllers() {
     for (final unit in _units) {
       final step = widget.config.stepFor(unit);
-      final index = (_value.component(unit) ~/ step).clamp(0, widget.config.wheelItemCount(unit) - 1);
+      final index = (_current.component(unit) ~/ step).clamp(
+        0,
+        widget.config.wheelItemCount(unit) - 1,
+      );
       _wheelControllers[unit] = FixedExtentScrollController(initialItem: index);
       _textControllers[unit] = TextEditingController();
       _focusNodes[unit] = FocusNode();
@@ -392,29 +396,58 @@ class _LdDurationPickerWidgetState extends State<LdDurationPickerWidget> {
 
   void _applyText() {
     for (final unit in _units) {
-      _textControllers[unit]?.text = _value.component(unit).toString();
+      final text = _current.component(unit).toString();
+      final controller = _textControllers[unit];
+      if (controller != null && controller.text != text && !(_focusNodes[unit]?.hasFocus ?? false)) {
+        controller.text = text;
+      }
     }
   }
 
-  void _jumpWheels() {
+  int _wheelIndex(LdDurationUnit unit) {
+    final step = widget.config.stepFor(unit);
+    return (_current.component(unit) ~/ step).clamp(
+      0,
+      widget.config.wheelItemCount(unit) - 1,
+    );
+  }
+
+  void _jumpWheels({LdDurationUnit? except}) {
     _syncingWheels = true;
     for (final unit in _units) {
+      if (unit == except) {
+        continue;
+      }
       final controller = _wheelControllers[unit];
       if (controller == null || !controller.hasClients) {
         continue;
       }
-      final step = widget.config.stepFor(unit);
-      final index = (_value.component(unit) ~/ step).clamp(0, widget.config.wheelItemCount(unit) - 1);
-      controller.jumpToItem(index);
+      final index = _wheelIndex(unit);
+      if (controller.selectedItem != index) {
+        controller.jumpToItem(index);
+      }
     }
     _syncingWheels = false;
   }
 
-  void _emit(LdDuration next) {
-    _value = widget.config.constrain(next);
+  void _setValue(
+    LdDuration next, {
+    required bool syncWheels,
+    LdDurationUnit? exceptWheel,
+    bool notify = true,
+  }) {
+    next = widget.config.constrain(next);
+    if (next == _current) {
+      return;
+    }
+    _value.value = next;
     _applyText();
-    _jumpWheels();
-    widget.onChanged(_value);
+    if (syncWheels) {
+      _jumpWheels(except: exceptWheel);
+    }
+    if (notify) {
+      widget.onChanged(next);
+    }
   }
 
   void _onWheelChanged(LdDurationUnit unit, int index) {
@@ -425,7 +458,20 @@ class _LdDurationPickerWidgetState extends State<LdDurationPickerWidget> {
       return;
     }
     final step = widget.config.stepFor(unit);
-    _emit(_value.withComponent(unit, index * step));
+    final requested = index * step;
+    _setValue(
+      _current.withComponent(unit, requested),
+      syncWheels: true,
+      exceptWheel: unit,
+    );
+    if (_current.component(unit) != requested) {
+      final controller = _wheelControllers[unit];
+      if (controller != null && controller.hasClients) {
+        _syncingWheels = true;
+        controller.jumpToItem(_wheelIndex(unit));
+        _syncingWheels = false;
+      }
+    }
   }
 
   void _onTextChanged(LdDurationUnit unit, String raw) {
@@ -439,7 +485,10 @@ class _LdDurationPickerWidgetState extends State<LdDurationPickerWidget> {
     if (step > 1) {
       next = ((next / step).round() * step).clamp(0, max - (max % step));
     }
-    _emit(_value.withComponent(unit, next));
+    _setValue(
+      _current.withComponent(unit, next),
+      syncWheels: true,
+    );
   }
 
   @override
@@ -451,23 +500,37 @@ class _LdDurationPickerWidgetState extends State<LdDurationPickerWidget> {
 
     return LdAutoSpace(
       children: [
-        LdText.hs(
-          ldFormatDuration(_value, l10n: l10n, compact: false),
-        ),
-        if (presets.isNotEmpty)
-          Wrap(
-            spacing: gap,
-            runSpacing: gap,
-            children: [
-              for (final preset in presets)
-                LdButton.ghost(
-                  active: widget.config.constrain(preset) == _value,
-                  size: LdSize.s,
-                  onPressed: () => _emit(preset),
-                  child: Text(ldFormatDuration(preset, l10n: l10n, compact: true)),
+        ValueListenableBuilder<LdDuration>(
+          valueListenable: _value,
+          builder: (context, duration, _) {
+            return LdAutoSpace(
+              children: [
+                LdText.hs(
+                  ldFormatDuration(duration, l10n: l10n, compact: false),
                 ),
-            ],
-          ),
+                if (presets.isNotEmpty)
+                  Wrap(
+                    spacing: gap,
+                    runSpacing: gap,
+                    children: [
+                      for (final preset in presets)
+                        LdButton.ghost(
+                          active: widget.config.constrain(preset) == duration,
+                          size: LdSize.s,
+                          onPressed: () => _setValue(
+                            preset,
+                            syncWheels: true,
+                          ),
+                          child: Text(
+                            ldFormatDuration(preset, l10n: l10n, compact: true),
+                          ),
+                        ),
+                    ],
+                  ),
+              ],
+            );
+          },
+        ),
         Row(
           children: [
             for (var i = 0; i < _units.length; i++) ...[
@@ -503,6 +566,7 @@ class _LdDurationPickerWidgetState extends State<LdDurationPickerWidget> {
         color: theme.surface,
       ),
       child: CupertinoPicker(
+        key: ValueKey(unit),
         scrollController: _wheelControllers[unit],
         selectionOverlay: Container(),
         squeeze: 1.4,
@@ -511,10 +575,8 @@ class _LdDurationPickerWidgetState extends State<LdDurationPickerWidget> {
         onSelectedItemChanged: (index) => _onWheelChanged(unit, index),
         children: List.generate(count, (index) {
           final label = (index * step).toString().padLeft(2, '0');
-          return Container(
+          return SizedBox(
             height: 32,
-            padding: const EdgeInsets.all(4),
-            color: theme.surface,
             child: Center(
               child: Text(
                 label,

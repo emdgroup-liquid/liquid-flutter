@@ -101,9 +101,7 @@ class _DateTimePickerDemoState extends State<DateTimePickerDemo> {
           LdDurationPickerWidget(
             value: _duration,
             onChanged: (duration) {
-              setState(() {
-                _duration = duration;
-              });
+              _duration = duration;
             },
           ),
         ],
