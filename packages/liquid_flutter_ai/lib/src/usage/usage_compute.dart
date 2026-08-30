@@ -33,17 +33,21 @@ LdUsageTotals ldComputeUsage({
     bucket.totalTokens += total;
     bucket.turnCount += 1;
 
+    final kind = record.kind;
+    // Tool mix shares are carved from prompt budget even when apps map tool
+    // results to completionTokens for by-tool "out" display — price as prompt.
+    final costPrompt = kind == LdUsageKind.tools ? prompt + completion : prompt;
+    final costCompletion = kind == LdUsageKind.tools ? 0 : completion;
     final tokenCost = pricing != null && pricing.hasTokenRates
         ? pricing.estimateTokenCost(
-            promptTokens: prompt,
-            completionTokens: completion,
+            promptTokens: costPrompt,
+            completionTokens: costCompletion,
           )
         : null;
     if (tokenCost != null) {
       bucket.tokenCostUsd = (bucket.tokenCostUsd ?? 0) + tokenCost;
     }
 
-    final kind = record.kind;
     if (kind != null) {
       final kindBucket = byKind.putIfAbsent(
         kind,

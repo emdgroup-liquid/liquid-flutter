@@ -403,10 +403,16 @@ class _ToolUsageRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = LdTheme.of(context);
+    // Tool tokens are prompt-attributed; apps may map results → completion for
+    // "out". Prefer args/result labels over model-style in/out.
     final subtitleParts = <String>[
-      '${ldFormatTokenCount(usage.promptTokens)} in',
-      '${ldFormatTokenCount(usage.completionTokens)} out',
-      '${ldFormatTokenCount(usage.totalTokens)} total',
+      if (usage.completionTokens > 0) ...[
+        if (usage.promptTokens > 0)
+          '${ldFormatTokenCount(usage.promptTokens)} args',
+        '${ldFormatTokenCount(usage.completionTokens)} result',
+        '${ldFormatTokenCount(usage.totalTokens)} total',
+      ] else
+        '${ldFormatTokenCount(usage.totalTokens)} tokens',
     ];
     if (usage.estimatedCostUsd != null) {
       subtitleParts.add(ldFormatUsd(usage.estimatedCostUsd));

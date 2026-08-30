@@ -34,7 +34,7 @@ final ldConfirm = CatalogItem(
 
         return LdAutoSpace(
           children: [
-            LdText.h(title),
+            LdText.hs(title),
             if (message != null && message.isNotEmpty) LdText.p(message),
             LdDivider(),
             Row(
@@ -42,7 +42,7 @@ final ldConfirm = CatalogItem(
               children: [
                 if (secondary != null) ...[
                   LdButton(
-                    size: LdSize.l,
+                    size: LdSize.m,
                     mode: LdButtonMode.outline,
                     onPressed: () =>
                         dispatchAction(ctx, secondary['action'] as JsonMap?),
@@ -52,7 +52,7 @@ final ldConfirm = CatalogItem(
                 LdButton(
                   mode: LdButtonMode.filled,
                   color: color,
-                  size: LdSize.l,
+                  size: LdSize.m,
                   onPressed: () =>
                       dispatchAction(ctx, primary['action'] as JsonMap?),
                   child: Text(primary['label'] as String? ?? 'Confirm'),

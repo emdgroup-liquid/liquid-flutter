@@ -36,6 +36,9 @@ typedef LdToolCallOverride = Widget Function(BuildContext context);
 typedef LdToolCallOverrideResolver =
     LdToolCallOverride? Function(LdToolCallItem item);
 
+typedef LdToolCallPressedCallback =
+    void Function(BuildContext context, LdToolCallItem item);
+
 /// Reversed conversation list (newest near the compose bar).
 ///
 /// When [dismissKeyboardOnFling] is true (default), a fast fling on the list
@@ -59,6 +62,10 @@ class LdConversation extends StatefulWidget {
   /// [itemBuilder] forwards [approval] to [defaultItemBuilder]).
   final LdConversationApprovalActions? approval;
 
+  /// Custom tool-call tap handler. When null, [LdToolCallCard] opens the
+  /// built-in detail modal.
+  final LdToolCallPressedCallback? onToolCallPressed;
+
   /// When set and greater than 0, items before this index are hidden until the
   /// user reveals them via the built-in control at the oldest end of the list.
   final int? hideBeforeIndex;
@@ -81,6 +88,7 @@ class LdConversation extends StatefulWidget {
     this.groupBuilder,
     this.toolCallOverride,
     this.approval,
+    this.onToolCallPressed,
     this.hideBeforeIndex,
     this.empty,
     this.header,
@@ -98,6 +106,7 @@ class LdConversation extends StatefulWidget {
     bool isSingleton, {
     LdConversationApprovalActions? approval,
     LdToolCallOverrideResolver? toolCallOverride,
+    LdToolCallPressedCallback? onToolCallPressed,
   }) {
     return switch (item) {
       LdSystemPromptItem() => LdSystemPromptCard(item: item),
@@ -110,7 +119,12 @@ class LdConversation extends StatefulWidget {
         LdAgentMarkdownReply(markdown: markdown, isStreaming: isStreaming),
       LdToolCallItem() =>
         toolCallOverride?.call(item)?.call(context) ??
-            LdToolCallCard(item: item),
+            LdToolCallCard(
+              item: item,
+              onPressed: onToolCallPressed == null
+                  ? null
+                  : () => onToolCallPressed(context, item),
+            ),
       LdApprovalItem() => LdApprovalCard(
         item: item,
         onApprove: approval?.onApprove == null
@@ -220,6 +234,7 @@ class _LdConversationState extends State<LdConversation> {
 
     final approval = widget.approval;
     final toolCallOverride = widget.toolCallOverride;
+    final onToolCallPressed = widget.onToolCallPressed;
 
     Widget resolvedItemBuilder(
       BuildContext context,
@@ -241,6 +256,7 @@ class _LdConversationState extends State<LdConversation> {
         isSingleton,
         approval: approval,
         toolCallOverride: toolCallOverride,
+        onToolCallPressed: onToolCallPressed,
       );
     }
 

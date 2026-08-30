@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter_ai/src/bubbles/tool_call_detail_modal.dart';
 import 'package:liquid_flutter_ai/src/models/conversation_item.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -10,10 +11,14 @@ class LdToolCallCard extends StatefulWidget {
   /// When true, plays a short size/fade entrance on first mount.
   final bool animateAppear;
 
+  /// Custom tap handler. When null, tap opens [showLdToolCallDetailModal].
+  final VoidCallback? onPressed;
+
   const LdToolCallCard({
     super.key,
     required this.item,
     this.animateAppear = true,
+    this.onPressed,
   });
 
   @override
@@ -22,6 +27,14 @@ class LdToolCallCard extends StatefulWidget {
 
 class _LdToolCallCardState extends State<LdToolCallCard>
     with SingleTickerProviderStateMixin {
+  void _handlePressed(BuildContext context) {
+    if (widget.onPressed != null) {
+      widget.onPressed!();
+      return;
+    }
+    showLdToolCallDetailModal(context, item: widget.item);
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = LdTheme.of(context);
@@ -29,13 +42,14 @@ class _LdToolCallCardState extends State<LdToolCallCard>
     return LdReveal(
       revealed: true,
       initialRevealed: false,
-      child: LdListItem(
+      child: LdListItem.trailingForward(
         borderRadius: theme.radius(LdSize.s),
         title: Text(widget.item.name),
         subtitle: widget.item.argsPreview != null
             ? Text(widget.item.argsPreview!)
             : null,
         leading: _buildLeading(theme),
+        onPressed: () => _handlePressed(context),
       ),
     );
   }

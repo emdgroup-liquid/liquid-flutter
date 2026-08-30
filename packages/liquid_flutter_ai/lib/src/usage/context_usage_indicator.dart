@@ -39,23 +39,28 @@ class LdContextUsageIndicator extends StatelessWidget {
       onPressed: () async {
         onTap?.call();
       },
-      child: usage.hasLimit
-          ? Builder(
-              builder: (context) {
-                final iconSize = IconTheme.of(context).size ?? 14;
-                return SizedBox(
-                  width: iconSize,
-                  height: iconSize,
-                  child: CircularProgressIndicator(
-                    value: usage.usageRatio,
-                    color: progressColor,
-                    strokeWidth: iconSize * 0.15,
-                    backgroundColor: theme.neutralShade(3),
-                  ),
-                );
-              },
-            )
-          : Icon(LucideIcons.gauge, size: 14, color: progressColor),
+      child: Builder(
+        builder: (context) {
+          final iconSize = IconTheme.of(context).size ?? 14;
+          if (usage.hasLimit) {
+            return SizedBox(
+              width: iconSize,
+              height: iconSize,
+              child: CircularProgressIndicator(
+                value: usage.usageRatio,
+                color: progressColor,
+                strokeWidth: iconSize * 0.15,
+                backgroundColor: theme.neutralShade(3),
+              ),
+            );
+          }
+          return Icon(
+            LucideIcons.gauge,
+            size: iconSize,
+            color: progressColor,
+          );
+        },
+      ),
     );
   }
 }

@@ -191,6 +191,31 @@ void main() {
     expect(ldStripGenuiBlocks(raw), isNot(contains('```genui')));
   });
 
+  testWidgets(
+    'LdContextUsageIndicator gauge icon uses button IconTheme size',
+    (tester) async {
+      const usage = LdContextUsage(
+        estimatedTokens: 100,
+        contextLimit: 0,
+      );
+
+      await tester.pumpWidget(
+        _wrap(
+          LdContextUsageIndicator(
+            contextUsage: usage,
+            onTap: () {},
+          ),
+        ),
+      );
+      await tester.pump();
+
+      final icon = tester.widget<Icon>(find.byType(Icon));
+      final iconTheme = IconTheme.of(tester.element(find.byType(Icon)));
+      expect(icon.size, iconTheme.size);
+      expect(icon.size, isNot(14));
+    },
+  );
+
   testWidgets('LdComposeBar shows send when text entered', (tester) async {
     final controller = TextEditingController();
     String? sent;
@@ -804,5 +829,57 @@ void main() {
     expect(find.text('Hidden user message'), findsOneWidget);
     expect(find.text('Hidden agent reply'), findsOneWidget);
     expect(find.text('Show 2 earlier messages'), findsNothing);
+  });
+
+  testWidgets('LdToolCallCard opens detail modal on tap', (tester) async {
+    const item = LdToolCallItem(
+      id: 't1',
+      name: 'search_docs',
+      toolCallId: 'tc1',
+      status: LdToolCallStatus.done,
+      argsPreview: '{"q":"x"}',
+      args: '{"q":"full query"}',
+      result: 'found 3 docs',
+    );
+
+    await tester.pumpWidget(
+      _wrap(
+        LdToolCallCard(item: item),
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.text('search_docs'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Tool call'), findsOneWidget);
+    expect(find.text('{"q":"full query"}'), findsOneWidget);
+    expect(find.text('found 3 docs'), findsOneWidget);
+  });
+
+  testWidgets('LdToolCallCard onPressed overrides default modal', (tester) async {
+    var pressed = false;
+    const item = LdToolCallItem(
+      id: 't1',
+      name: 'search_docs',
+      toolCallId: 'tc1',
+      status: LdToolCallStatus.done,
+    );
+
+    await tester.pumpWidget(
+      _wrap(
+        LdToolCallCard(
+          item: item,
+          onPressed: () => pressed = true,
+        ),
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.text('search_docs'));
+    await tester.pump();
+
+    expect(pressed, isTrue);
+    expect(find.text('Tool call'), findsNothing);
   });
 }

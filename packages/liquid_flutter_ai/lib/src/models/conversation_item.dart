@@ -67,6 +67,12 @@ final class LdToolCallItem extends LdConversationItem {
   final String? argsPreview;
   final String? resultPreview;
 
+  /// Full tool arguments for the detail modal (may exceed [argsPreview]).
+  final String? args;
+
+  /// Full tool result for the detail modal (may exceed [resultPreview]).
+  final String? result;
+
   const LdToolCallItem({
     required super.id,
     required this.name,
@@ -74,6 +80,8 @@ final class LdToolCallItem extends LdConversationItem {
     this.status = LdToolCallStatus.pending,
     this.argsPreview,
     this.resultPreview,
+    this.args,
+    this.result,
   });
 }
 

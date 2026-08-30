@@ -15,6 +15,7 @@ export 'src/bubbles/agent_markdown.dart';
 export 'src/bubbles/stream_reveal.dart';
 export 'src/bubbles/edge_fade.dart';
 export 'src/bubbles/tool_call.dart';
+export 'src/bubbles/tool_call_detail_modal.dart';
 export 'src/bubbles/approval.dart';
 export 'src/bubbles/reasoning.dart';
 export 'src/bubbles/system_prompt.dart';
