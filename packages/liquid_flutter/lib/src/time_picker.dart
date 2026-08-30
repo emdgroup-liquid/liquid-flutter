@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
@@ -139,13 +137,12 @@ class _LdTimePickerModalState extends State<LdTimePickerModal> {
             )
           ],
           child: LdScaffoldBody(
+            shrinkWrap: true,
             children: [
               LdTimePickerWidget(
                 initialTime: _time,
                 onTimeSelected: (time) {
-                  setState(() {
-                    _time = time;
-                  });
+                  _time = time;
                 },
                 minutePrecision: widget.minutePrecision,
               ),
@@ -174,8 +171,8 @@ class LdTimePickerWidget extends StatefulWidget {
 }
 
 class _LdTimePickerWidgetState extends State<LdTimePickerWidget> {
-  final _hourController = FixedExtentScrollController();
-  final _minuteController = FixedExtentScrollController();
+  late final FixedExtentScrollController _hourController;
+  late FixedExtentScrollController _minuteController;
 
   final _hourControllerText = TextEditingController();
   final _minuteControllerText = TextEditingController();
@@ -183,16 +180,36 @@ class _LdTimePickerWidgetState extends State<LdTimePickerWidget> {
   final _hourFocusNode = FocusNode();
   final _minuteFocusNode = FocusNode();
 
-  late TimeOfDay? _time = widget.initialTime;
+  late TimeOfDay _time;
+  bool _syncingWheels = false;
+
+  int get _minuteIndex => (_time.minute ~/ widget.minutePrecision).clamp(
+        0,
+        (60 ~/ widget.minutePrecision) - 1,
+      );
 
   @override
   void initState() {
     super.initState();
     _time = widget.initialTime ?? TimeOfDay.now();
-    _hourControllerText.text = _time!.hour.toString();
-    _minuteControllerText.text = _time!.minute.toString();
-    _applyWheels();
+    _hourController = FixedExtentScrollController(initialItem: _time.hour);
+    _minuteController = FixedExtentScrollController(initialItem: _minuteIndex);
     _applyText();
+  }
+
+  @override
+  void didUpdateWidget(covariant LdTimePickerWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.minutePrecision != oldWidget.minutePrecision) {
+      _minuteController.dispose();
+      _minuteController = FixedExtentScrollController(initialItem: _minuteIndex);
+    }
+    final incoming = widget.initialTime;
+    if (incoming != null && incoming != _time) {
+      _time = incoming;
+      _applyText();
+      _jumpWheels();
+    }
   }
 
   @override
@@ -206,39 +223,34 @@ class _LdTimePickerWidgetState extends State<LdTimePickerWidget> {
     super.dispose();
   }
 
-  Future<void> _applyWheels() async {
-    if (_time == null) return;
-    await Future<void>.delayed(const Duration(milliseconds: 100));
-    if (!mounted) {
-      return;
+  void _applyText() {
+    final hour = _time.hour.toString();
+    final minute = _time.minute.toString();
+    if (!_hourFocusNode.hasFocus && _hourControllerText.text != hour) {
+      _hourControllerText.text = hour;
     }
-    unawaited(
-      _hourController.animateTo(
-        (_time!.hour) * 32,
-        duration: const Duration(milliseconds: 100),
-        curve: Curves.easeInOut,
-      ),
-    );
-    unawaited(
-      _minuteController.animateTo(
-        (_time!.minute ~/ widget.minutePrecision) * 32,
-        duration: const Duration(milliseconds: 100),
-        curve: Curves.easeInOut,
-      ),
-    );
+    if (!_minuteFocusNode.hasFocus && _minuteControllerText.text != minute) {
+      _minuteControllerText.text = minute;
+    }
   }
 
-  void _applyText() {
-    _hourControllerText.text = _time!.hour.toString();
-    _minuteControllerText.text = _time!.minute.toString();
+  void _jumpWheels({bool hour = true, bool minute = true}) {
+    _syncingWheels = true;
+    if (hour && _hourController.hasClients && _hourController.selectedItem != _time.hour) {
+      _hourController.jumpToItem(_time.hour);
+    }
+    if (minute && _minuteController.hasClients && _minuteController.selectedItem != _minuteIndex) {
+      _minuteController.jumpToItem(_minuteIndex);
+    }
+    _syncingWheels = false;
   }
 
   void _hourTextChanged(String newHour) {
     final hour = int.tryParse(newHour);
     if (hour != null && hour >= 0 && hour <= 23) {
-      _time = TimeOfDay(hour: hour, minute: _time?.minute ?? 0);
-      _applyWheels();
-      widget.onTimeSelected(_time!);
+      _time = TimeOfDay(hour: hour, minute: _time.minute);
+      _jumpWheels();
+      widget.onTimeSelected(_time);
     }
   }
 
@@ -246,126 +258,99 @@ class _LdTimePickerWidgetState extends State<LdTimePickerWidget> {
     final minute = int.tryParse(newMinute);
     if (minute != null && minute >= 0 && minute <= 59) {
       _time = TimeOfDay(
-        hour: _time?.hour ?? 0,
+        hour: _time.hour,
         minute: ((minute / widget.minutePrecision).round() * widget.minutePrecision).clamp(0, 59),
       );
-      _applyWheels();
-      widget.onTimeSelected(_time!);
+      _jumpWheels();
+      widget.onTimeSelected(_time);
     }
   }
 
-  void _submit() {
-    if (_time == null) return;
+  void _onHourWheelChanged(int value) {
+    if (_syncingWheels || _hourFocusNode.hasFocus) {
+      return;
+    }
+    _time = TimeOfDay(
+      hour: value,
+      minute: _time.minute,
+    );
+    _applyText();
+    widget.onTimeSelected(_time);
+  }
 
-    _minuteTextChanged(_minuteControllerText.text);
-    _hourTextChanged(_hourControllerText.text);
-
-    widget.onTimeSelected(_time!);
+  void _onMinuteWheelChanged(int value) {
+    if (_syncingWheels || _minuteFocusNode.hasFocus) {
+      return;
+    }
+    _time = TimeOfDay(
+      hour: _time.hour,
+      minute: value * widget.minutePrecision,
+    );
+    _applyText();
+    widget.onTimeSelected(_time);
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = LiquidLocalizations.of(context);
+    final theme = LdTheme.of(context);
+    final hourHint = l10n.durationHintHours;
+    final minuteHint = l10n.durationHintMinutes;
+
     return LdAutoSpace(
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: Container(
-                height: 128,
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: LdTheme.of(context).border,
-                    width: LdTheme.of(context).borderWidth,
+        NotificationListener<ScrollNotification>(
+          onNotification: (_) => true,
+          child: NotificationListener<ScrollMetricsNotification>(
+            onNotification: (_) => true,
+            child: Row(
+              children: [
+                Expanded(
+                  child: _wheelFrame(
+                    theme: theme,
+                    child: CupertinoPicker(
+                      scrollController: _hourController,
+                      selectionOverlay: Container(),
+                      squeeze: 1.4,
+                      itemExtent: 32,
+                      useMagnifier: true,
+                      onSelectedItemChanged: _onHourWheelChanged,
+                      children: List.generate(24, (index) {
+                        return _wheelItem(
+                          theme: theme,
+                          value: index.toString().padLeft(2, '0'),
+                          unit: hourHint,
+                        );
+                      }),
+                    ),
                   ),
-                  borderRadius: LdTheme.of(context).radius(LdSize.s),
-                  color: LdTheme.of(context).surface,
                 ),
-                child: CupertinoPicker(
-                  scrollController: _hourController,
-                  selectionOverlay: Container(),
-                  squeeze: 1.4,
-                  itemExtent: 32,
-                  useMagnifier: true,
-                  onSelectedItemChanged: (value) {
-                    if (_hourFocusNode.hasFocus) {
-                      return;
-                    }
-                    _time = TimeOfDay(
-                      hour: value,
-                      minute: _time?.minute ?? 0,
-                    );
-                    _applyText();
-                    _applyWheels();
-                    _submit();
-                  },
-                  children: List.generate(24, (index) {
-                    return Container(
-                      height: 32,
-                      padding: const EdgeInsets.all(4),
-                      color: LdTheme.of(context).surface,
-                      child: Center(
-                        child: Text(
-                          index.toString().padLeft(2, '0'),
-                          style: const TextStyle(
-                            fontFamily: 'monospace',
-                          ),
-                        ),
-                      ),
-                    );
-                  }),
-                ),
-              ),
-            ),
-            ldSpacerM,
-            LdText.l(':'),
-            ldSpacerM,
-            Expanded(
-              child: Container(
-                height: 128,
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: LdTheme.of(context).border,
-                    width: LdTheme.of(context).borderWidth,
+                ldSpacerM,
+                LdText.l(':'),
+                ldSpacerM,
+                Expanded(
+                  child: _wheelFrame(
+                    theme: theme,
+                    child: CupertinoPicker(
+                      scrollController: _minuteController,
+                      selectionOverlay: Container(),
+                      squeeze: 1.4,
+                      itemExtent: 32,
+                      useMagnifier: true,
+                      onSelectedItemChanged: _onMinuteWheelChanged,
+                      children: List.generate(60 ~/ widget.minutePrecision, (index) {
+                        return _wheelItem(
+                          theme: theme,
+                          value: (index * widget.minutePrecision).toString().padLeft(2, '0'),
+                          unit: minuteHint,
+                        );
+                      }),
+                    ),
                   ),
-                  color: LdTheme.of(context).surface,
-                  borderRadius: LdTheme.of(context).radius(LdSize.s),
                 ),
-                child: CupertinoPicker(
-                  scrollController: _minuteController,
-                  selectionOverlay: Container(),
-                  squeeze: 1.4,
-                  itemExtent: 32,
-                  useMagnifier: true,
-                  onSelectedItemChanged: (value) {
-                    if (_minuteFocusNode.hasFocus) {
-                      return;
-                    }
-                    _time = TimeOfDay(
-                      hour: _time?.hour ?? 0,
-                      minute: value * widget.minutePrecision,
-                    );
-                    _applyText();
-                    _applyWheels();
-                    _submit();
-                  },
-                  children: List.generate(60 ~/ widget.minutePrecision, (index) {
-                    return Container(
-                      height: 32,
-                      padding: const EdgeInsets.all(4),
-                      child: Center(
-                        child: Text(
-                          (index * widget.minutePrecision).toString(),
-                          style: const TextStyle(
-                            fontFamily: 'monospace',
-                          ),
-                        ),
-                      ),
-                    );
-                  }),
-                ),
-              ),
+              ],
             ),
-          ],
+          ),
         ),
         Row(
           children: [
@@ -377,9 +362,7 @@ class _LdTimePickerWidgetState extends State<LdTimePickerWidget> {
                 controller: _hourControllerText,
                 size: LdSize.l,
                 keyboardType: TextInputType.number,
-                onChanged: (p0) {
-                  _hourTextChanged(p0);
-                },
+                onChanged: _hourTextChanged,
               ),
             ),
             ldSpacerM,
@@ -391,15 +374,59 @@ class _LdTimePickerWidgetState extends State<LdTimePickerWidget> {
                 hint: 'MM',
                 controller: _minuteControllerText,
                 keyboardType: TextInputType.number,
-                onChanged: (p0) {
-                  _minuteTextChanged(p0);
-                },
+                onChanged: _minuteTextChanged,
                 size: LdSize.l,
               ),
             ),
           ],
         ),
       ],
+    );
+  }
+
+  Widget _wheelFrame({
+    required LdTheme theme,
+    required Widget child,
+  }) {
+    return Container(
+      height: 90,
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: theme.border,
+          width: theme.borderWidth,
+        ),
+        borderRadius: theme.radius(LdSize.s),
+      ),
+      child: child,
+    );
+  }
+
+  Widget _wheelItem({
+    required LdTheme theme,
+    required String value,
+    required String unit,
+  }) {
+    return Container(
+      height: 32,
+      padding: const EdgeInsets.all(4),
+      child: Center(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              value,
+              style: const TextStyle(
+                fontFamily: 'monospace',
+              ),
+            ),
+            ldHSpacerXS,
+            LdText.lxs(
+              unit,
+              color: theme.textMuted,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

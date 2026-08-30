@@ -49,18 +49,3 @@ String ldDurationUnitHint(
     LdDurationUnit.seconds => l10n.durationHintSeconds,
   };
 }
-
-String ldDurationUnitName(
-  LdDurationUnit unit,
-  LiquidLocalizations l10n,
-) {
-  return switch (unit) {
-    LdDurationUnit.years => l10n.durationUnitYears(0),
-    LdDurationUnit.months => l10n.durationUnitMonths(0),
-    LdDurationUnit.weeks => l10n.durationUnitWeeks(0),
-    LdDurationUnit.days => l10n.durationUnitDays(0),
-    LdDurationUnit.hours => l10n.durationUnitHours(0),
-    LdDurationUnit.minutes => l10n.durationUnitMinutes(0),
-    LdDurationUnit.seconds => l10n.durationUnitSeconds(0),
-  };
-}

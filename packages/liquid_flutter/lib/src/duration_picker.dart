@@ -288,6 +288,7 @@ class _LdDurationPickerModalState extends State<LdDurationPickerModal> {
             ),
           ],
           child: LdScaffoldBody(
+            shrinkWrap: true,
             children: [
               LdDurationPickerWidget(
                 value: _value,
@@ -500,37 +501,6 @@ class _LdDurationPickerWidgetState extends State<LdDurationPickerWidget> {
 
     return LdAutoSpace(
       children: [
-        ValueListenableBuilder<LdDuration>(
-          valueListenable: _value,
-          builder: (context, duration, _) {
-            return LdAutoSpace(
-              children: [
-                LdText.hs(
-                  ldFormatDuration(duration, l10n: l10n, compact: false),
-                ),
-                if (presets.isNotEmpty)
-                  Wrap(
-                    spacing: gap,
-                    runSpacing: gap,
-                    children: [
-                      for (final preset in presets)
-                        LdButton.ghost(
-                          active: widget.config.constrain(preset) == duration,
-                          size: LdSize.s,
-                          onPressed: () => _setValue(
-                            preset,
-                            syncWheels: true,
-                          ),
-                          child: Text(
-                            ldFormatDuration(preset, l10n: l10n, compact: true),
-                          ),
-                        ),
-                    ],
-                  ),
-              ],
-            );
-          },
-        ),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -542,6 +512,32 @@ class _LdDurationPickerWidgetState extends State<LdDurationPickerWidget> {
             ],
           ],
         ),
+        if (presets.isNotEmpty) ...[
+          LdDivider(),
+          ValueListenableBuilder<LdDuration>(
+            valueListenable: _value,
+            builder: (context, duration, _) {
+              return Wrap(
+                spacing: gap,
+                runSpacing: gap,
+                children: [
+                  for (final preset in presets)
+                    LdButton.outline(
+                      active: widget.config.constrain(preset) == duration,
+                      size: LdSize.s,
+                      onPressed: () => _setValue(
+                        preset,
+                        syncWheels: true,
+                      ),
+                      child: Text(
+                        ldFormatDuration(preset, l10n: l10n, compact: true),
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
+        ],
       ],
     );
   }
@@ -554,7 +550,6 @@ class _LdDurationPickerWidgetState extends State<LdDurationPickerWidget> {
     final isFirst = unit == _units.first;
     return LdAutoSpace(
       children: [
-        LdText.caption(ldDurationUnitName(unit, l10n)),
         _buildWheel(context, unit, l10n),
         LdInput(
           hint: ldDurationUnitHint(unit, l10n),
@@ -578,50 +573,54 @@ class _LdDurationPickerWidgetState extends State<LdDurationPickerWidget> {
     final step = widget.config.stepFor(unit);
     final count = widget.config.wheelItemCount(unit);
     final unitHint = ldDurationUnitHint(unit, l10n);
-    return Container(
-      height: 128,
-      decoration: BoxDecoration(
-        border: Border.all(
-          color: theme.border,
-          width: theme.borderWidth,
-        ),
-        borderRadius: theme.radius(LdSize.s),
-        color: theme.surface,
-      ),
-      child: CupertinoPicker(
-        key: ValueKey(unit),
-        scrollController: _wheelControllers[unit],
-        selectionOverlay: Container(),
-        squeeze: 1.4,
-        itemExtent: 32,
-        useMagnifier: true,
-        onSelectedItemChanged: (index) => _onWheelChanged(unit, index),
-        children: List.generate(count, (index) {
-          final value = (index * step).toString().padLeft(2, '0');
-          return Container(
-            height: 32,
-            padding: const EdgeInsets.all(4),
-            color: theme.surface,
-            child: Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    value,
-                    style: const TextStyle(
-                      fontFamily: 'monospace',
-                    ),
-                  ),
-                  ldHSpacerXS,
-                  LdText.lxs(
-                    unitHint,
-                    color: theme.textMuted,
-                  ),
-                ],
-              ),
+    return NotificationListener<ScrollNotification>(
+      onNotification: (_) => true,
+      child: NotificationListener<ScrollMetricsNotification>(
+        onNotification: (_) => true,
+        child: Container(
+          height: 90,
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: theme.border,
+              width: theme.borderWidth,
             ),
-          );
-        }),
+            borderRadius: theme.radius(LdSize.s),
+          ),
+          child: CupertinoPicker(
+            key: ValueKey(unit),
+            scrollController: _wheelControllers[unit],
+            selectionOverlay: Container(),
+            squeeze: 1.4,
+            itemExtent: 32,
+            useMagnifier: true,
+            onSelectedItemChanged: (index) => _onWheelChanged(unit, index),
+            children: List.generate(count, (index) {
+              final value = (index * step).toString().padLeft(2, '0');
+              return Container(
+                height: 32,
+                padding: const EdgeInsets.all(4),
+                child: Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        value,
+                        style: const TextStyle(
+                          fontFamily: 'monospace',
+                        ),
+                      ),
+                      ldHSpacerXS,
+                      LdText.lxs(
+                        unitHint,
+                        color: theme.textMuted,
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }),
+          ),
+        ),
       ),
     );
   }
