@@ -532,18 +532,13 @@ class _LdDurationPickerWidgetState extends State<LdDurationPickerWidget> {
           },
         ),
         Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             for (var i = 0; i < _units.length; i++) ...[
-              if (i > 0) ldSpacerS,
-              Expanded(child: _buildWheel(context, _units[i])),
-            ],
-          ],
-        ),
-        Row(
-          children: [
-            for (var i = 0; i < _units.length; i++) ...[
-              if (i > 0) ldSpacerS,
-              Expanded(child: _buildInput(context, _units[i], l10n)),
+              if (i > 0) ldSpacerM,
+              Expanded(
+                child: _buildUnitColumn(context, _units[i], l10n),
+              ),
             ],
           ],
         ),
@@ -551,10 +546,38 @@ class _LdDurationPickerWidgetState extends State<LdDurationPickerWidget> {
     );
   }
 
-  Widget _buildWheel(BuildContext context, LdDurationUnit unit) {
+  Widget _buildUnitColumn(
+    BuildContext context,
+    LdDurationUnit unit,
+    LiquidLocalizations l10n,
+  ) {
+    final isFirst = unit == _units.first;
+    return LdAutoSpace(
+      children: [
+        LdText.caption(ldDurationUnitName(unit, l10n)),
+        _buildWheel(context, unit, l10n),
+        LdInput(
+          hint: ldDurationUnitHint(unit, l10n),
+          autofocus: isFirst && LdTheme.of(context).platform.isDesktop,
+          focusNode: _focusNodes[unit],
+          controller: _textControllers[unit],
+          size: LdSize.l,
+          keyboardType: TextInputType.number,
+          onChanged: (text) => _onTextChanged(unit, text),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildWheel(
+    BuildContext context,
+    LdDurationUnit unit,
+    LiquidLocalizations l10n,
+  ) {
     final theme = LdTheme.of(context);
     final step = widget.config.stepFor(unit);
     final count = widget.config.wheelItemCount(unit);
+    final unitHint = ldDurationUnitHint(unit, l10n);
     return Container(
       height: 128,
       decoration: BoxDecoration(
@@ -574,37 +597,32 @@ class _LdDurationPickerWidgetState extends State<LdDurationPickerWidget> {
         useMagnifier: true,
         onSelectedItemChanged: (index) => _onWheelChanged(unit, index),
         children: List.generate(count, (index) {
-          final label = (index * step).toString().padLeft(2, '0');
-          return SizedBox(
+          final value = (index * step).toString().padLeft(2, '0');
+          return Container(
             height: 32,
+            padding: const EdgeInsets.all(4),
+            color: theme.surface,
             child: Center(
-              child: Text(
-                label,
-                style: const TextStyle(
-                  fontFamily: 'monospace',
-                ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    value,
+                    style: const TextStyle(
+                      fontFamily: 'monospace',
+                    ),
+                  ),
+                  ldHSpacerXS,
+                  LdText.lxs(
+                    unitHint,
+                    color: theme.textMuted,
+                  ),
+                ],
               ),
             ),
           );
         }),
       ),
-    );
-  }
-
-  Widget _buildInput(
-    BuildContext context,
-    LdDurationUnit unit,
-    LiquidLocalizations l10n,
-  ) {
-    final isFirst = unit == _units.first;
-    return LdInput(
-      hint: ldDurationUnitHint(unit, l10n),
-      autofocus: isFirst && LdTheme.of(context).platform.isDesktop,
-      focusNode: _focusNodes[unit],
-      controller: _textControllers[unit],
-      size: LdSize.l,
-      keyboardType: TextInputType.number,
-      onChanged: (text) => _onTextChanged(unit, text),
     );
   }
 }

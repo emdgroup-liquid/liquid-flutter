@@ -59,6 +59,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('duration_picker_sheet')), findsOneWidget);
+    expect(find.text('HOURS'), findsWidgets);
+    expect(find.text('MINUTES'), findsWidgets);
   });
 
   testWidgets('updates selected duration from text fields', (tester) async {
