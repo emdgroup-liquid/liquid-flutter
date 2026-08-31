@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
@@ -697,6 +699,139 @@ void main() {
       // Bar should not have moved at all.
       final barTopAfter = tester.getTopLeft(find.text('Bar')).dy;
       expect(barTopAfter, closeTo(barTopBefore, 1.0));
+    });
+  });
+
+  // =========================================================================
+  // Hide only when remaining scroll can fully tuck the bar away
+  // =========================================================================
+
+  group('AppBarFrame – hide requires sufficient remaining scroll extent', () {
+    testWidgets('does not hide when maxScrollExtent is less than bar height', (tester) async {
+      ldDisableAnimations = true;
+
+      LdAppBarMetrics? bodyMetrics;
+
+      await tester.pumpWidget(
+        _withTheme(
+          AppBarFrame(
+            position: LdAppBarPosition.top,
+            scrollBehavior: LdAppBarScrollBehavior.always,
+            wrappedChild: LayoutBuilder(
+              builder: (context, constraints) {
+                bodyMetrics = context.watch<LdAppBarMetrics?>();
+                final barH = bodyMetrics?.barHeightForPosition ?? 0;
+                // Overflow is enough to cross the 50% snap-hidden threshold,
+                // but not enough to fully hide the bar.
+                final overflow = max(barH * 0.7, 8.0);
+                return SingleChildScrollView(
+                  child: SizedBox(
+                    height: constraints.maxHeight + overflow,
+                    child: const Text('content'),
+                  ),
+                );
+              },
+            ),
+            child: const SizedBox(height: 60, child: Text('Bar')),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      final barH = bodyMetrics!.barHeightForPosition;
+      final position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+      expect(position.maxScrollExtent, greaterThan(0));
+      expect(position.maxScrollExtent, lessThan(barH));
+
+      final barTopBefore = tester.getTopLeft(find.text('Bar')).dy;
+
+      await tester.drag(find.byType(Scrollable), Offset(0, -(position.maxScrollExtent + 40)));
+      await tester.pumpAndSettle();
+
+      expect(bodyMetrics!.hideOffsetForPosition, 0.0);
+      expect(tester.getTopLeft(find.text('Bar')).dy, closeTo(barTopBefore, 1.0));
+    });
+
+    testWidgets('does not hide when remaining extent is between 50% and 100% of bar height', (tester) async {
+      ldDisableAnimations = true;
+
+      LdAppBarMetrics? bodyMetrics;
+
+      await tester.pumpWidget(
+        _withTheme(
+          AppBarFrame(
+            position: LdAppBarPosition.top,
+            scrollBehavior: LdAppBarScrollBehavior.always,
+            wrappedChild: Builder(
+              builder: (context) {
+                bodyMetrics = context.watch<LdAppBarMetrics?>();
+                return ListView.builder(
+                  itemCount: 50,
+                  itemBuilder: (_, i) => SizedBox(height: 40, child: Text('item $i')),
+                );
+              },
+            ),
+            child: const SizedBox(height: 60, child: Text('Bar')),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      final barH = bodyMetrics!.barHeightForPosition;
+      final position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+      // Remaining travel is enough to cross the 50% snap-hidden threshold, but
+      // not enough to fully hide. Without the extent gate the bar would snap
+      // off-screen.
+      final remaining = barH * 0.7;
+      expect(position.maxScrollExtent, greaterThan(remaining));
+
+      final barTopBefore = tester.getTopLeft(find.text('Bar')).dy;
+      await fakeAppBarScroll(
+        tester,
+        startOffset: position.maxScrollExtent - remaining,
+        endOffset: position.maxScrollExtent,
+      );
+
+      expect(bodyMetrics!.hideOffsetForPosition, 0.0);
+      expect(tester.getTopLeft(find.text('Bar')).dy, closeTo(barTopBefore, 1.0));
+    });
+
+    testWidgets('hides when remaining extent is sufficient to fully hide the bar', (tester) async {
+      ldDisableAnimations = true;
+
+      LdAppBarMetrics? bodyMetrics;
+
+      await tester.pumpWidget(
+        _withTheme(
+          AppBarFrame(
+            position: LdAppBarPosition.top,
+            scrollBehavior: LdAppBarScrollBehavior.always,
+            wrappedChild: Builder(
+              builder: (context) {
+                bodyMetrics = context.watch<LdAppBarMetrics?>();
+                return ListView.builder(
+                  itemCount: 50,
+                  itemBuilder: (_, i) => SizedBox(height: 40, child: Text('item $i')),
+                );
+              },
+            ),
+            child: const SizedBox(height: 60, child: Text('Bar')),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      final barH = bodyMetrics!.barHeightForPosition;
+      final barTopBefore = tester.getTopLeft(find.text('Bar')).dy;
+
+      await fakeAppBarScroll(tester, startOffset: 300, endOffset: 300 + barH * 2);
+      await tester.pumpAndSettle();
+
+      expect(bodyMetrics!.hideOffsetForPosition, greaterThan(barH * 0.9));
+      expect(tester.getTopLeft(find.text('Bar')).dy, lessThan(barTopBefore - barH * 0.9));
     });
   });
 

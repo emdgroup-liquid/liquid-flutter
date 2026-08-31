@@ -596,12 +596,7 @@ Call out if you want this expanded into a full changelog entry, a PR description
         id: id,
         child: LdUserBubble(text: text, attachments: attachments),
       ),
-      _ => LdConversation.defaultItemBuilder(
-        context,
-        item,
-        isSingleton,
-        approval: _approvalActions,
-      ),
+      _ => LdConversation.defaultItemBuilder(context, item, isSingleton, approval: _approvalActions),
     };
   }
 
@@ -661,6 +656,29 @@ Call out if you want this expanded into a full changelog entry, a PR description
             focusNode: _focusNode,
             attachments: _attachments,
             isBusy: _isBusy,
+            attachmentsExtra: LdAutoSpace(
+              children: [
+                LdSelect(
+                  label: 'Model',
+                  value: "smart",
+                  items: [
+                    LdSelectItem(value: 'smart', child: Text('Model Super Smart plus')),
+                    LdSelectItem(value: 'fast', child: Text('Model Fast and Furious')),
+                  ],
+                  onChanged: (value) {},
+                ),
+                LdSelect(
+                  label: 'Effort',
+                  value: 'high',
+                  items: [
+                    LdSelectItem(child: Text('Extra high'), value: 'high'),
+                    LdSelectItem(child: Text('Normal'), value: 'normal'),
+                    LdSelectItem(child: Text('Low'), value: 'low'),
+                  ],
+                  onChanged: (value) {},
+                ),
+              ],
+            ),
             leading: LdContextUsageIndicator(
               contextUsage: const LdContextUsage(estimatedTokens: 12400, contextLimit: 128000, lastPromptTokens: 9800),
               onTap: () {
@@ -775,13 +793,7 @@ Call out if you want this expanded into a full changelog entry, a PR description
           return LdScaffold(
             body: LdAppBar.top(
               title: LdText.h('Conversation'),
-              actions: [
-                LdButton.ghost(
-                  size: LdSize.s,
-                  onPressed: _compactHistory,
-                  child: const Text('Compact'),
-                ),
-              ],
+              actions: [LdButton.ghost(size: LdSize.s, onPressed: _compactHistory, child: const Text('Compact'))],
               child: composeBar,
             ),
           );
@@ -815,10 +827,7 @@ class _RichFileResult extends StatelessWidget {
             Container(
               width: double.infinity,
               padding: theme.pad(size: LdSize.s),
-              decoration: BoxDecoration(
-                color: theme.surface,
-                borderRadius: theme.radius(LdSize.s),
-              ),
+              decoration: BoxDecoration(color: theme.surface, borderRadius: theme.radius(LdSize.s)),
               child: LdText.p(preview),
             ),
         ],
@@ -831,17 +840,13 @@ class _SubAgentRow extends StatelessWidget {
   final LdToolCallItem item;
   final VoidCallback onTap;
 
-  const _SubAgentRow({
-    required this.item,
-    required this.onTap,
-  });
+  const _SubAgentRow({required this.item, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     final theme = LdTheme.of(context);
     final title = _titleFromArgs(item) ?? 'Subagent';
-    final isRunning = item.status == LdToolCallStatus.pending ||
-        item.status == LdToolCallStatus.running;
+    final isRunning = item.status == LdToolCallStatus.pending || item.status == LdToolCallStatus.running;
     final statusLabel = switch (item.status) {
       LdToolCallStatus.pending || LdToolCallStatus.running => 'Running',
       LdToolCallStatus.done => 'Completed',
@@ -852,11 +857,7 @@ class _SubAgentRow extends StatelessWidget {
       padding: EdgeInsets.zero,
       child: LdListItem.trailingForward(
         onPressed: onTap,
-        leading: LdAvatar(
-          child: isRunning
-              ? const LdLoader(size: 16)
-              : const Icon(LucideIcons.bot),
-        ),
+        leading: LdAvatar(child: isRunning ? const LdLoader(size: 16) : const Icon(LucideIcons.bot)),
         title: Text(title),
         subtitle: Text(statusLabel),
         borderRadius: theme.radius(LdSize.s),

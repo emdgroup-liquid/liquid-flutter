@@ -318,7 +318,7 @@ class _LdComposeBarState extends State<LdComposeBar> {
           ),
         ),
         LdReveal.quick(
-          revealed: !_isRecording && !_focusNode.hasFocus,
+          revealed: !_isRecording && !_focusNode.hasFocus && !widget.isBusy,
           child: Row(
             children: [if (widget.leading != null) widget.leading!, ldSpacerXS],
           ),
@@ -429,7 +429,7 @@ class _LdComposeBarState extends State<LdComposeBar> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 LdHorizontalScroll(
-                  edgeBleed: theme.pad(),
+                  edgeBleed: theme.pad().copyWith(top: 0, bottom: 0),
                   children: [
                     if (widget.onPickImage != null)
                       SizedBox(
@@ -493,7 +493,7 @@ class _LdComposeBarState extends State<LdComposeBar> {
                 ldSpacerM,
                 if (widget.attachmentsExtra != null) widget.attachmentsExtra!,
               ],
-            ),
+            ).padM(),
           ),
           builder: (context, isShuttle, trigger, isOpen, child) {
             return LdButton.outline(

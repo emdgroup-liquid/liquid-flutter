@@ -447,8 +447,16 @@ class _AppBarFrameState extends State<AppBarFrame> {
 
     final maxOffset = metrics.maximumSize.atPosition(widget.position) + 1;
 
-    // If the remaining scroll extent is less than the remaining hide offset we can apply we should not apply any more scroll delta.
-    if (scrollingDown && notification.metrics.extentAfter < maxOffset - metrics.minSize.atPosition(widget.position)) {
+    // Remaining distance this bar still needs to travel to fully hide.
+    final remainingHideOffset = maxOffset - _hideOffset;
+
+    // ScrollUpdate metrics are post-update; add this frame's delta so we
+    // compare against remaining content at the start of the gesture update.
+    final remainingScrollExtent = notification.metrics.extentAfter + scrollDelta;
+
+    // Only hide when remaining content is enough for the bar to become fully
+    // hidden. Otherwise the bar would stick mid-travel when the list ends.
+    if (scrollingDown && remainingScrollExtent < remainingHideOffset) {
       return false;
     }
 
