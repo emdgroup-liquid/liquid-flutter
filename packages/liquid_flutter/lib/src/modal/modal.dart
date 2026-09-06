@@ -318,10 +318,13 @@ class LdModalRoute<T> extends PageRoute<T> {
 
       return Provider.value(
           value: modalRouteInfo,
-          child: switch (isSheet) {
-            true => _buildSheetContent(context, pageBuilder),
-            false => _buildDialogContent(context, pageBuilder),
-          });
+          child: LdAppBarConfigProvider(
+            config: LdAppBarConfig(scrollBehavior: LdAppBarScrollBehavior.static),
+            child: switch (isSheet) {
+              true => _buildSheetContent(context, pageBuilder),
+              false => _buildDialogContent(context, pageBuilder),
+            },
+          ));
     });
   }
 
