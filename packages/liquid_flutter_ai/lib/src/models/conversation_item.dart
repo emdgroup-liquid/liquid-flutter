@@ -121,6 +121,18 @@ final class LdReasoningItem extends LdConversationItem {
   });
 }
 
+/// Visible provider / runner failure. Never looks like a successful reply.
+final class LdTurnErrorItem extends LdConversationItem {
+  final String message;
+  final String? code;
+
+  const LdTurnErrorItem({
+    required super.id,
+    required this.message,
+    this.code,
+  });
+}
+
 /// Whether [item] is tool/reasoning noise that can collapse into an activity group.
 bool ldIsAgentActivityItem(LdConversationItem item) {
   return switch (item) {

@@ -19,6 +19,7 @@ export 'src/bubbles/tool_call_detail_modal.dart';
 export 'src/bubbles/approval.dart';
 export 'src/bubbles/reasoning.dart';
 export 'src/bubbles/system_prompt.dart';
+export 'src/bubbles/turn_error.dart';
 export 'src/bubbles/agent_activity_group.dart';
 export 'src/tasks/agent_task_panel.dart';
 export 'src/send/send_fly_scope.dart'

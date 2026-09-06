@@ -68,10 +68,10 @@ final class LdConversationActivityGroup extends LdConversationVisualGroup {
 /// - Buffers consecutive tool / reasoning / completed-approval items into
 ///   [LdConversationActivityGroup] (even for a single item, so the group widget
 ///   stays mounted when more activity appends).
-/// - Flushes on user messages, agent markdown, system prompts, pending
-///   approvals, and tool calls matched by [pinToolCall].
-/// - System prompts, pending approvals, and pinned tool calls are always
-///   singleton rows.
+/// - Flushes on user messages, agent markdown, system prompts, turn errors,
+///   pending approvals, and tool calls matched by [pinToolCall].
+/// - System prompts, pending approvals, turn errors, and pinned tool calls
+///   are always singleton rows.
 List<LdConversationVisualGroup> groupConversationItems(
   List<LdConversationItem> items, {
   bool coalesceToolCalls = true,

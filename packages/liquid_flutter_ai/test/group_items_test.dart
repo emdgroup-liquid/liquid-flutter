@@ -7,6 +7,27 @@ void main() {
       expect(groupConversationItems(const []), isEmpty);
     });
 
+    test('keeps turn errors as singletons outside activity groups', () {
+      final groups = groupConversationItems(const [
+        LdUserMessageItem(id: 'u1', text: 'hi'),
+        LdReasoningItem(id: 'r1', content: 'planning'),
+        LdTurnErrorItem(
+          id: 'e1',
+          message: 'OpenRouter credits exhausted (HTTP 402).',
+          code: 'provider_payment_required',
+        ),
+      ]);
+
+      expect(groups, hasLength(3));
+      expect(groups[0], isA<LdConversationSingletonGroup>());
+      expect(groups[1], isA<LdConversationActivityGroup>());
+      expect(groups[2], isA<LdConversationSingletonGroup>());
+      expect(
+        (groups[2] as LdConversationSingletonGroup).item,
+        isA<LdTurnErrorItem>(),
+      );
+    });
+
     test('keeps user and markdown as singletons', () {
       final groups = groupConversationItems(const [
         LdUserMessageItem(id: 'u1', text: 'hi'),

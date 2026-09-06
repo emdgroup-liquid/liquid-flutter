@@ -6,6 +6,7 @@ import 'package:liquid_flutter_ai/src/bubbles/approval.dart';
 import 'package:liquid_flutter_ai/src/bubbles/reasoning.dart';
 import 'package:liquid_flutter_ai/src/bubbles/system_prompt.dart';
 import 'package:liquid_flutter_ai/src/bubbles/tool_call.dart';
+import 'package:liquid_flutter_ai/src/bubbles/turn_error.dart';
 import 'package:liquid_flutter_ai/src/bubbles/user_bubble.dart';
 import 'package:liquid_flutter_ai/src/conversation/approval_actions.dart';
 import 'package:liquid_flutter_ai/src/conversation/group_items.dart';
@@ -140,6 +141,7 @@ class LdConversation extends StatefulWidget {
         item: item,
         isSingleton: isSingleton,
       ),
+      LdTurnErrorItem() => LdTurnErrorCard(item: item),
     };
   }
 

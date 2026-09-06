@@ -885,4 +885,55 @@ void main() {
     expect(pressed, isTrue);
     expect(find.text('Tool call'), findsNothing);
   });
+
+  testWidgets('LdTurnErrorCard shows the failure, not assistant markdown',
+      (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        const LdTurnErrorCard(
+          item: LdTurnErrorItem(
+            id: 'e1',
+            message:
+                'OpenRouter credits are exhausted, or this request exceeds remaining credit (HTTP 402).',
+            code: 'provider_payment_required',
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(
+      find.textContaining('OpenRouter credits are exhausted'),
+      findsOneWidget,
+    );
+    expect(find.text('Turn failed'), findsOneWidget);
+    expect(find.byType(LdHint), findsOneWidget);
+  });
+
+  testWidgets('LdConversation renders LdTurnErrorItem via default builder',
+      (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        SizedBox(
+          width: 400,
+          height: 600,
+          child: LdConversation(
+            items: const [
+              LdUserMessageItem(id: 'u1', text: 'hello'),
+              LdTurnErrorItem(
+                id: 'e1',
+                message: 'Gemini returned HTTP 400.',
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.text('hello'), findsOneWidget);
+    expect(find.text('Gemini returned HTTP 400.'), findsOneWidget);
+    expect(find.text('Turn failed'), findsOneWidget);
+    expect(find.byType(LdTurnErrorCard), findsOneWidget);
+  });
 }
