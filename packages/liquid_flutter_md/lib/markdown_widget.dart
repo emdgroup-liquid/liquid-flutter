@@ -206,7 +206,7 @@ TextStyle _paragraphStyle(BuildContext context) {
 List<Widget> markdownToWidgets(
   BuildContext context,
   List<md.Node> nodes, {
-void Function(String url, String title)? onLinkTap,
+  void Function(String url, String title)? onLinkTap,
   void Function(String tag)? onHashtagTap,
   Widget? Function(String src, String alt)? imageBuilder,
 }) {
@@ -227,7 +227,7 @@ void Function(String url, String title)? onLinkTap,
 Widget? _nodeToBlockWidget(
   BuildContext context,
   md.Node node, {
-void Function(String url, String title)? onLinkTap,
+  void Function(String url, String title)? onLinkTap,
   void Function(String tag)? onHashtagTap,
   Widget? Function(String src, String alt)? imageBuilder,
 }) {
@@ -258,7 +258,7 @@ Widget _orphanTextWidget(BuildContext context, String text) {
 Widget _elementToBlockWidget(
   BuildContext context,
   md.Element node, {
-void Function(String url, String title)? onLinkTap,
+  void Function(String url, String title)? onLinkTap,
   void Function(String tag)? onHashtagTap,
   Widget? Function(String src, String alt)? imageBuilder,
 }) {
@@ -311,8 +311,8 @@ void Function(String url, String title)? onLinkTap,
       context,
       node,
       onLinkTap: onLinkTap,
-          onHashtagTap: onHashtagTap,
-            imageBuilder: imageBuilder,
+      onHashtagTap: onHashtagTap,
+      imageBuilder: imageBuilder,
     ),
 
     'input' => LdCheckbox(checked: node.attributes['checked'] == 'true'),
@@ -348,7 +348,7 @@ void Function(String url, String title)? onLinkTap,
 
     'code' => _MarkdownCode(
       code: node.textContent,
-      language: node.attributes['class']?.split('-').lastOrNull ?? 'text',
+      language: _codeLanguage(node),
     ),
 
     'blockquote' => LdCard(
@@ -494,7 +494,7 @@ void Function(String url, String title)? onLinkTap,
 Widget _combineBlockWidgets(
   BuildContext context,
   List<md.Node> nodes, {
-void Function(String url, String title)? onLinkTap,
+  void Function(String url, String title)? onLinkTap,
   void Function(String tag)? onHashtagTap,
   Widget? Function(String src, String alt)? imageBuilder,
 }) {
@@ -518,7 +518,7 @@ void Function(String url, String title)? onLinkTap,
 Widget _tableCellContent(
   BuildContext context,
   md.Element cell, {
-void Function(String url, String title)? onLinkTap,
+  void Function(String url, String title)? onLinkTap,
   void Function(String tag)? onHashtagTap,
   Widget? Function(String src, String alt)? imageBuilder,
 }) {
@@ -580,7 +580,7 @@ Widget _buildList(
   md.Element list, {
   required bool ordered,
   int indent = 0,
-void Function(String url, String title)? onLinkTap,
+  void Function(String url, String title)? onLinkTap,
   void Function(String tag)? onHashtagTap,
   Widget? Function(String src, String alt)? imageBuilder,
 }) {
@@ -629,7 +629,7 @@ List<InlineSpan> _flatListSpans(
   BuildContext context,
   md.Element list, {
   required bool ordered,
-void Function(String url, String title)? onLinkTap,
+  void Function(String url, String title)? onLinkTap,
   void Function(String tag)? onHashtagTap,
   Widget? Function(String src, String alt)? imageBuilder,
 }) {
@@ -662,7 +662,7 @@ void Function(String url, String title)? onLinkTap,
 Widget _buildStandaloneListItem(
   BuildContext context,
   md.Element li, {
-void Function(String url, String title)? onLinkTap,
+  void Function(String url, String title)? onLinkTap,
   void Function(String tag)? onHashtagTap,
   Widget? Function(String src, String alt)? imageBuilder,
 }) {
@@ -684,7 +684,7 @@ Widget _buildNestedListItem(
   required bool ordered,
   required int index,
   required int indent,
-void Function(String url, String title)? onLinkTap,
+  void Function(String url, String title)? onLinkTap,
   void Function(String tag)? onHashtagTap,
   Widget? Function(String src, String alt)? imageBuilder,
 }) {
@@ -696,8 +696,8 @@ void Function(String url, String title)? onLinkTap,
       li,
       style: style,
       onLinkTap: onLinkTap,
-          onHashtagTap: onHashtagTap,
-            imageBuilder: imageBuilder,
+      onHashtagTap: onHashtagTap,
+      imageBuilder: imageBuilder,
     ),
   ];
 
@@ -762,7 +762,7 @@ List<InlineSpan> _listItemInlineSpans(
   BuildContext context,
   md.Element li, {
   required TextStyle style,
-void Function(String url, String title)? onLinkTap,
+  void Function(String url, String title)? onLinkTap,
   void Function(String tag)? onHashtagTap,
   Widget? Function(String src, String alt)? imageBuilder,
 }) {
@@ -818,7 +818,7 @@ void Function(String url, String title)? onLinkTap,
 List<InlineSpan> _inlineNodesToSpans(
   BuildContext context,
   List<md.Node> nodes, {
-void Function(String url, String title)? onLinkTap,
+  void Function(String url, String title)? onLinkTap,
   void Function(String tag)? onHashtagTap,
   Widget? Function(String src, String alt)? imageBuilder,
 }) {
@@ -886,6 +886,15 @@ List<TextSpan> _splitTextByHashtags(
   return spans;
 }
 
+/// Extracts the code block language from a `code` element's `class` attribute
+/// (e.g. `language-dart` → `dart`). Falls back to `'text'` when absent.
+String _codeLanguage(md.Element node) {
+  final cls = node.attributes['class'];
+  if (cls == null) return 'text';
+  final lang = cls.replaceFirst('language-', '').trim();
+  return lang.isEmpty ? 'text' : lang;
+}
+
 class _MarkdownCode extends StatelessWidget {
   final String code;
   final String language;
@@ -907,15 +916,22 @@ class _MarkdownCode extends StatelessWidget {
     );
 
     // Normalize language: strip any residual "language-" prefix that may
-    // survive from older parsers, and fall back to plain text.
+    // survive from older parsers. Never pass a null or unknown language to
+    // the highlighter — `highlight.parse` throws on a null language, and
+    // unknown ones fall back to plain text anyway, so map them to the
+    // registered 'plaintext' grammar explicitly.
     final lang = language.replaceFirst('language-', '');
+    final highlightLanguage =
+        lang.isEmpty || lang == 'text' || lang == 'plaintext' || lang == 'txt'
+            ? 'plaintext'
+            : lang;
 
     return ClipRect(
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: HighlightView(
           code,
-          language: lang.isEmpty || lang == 'text' ? null : lang,
+          language: highlightLanguage,
           theme: highlightTheme,
           padding: theme.pad(size: LdSize.s),
           textStyle: TextStyle(
@@ -933,47 +949,31 @@ class _MarkdownCode extends StatelessWidget {
 Widget buildText(
   BuildContext context,
   md.Element text, {
-void Function(String url, String title)? onLinkTap,
+  void Function(String url, String title)? onLinkTap,
   void Function(String tag)? onHashtagTap,
   Widget? Function(String src, String alt)? imageBuilder,
 }) {
   final theme = LdTheme.of(context, listen: true);
-  final (paddingTop, paddingBottom) = switch (text.tag) {
-    'h1' => (LdSize.l, LdSize.s),
-    'h2' => (LdSize.l, LdSize.s),
-    'h3' => (LdSize.m, LdSize.s),
-    'h4' => (LdSize.s, LdSize.xs),
-    'h5' => (LdSize.s, LdSize.xs),
-    'h6' => (LdSize.xs, LdSize.s),
-    _ => (null, null),
-  };
-  final padding = EdgeInsets.only(
-    top: paddingTop != null ? theme.pad(size: paddingTop).top : 0,
-    bottom: paddingBottom != null ? theme.pad(size: paddingBottom).bottom : 0,
-  );
-  return Padding(
-    padding: padding,
-    child: Text.rich(
-      TextSpan(
-        children: _inlineNodesToSpans(
-          context,
-          text.children ?? [],
-          onLinkTap: onLinkTap,
-          onHashtagTap: onHashtagTap,
-          imageBuilder: imageBuilder,
-        ),
-        style: switch (text.tag) {
-          'p' => ldBuildTextStyle(theme, LdTextType.paragraph, LdSize.m),
-          'h1' => ldBuildTextStyle(theme, LdTextType.headline, LdSize.l),
-          'h2' => ldBuildTextStyle(theme, LdTextType.headline, LdSize.m),
-          'h3' => ldBuildTextStyle(theme, LdTextType.headline, LdSize.s),
-          'h4' => ldBuildTextStyle(theme, LdTextType.headline, LdSize.xs),
-          'h5' => ldBuildTextStyle(theme, LdTextType.headline, LdSize.xs),
-          'h6' => ldBuildTextStyle(theme, LdTextType.headline, LdSize.xs),
-          'em' || 'i' => const TextStyle(fontStyle: FontStyle.italic),
-          _ => throw Exception('Invalid text type: ${text.tag}'),
-        },
+  return Text.rich(
+    TextSpan(
+      children: _inlineNodesToSpans(
+        context,
+        text.children ?? [],
+        onLinkTap: onLinkTap,
+        onHashtagTap: onHashtagTap,
+        imageBuilder: imageBuilder,
       ),
+      style: switch (text.tag) {
+        'p' => ldBuildTextStyle(theme, LdTextType.paragraph, LdSize.m),
+        'h1' => ldBuildTextStyle(theme, LdTextType.headline, LdSize.l),
+        'h2' => ldBuildTextStyle(theme, LdTextType.headline, LdSize.m),
+        'h3' => ldBuildTextStyle(theme, LdTextType.headline, LdSize.s),
+        'h4' => ldBuildTextStyle(theme, LdTextType.headline, LdSize.xs),
+        'h5' => ldBuildTextStyle(theme, LdTextType.headline, LdSize.xs),
+        'h6' => ldBuildTextStyle(theme, LdTextType.headline, LdSize.xs),
+        'em' || 'i' => const TextStyle(fontStyle: FontStyle.italic),
+        _ => throw Exception('Invalid text type: ${text.tag}'),
+      },
     ),
   );
 }
@@ -981,7 +981,7 @@ void Function(String url, String title)? onLinkTap,
 InlineSpan buildTextSpan(
   BuildContext context,
   md.Node node, {
-void Function(String url, String title)? onLinkTap,
+  void Function(String url, String title)? onLinkTap,
   void Function(String tag)? onHashtagTap,
   Widget? Function(String src, String alt)? imageBuilder,
 }) {
@@ -1021,12 +1021,7 @@ void Function(String url, String title)? onLinkTap,
         children: children,
         style: const TextStyle(fontStyle: FontStyle.italic),
       ),
-      'a' => _buildAnchorSpan(
-        context,
-        node,
-        children,
-        onLinkTap: onLinkTap,
-      ),
+      'a' => _buildAnchorSpan(context, node, children, onLinkTap: onLinkTap),
       'sup' => _buildSuperscriptSpan(
         context,
         node,
@@ -1094,10 +1089,7 @@ InlineSpan _buildAnchorSpan(
 }
 
 class _FootnoteScope extends InheritedWidget {
-  const _FootnoteScope({
-    required this.definitions,
-    required super.child,
-  });
+  const _FootnoteScope({required this.definitions, required super.child});
 
   final Map<String, List<md.Node>> definitions;
 
@@ -1119,9 +1111,9 @@ class _FootnoteScope extends InheritedWidget {
     if (node is md.Element &&
         node.tag == 'section' &&
         (node.attributes['class'] ?? '').split(' ').contains('footnotes')) {
-      final ol = node.children
-          ?.whereType<md.Element>()
-          .firstWhereOrNull((e) => e.tag == 'ol');
+      final ol = node.children?.whereType<md.Element>().firstWhereOrNull(
+        (e) => e.tag == 'ol',
+      );
       for (final child in ol?.children ?? const <md.Node>[]) {
         if (child is! md.Element || child.tag != 'li') continue;
         final id = child.attributes['id'];
@@ -1139,9 +1131,9 @@ List<md.Node> _stripFootnoteBackrefs(List<md.Node> nodes) {
   final out = <md.Node>[];
   for (final node in nodes) {
     if (node is md.Element) {
-      if ((node.attributes['class'] ?? '').split(' ').contains(
-        'footnote-backref',
-      )) {
+      if ((node.attributes['class'] ?? '')
+          .split(' ')
+          .contains('footnote-backref')) {
         continue;
       }
       final children = node.children;
@@ -1177,11 +1169,11 @@ String? _footnoteDefId(md.Element sup) {
 }
 
 TextStyle _footnoteSupStyle(LdTheme theme) {
-  return ldBuildTextStyle(theme, LdTextType.label, LdSize.xs).copyWith(
-    height: 1,
-    fontWeight: FontWeight.w600,
-    color: theme.primaryColor,
-  );
+  return ldBuildTextStyle(
+    theme,
+    LdTextType.label,
+    LdSize.xs,
+  ).copyWith(height: 1, fontWeight: FontWeight.w600, color: theme.primaryColor);
 }
 
 InlineSpan _buildSuperscriptSpan(
@@ -1194,9 +1186,9 @@ InlineSpan _buildSuperscriptSpan(
 }) {
   final theme = LdTheme.of(context);
   final style = _footnoteSupStyle(theme);
-  final isFootnoteRef = (node.attributes['class'] ?? '').split(' ').contains(
-    'footnote-ref',
-  );
+  final isFootnoteRef = (node.attributes['class'] ?? '')
+      .split(' ')
+      .contains('footnote-ref');
   final defId = isFootnoteRef ? _footnoteDefId(node) : null;
   final body = defId == null
       ? null
@@ -1207,9 +1199,7 @@ InlineSpan _buildSuperscriptSpan(
       alignment: PlaceholderAlignment.top,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 1),
-        child: Text.rich(
-          TextSpan(children: children, style: style),
-        ),
+        child: Text.rich(TextSpan(children: children, style: style)),
       ),
     );
   }

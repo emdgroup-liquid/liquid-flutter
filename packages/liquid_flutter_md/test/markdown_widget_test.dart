@@ -66,6 +66,48 @@ void main() {
     expect(find.textContaining('link'), findsOneWidget);
   });
 
+  testWidgets('renders fenced code block without a language', (tester) async {
+    await tester.pumpWidget(
+      _withTheme(
+        const LdMarkdown(
+          data: '```\nplain code\n```\n',
+        ),
+      ),
+    );
+
+    // A missing language must not crash the highlighter (it previously
+    // passed a null language to highlight.parse, which threw).
+    expect(find.byType(RichText), findsOneWidget);
+  });
+
+  testWidgets('renders fenced code block with an unknown language', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _withTheme(
+        const LdMarkdown(
+          data: '```definitelynotalanguage\nweird code\n```\n',
+        ),
+      ),
+    );
+
+    expect(find.byType(RichText), findsOneWidget);
+  });
+
+  testWidgets('renders fenced code block with a known language', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _withTheme(
+        const LdMarkdown(
+          data: '```dart\nvoid main() {}\n```\n',
+        ),
+      ),
+    );
+
+    expect(find.byType(RichText), findsOneWidget);
+  });
+
   testWidgets('renders footnote refs and definitions', (tester) async {
     await tester.pumpWidget(
       _withTheme(
