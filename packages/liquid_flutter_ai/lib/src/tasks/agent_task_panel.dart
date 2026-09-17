@@ -185,16 +185,16 @@ class _LdAgentTaskPanelState extends State<LdAgentTaskPanel> {
 
     final theme = LdTheme.of(context);
 
-    return AppBarFrame(
-      position: LdAppBarPosition.bottom,
-      insidePadding: theme.pad(),
+    return LdRawAppBar(
+      addContainer: true,
+
       attached: true,
       scrollBehavior: LdAppBarScrollBehavior.static,
       outsideDecoration: BoxDecoration(
         color: theme.surface,
         border: Border(top: BorderSide(color: theme.border)),
       ),
-      wrappedChild: widget.child,
+      content: widget.child,
       child: Builder(
         builder: (context) {
           return Container(

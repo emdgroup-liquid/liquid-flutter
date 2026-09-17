@@ -37,6 +37,9 @@ class _LdToolAllowRulePickerSheetState
     extends State<LdToolAllowRulePickerSheet> {
   late LdToolAllowFieldSession _session;
   late final Map<String, dynamic> _requestArgs;
+  late final LdToolAllowRule _usedArgumentsRule;
+  late final LdToolAllowRule _usedWildcardRule;
+  bool _wildcard = false;
 
   @override
   void initState() {
@@ -46,18 +49,73 @@ class _LdToolAllowRulePickerSheetState
             widget.seedRule!.toolName == widget.toolName
         ? widget.seedRule
         : null;
-    _session = ldBuildToolAllowFieldSession(
-      inputSchema: widget.inputSchema,
-      arguments: widget.functionArguments,
-      seedRule: seed,
-    );
+    _wildcard = seed?.wildcard ?? false;
+    _session = _buildSession(seedRule: seed);
+    _usedArgumentsRule = _buildSession().toRule(widget.toolName);
+    _usedWildcardRule = _buildUsedWildcardSession().toRule(widget.toolName);
+  }
+
+  LdToolAllowFieldSession _buildSession({LdToolAllowRule? seedRule}) =>
+      ldBuildToolAllowFieldSession(
+        inputSchema: widget.inputSchema,
+        arguments: widget.functionArguments,
+        seedRule: seedRule,
+      );
+
+  /// Session where every argument path used by the request is pinned to Any.
+  LdToolAllowFieldSession _buildUsedWildcardSession() {
+    final session = _buildSession();
+    final usedPaths = <String>{};
+    void walk(Map<String, dynamic> map, String prefix) {
+      for (final entry in map.entries) {
+        final path = prefix.isEmpty ? entry.key : '$prefix.${entry.key}';
+        usedPaths.add(path);
+        if (entry.value is Map) {
+          walk(Map<String, dynamic>.from(entry.value as Map), path);
+        }
+      }
+    }
+
+    walk(_requestArgs, '');
+    final pins = <String, LdToolAllowFieldPin>{};
+    for (final entry in session.pins.entries) {
+      pins[entry.key] = usedPaths.contains(entry.key)
+          ? const LdToolAllowFieldPin(mode: LdToolAllowPinMode.wildcard)
+          : entry.value;
+    }
+    return session.copyWithPins(pins);
   }
 
   void _pop(LdToolAllowRulePickerResult result) {
     Navigator.of(context).pop(result);
   }
 
-  LdToolAllowRule get _draftRule => _session.toRule(widget.toolName);
+  void _applyWildcard() {
+    setState(() => _wildcard = true);
+  }
+
+  void _applyUsedArguments() {
+    setState(() {
+      _wildcard = false;
+      _session = _buildSession();
+    });
+  }
+
+  void _applyUsedWildcard() {
+    setState(() {
+      _wildcard = false;
+      _session = _buildUsedWildcardSession();
+    });
+  }
+
+  bool get _usedArgumentsActive =>
+      !_wildcard && _draftRule == _usedArgumentsRule;
+
+  bool get _usedWildcardActive => !_wildcard && _draftRule == _usedWildcardRule;
+
+  LdToolAllowRule get _draftRule => _wildcard
+      ? LdToolAllowRule.wildcardAll(toolName: widget.toolName)
+      : _session.toRule(widget.toolName);
 
   bool get _draftMatchesRequest =>
       _draftRule.matches(widget.toolName, _requestArgs);
@@ -123,19 +181,53 @@ class _LdToolAllowRulePickerSheetState
                 'Nested object alternatives are not OR-combined; use Any on '
                 'the parent or separate rules.',
               ),
-              LdToolAllowFieldTree(
-                session: _session,
-                onPinChanged: (path, pin) {
-                  setState(() {
-                    _session = _session.copyWithPins({
-                      ..._session.pins,
-                      path: pin,
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  LdButton(
+                    mode: _wildcard
+                        ? LdButtonMode.filled
+                        : LdButtonMode.outline,
+                    onPressed: _applyWildcard,
+                    child: const Text('Allow any arguments'),
+                  ),
+                  LdButton(
+                    mode: _usedArgumentsActive
+                        ? LdButtonMode.filled
+                        : LdButtonMode.outline,
+                    onPressed: _applyUsedArguments,
+                    child: const Text('Allow used'),
+                  ),
+                  LdButton(
+                    mode: _usedWildcardActive
+                        ? LdButtonMode.filled
+                        : LdButtonMode.outline,
+                    onPressed: _applyUsedWildcard,
+                    child: const Text('Allow * for used'),
+                  ),
+                ],
+              ),
+              if (_wildcard)
+                const LdHint(
+                  type: LdHintType.info,
+                  child: Text('Any arguments allowed for this tool.'),
+                ).padL()
+              else
+                LdToolAllowFieldTree(
+                  session: _session,
+                  onPinChanged: (path, pin) {
+                    setState(() {
+                      _wildcard = false;
+                      _session = _session.copyWithPins({
+                        ..._session.pins,
+                        path: pin,
+                      });
                     });
-                  });
-                },
-                emptyLabel:
-                    'No arguments to pin — rule will require no arguments.',
-              ).padL(),
+                  },
+                  emptyLabel:
+                      'No arguments to pin — rule will require no arguments.',
+                ).padL(),
               LdAccordion.single(
                 initialOpen: false,
                 size: LdSize.s,

@@ -30,8 +30,8 @@ class LdTimePicker extends StatelessWidget {
   Widget build(BuildContext context) {
     final locale = LiquidLocalizations.of(context);
     final theme = LdTheme.of(context, listen: true);
-    final lineBoxHeight = theme.labelSize(size) * ldLineHeight(LdTextType.label, size: size);
-    final fieldPadding = theme.controlContentPadding(size) - EdgeInsets.all(theme.borderWidth);
+    final scope = LdControlGroupScope.of(context);
+    final size = scope?.size ?? this.size;
 
     var initialTimeString = locale.selectTime;
 
@@ -41,56 +41,45 @@ class LdTimePicker extends StatelessWidget {
 
     return LdBundle(
       children: [
-        if (label != null)
+        if (label != null && scope == null)
           LdText.l(
             label!,
             size: size,
           ),
-        LdTouchableSurface(
-          allowTapOutside: true,
-          disabled: disabled,
-          focusNode: focusNode,
-          key: const Key("time_picker_button"),
-          onPressed: () async {
-            final navigator = useRootNavigator ? Navigator.of(context, rootNavigator: true) : Navigator.of(context);
-            final newTime = await navigator.push(LdModalRoute(
-              context: context,
-              pageBuilder: (context) => LdTimePickerModal(initialTime: value, minutePrecision: minutePrecision),
-            )) as TimeOfDay?;
+        ldGroupLabelTooltip(
+          context: context,
+          label: label,
+          child: LdTouchableSurface(
+            allowTapOutside: true,
+            disabled: disabled,
+            focusNode: focusNode,
+            key: const Key("time_picker_button"),
+            onPressed: () async {
+              final navigator = useRootNavigator ? Navigator.of(context, rootNavigator: true) : Navigator.of(context);
+              final newTime = await navigator.push(LdModalRoute(
+                context: context,
+                pageBuilder: (context) => LdTimePickerModal(initialTime: value, minutePrecision: minutePrecision),
+              )) as TimeOfDay?;
 
-            if (newTime != null) {
-              onChanged(newTime);
-            }
-          },
-          builder: (context, status, _) => Builder(builder: (context) {
-            final colorBundle = inputColor(theme, status, isValid: true);
-            return Container(
-              clipBehavior: Clip.hardEdge,
-              padding: fieldPadding,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: colorBundle.surface,
-                borderRadius: theme.radius(LdSize.s),
-                border: Border.all(
-                  color: colorBundle.border,
-                  width: theme.borderWidth,
+              if (newTime != null) {
+                onChanged(newTime);
+              }
+            },
+            builder: (context, status, _) => Builder(builder: (context) {
+              final colorBundle = inputColor(theme, status, isValid: true);
+              return LdFieldFrame(
+                colors: colorBundle,
+                size: size,
+                child: LdText.l(
+                  initialTimeString,
+                  size: size,
+                  color: colorBundle.text,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: lineBoxHeight,
-                ),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: LdText.l(
-                    initialTimeString,
-                    size: size,
-                    color: colorBundle.text,
-                  ),
-                ),
-              ),
-            );
-          }),
+              );
+            }),
+          ),
         ),
       ],
     );
@@ -131,6 +120,7 @@ class _LdTimePickerModalState extends State<LdTimePickerModal> {
             LdFlexibleChild(
               child: LdButton.vague(
                 width: double.infinity,
+                size: LdSize.l,
                 child: Text(LiquidLocalizations.of(context).done),
                 onPressed: () => Navigator.pop(context, _time),
               ),

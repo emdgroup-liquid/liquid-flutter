@@ -9,6 +9,7 @@ class LdOverflowViewParentData extends ContainerBoxParentData<RenderBox> {
   bool? offstage;
   int? consumeRemainder;
   bool pinnedFromOverflow = false;
+  bool alwaysOverflow = false;
 }
 
 class LdRenderOverflowView extends RenderBox
@@ -303,6 +304,7 @@ class LdRenderOverflowView extends RenderBox
           }
         });
       }
+
       visit(child);
     }
   }
@@ -374,6 +376,12 @@ class LdRenderOverflowView extends RenderBox
     return _findAdaptiveDescendant(child);
   }
 
+  int _adaptiveDescendantCount(RenderBox child) {
+    final adaptives = <RenderLdOverflowAdaptiveChild>[];
+    _collectAdaptivesInChildOrder([child], adaptives);
+    return adaptives.length;
+  }
+
   double _childMainSize(
     RenderBox child, {
     required bool preferExpanded,
@@ -383,8 +391,12 @@ class LdRenderOverflowView extends RenderBox
     if (parentData.consumeRemainder != null && parentData.consumeRemainder! > 0) {
       return 0.0;
     }
-    final adaptive = _adaptiveSizeForChild(child);
-    if (adaptive != null) {
+    if (parentData.alwaysOverflow) {
+      return 0.0;
+    }
+    final adaptiveCount = _adaptiveDescendantCount(child);
+    if (adaptiveCount == 1) {
+      final adaptive = _adaptiveSizeForChild(child)!;
       if (preferExpanded) {
         return adaptive.preferredMainSize(crossExtent, isHorizontal: _isHorizontal);
       }
@@ -392,7 +404,18 @@ class LdRenderOverflowView extends RenderBox
           ? adaptive.compactMainSize(crossExtent, isHorizontal: _isHorizontal)
           : adaptive.preferredMainSize(crossExtent, isHorizontal: _isHorizontal);
     }
-    return _isHorizontal ? child.getMinIntrinsicWidth(constraints.maxHeight) : child.getMinIntrinsicHeight(constraints.maxWidth);
+    if (adaptiveCount > 1) {
+      return _isHorizontal
+          ? (preferExpanded
+              ? child.getMaxIntrinsicWidth(constraints.maxHeight)
+              : child.getMinIntrinsicWidth(constraints.maxHeight))
+          : (preferExpanded
+              ? child.getMaxIntrinsicHeight(constraints.maxWidth)
+              : child.getMinIntrinsicHeight(constraints.maxWidth));
+    }
+    return _isHorizontal
+        ? child.getMinIntrinsicWidth(constraints.maxHeight)
+        : child.getMinIntrinsicHeight(constraints.maxWidth);
   }
 
   List<double> _getChildrenMainSizes(
@@ -401,7 +424,9 @@ class LdRenderOverflowView extends RenderBox
   }) {
     final crossExtent = _isHorizontal ? constraints.maxHeight : constraints.maxWidth;
 
-    return children.map((child) => _childMainSize(child, preferExpanded: preferExpanded, crossExtent: crossExtent)).toList();
+    return children
+        .map((child) => _childMainSize(child, preferExpanded: preferExpanded, crossExtent: crossExtent))
+        .toList();
   }
 
   bool _isFlexChild(LdOverflowViewParentData parentData) {
@@ -412,7 +437,14 @@ class LdRenderOverflowView extends RenderBox
     return parentData.pinnedFromOverflow;
   }
 
+  bool _isAlwaysOverflowChild(LdOverflowViewParentData parentData) {
+    return parentData.alwaysOverflow;
+  }
+
   bool _mustShowChild(LdOverflowViewParentData parentData) {
+    if (_isAlwaysOverflowChild(parentData)) {
+      return false;
+    }
     return _isFlexChild(parentData) || _isPinnedChild(parentData);
   }
 
@@ -495,6 +527,10 @@ class LdRenderOverflowView extends RenderBox
       if (onStage[i]) {
         continue;
       }
+      final parentData = children[i].parentData as LdOverflowViewParentData;
+      if (_isAlwaysOverflowChild(parentData)) {
+        continue;
+      }
       onStage[i] = true;
       final overflowCount = _overflowedChildIndices(children, onStage).length;
       final projected = _projectedOnStageExtentForMaskWithIndicator(
@@ -553,8 +589,20 @@ class LdRenderOverflowView extends RenderBox
     return false;
   }
 
+  bool _hasAlwaysOverflowChildren(List<RenderBox> children) {
+    for (final child in children) {
+      final parentData = child.parentData as LdOverflowViewParentData;
+      if (_isAlwaysOverflowChild(parentData)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   double _flexChildMinMainSize(RenderBox child) {
-    return _isHorizontal ? child.getMinIntrinsicWidth(constraints.maxHeight) : child.getMinIntrinsicHeight(constraints.maxWidth);
+    return _isHorizontal
+        ? child.getMinIntrinsicWidth(constraints.maxHeight)
+        : child.getMinIntrinsicHeight(constraints.maxWidth);
   }
 
   /// Minimum main-axis space reserved for [LdFlexibleChild] widgets before fitting
@@ -764,8 +812,8 @@ class LdRenderOverflowView extends RenderBox
 
     final indicesUnchanged = _lastIndicatorOverflowedIndices != null &&
         _sameOverflowedChildIndices(_lastIndicatorOverflowedIndices!, overflowedChildIndices);
-    final constraintsUnchanged = _lastIndicatorConstraints != null &&
-        !_constraintsChangedSignificantly(_lastIndicatorConstraints!);
+    final constraintsUnchanged =
+        _lastIndicatorConstraints != null && !_constraintsChangedSignificantly(_lastIndicatorConstraints!);
 
     // Only skip layout when both the overflowed indices and constraints are unchanged.
     if (indicesUnchanged && constraintsUnchanged && _cachedIndicatorSizes!.containsKey(overflowCount)) {
@@ -814,12 +862,13 @@ class LdRenderOverflowView extends RenderBox
         : _getChildrenMainSizes(children, preferExpanded: true);
 
     final hasPinnedChildren = _hasPinnedChildren(children);
+    final hasAlwaysOverflowChildren = _hasAlwaysOverflowChildren(children);
     late final List<bool> onStageMask;
     late final List<int> onStageIndices;
     late final List<RenderBox> renderedChildren;
     late final List<int> overflowedChildIndices;
 
-    if (hasPinnedChildren) {
+    if (hasPinnedChildren || hasAlwaysOverflowChildren) {
       onStageMask = _resolveOnStageMask(
         children,
         childrenSizes,
@@ -940,10 +989,12 @@ class LdRenderOverflowView extends RenderBox
         final flexRatio = flex / totalFlex;
         final minFlexExtent = _flexChildMinMainSize(child);
         final flexShare = flexBudget * flexRatio;
-        flexChildFinalWidths[renderedIndex] = math.min(
-          flexBudget,
-          math.max(minFlexExtent, flexShare),
-        ).toDouble();
+        flexChildFinalWidths[renderedIndex] = math
+            .min(
+              flexBudget,
+              math.max(minFlexExtent, flexShare),
+            )
+            .toDouble();
       }
     }
 
@@ -1047,9 +1098,7 @@ class LdRenderOverflowView extends RenderBox
       offset += _getMainSizeOfRenderBox(child) + spacing;
     }
 
-    final mainExtent = renderedChildren.isEmpty
-        ? 0.0
-        : math.max(0.0, offset - spacing).toDouble();
+    final mainExtent = renderedChildren.isEmpty ? 0.0 : math.max(0.0, offset - spacing).toDouble();
     _hasOverflow = showOverflowIndicator || mainExtent > availableExtent + 0.5;
 
     Size idealSize;

@@ -11,7 +11,7 @@ The Liquid Flutter design system provides a comprehensive set of components and 
 ## Core Components for General Tasks
 
 ### Layout Components
-- **LdScaffold**: Main page scaffold with drawer support. Wrap the body with `LdAppBar` to add app bars. Use `drawer` / `drawerWidth` / `drawerMinWidth` when hosting a side panel (e.g. a rail).
+- **LdScaffold**: Main page scaffold with drawer support. Wrap the body with `LdAppBar` to add app bars. Use `drawer` / `drawerWidth` / `drawerMinWidth` when hosting a side panel (e.g. a rail). Set `drawerCollapsible: false` to pin a side-by-side drawer open and hide the app bar's close toggle (e.g. a permanent `LdNavigationRail`).
 - **LdAppBar**: App bar that wraps its `child`. Use `LdAppBar.top` / `LdAppBar.bottom` or nest bars for multiple edges.
 - **LdScaffoldBody**: Body wrapper for scaffold content. Use `addContainer: true` for automatic container padding.
 - **LdAutoSpace**: Automatically spaces children in a Column based on component types. Use for arranging items vertically with proper spacing.
@@ -22,7 +22,7 @@ The Liquid Flutter design system provides a comprehensive set of components and 
 ### Navigation Components
 - **LdNavigationTab**: Shared primary destination model (`label`, `icon`, `route`, optional `isActive`). Use the same list for bottom tabs and the side rail. Call `matches(context, activeRoute)` for highlight state (`*` wildcard suffix or custom `isActive`).
 - **LdTabNavigation**: Horizontal tab bar (typically bottom on mobile). Pass `List<LdNavigationTab>`, `activeRoute` (or `pageController`), and `onTabPressed`. Wraps `child` like an app bar edge.
-- **LdNavigationRail**: Vertical primary nav for `LdScaffold.drawer`. Same `LdNavigationTab` destinations. Width-responsive: compact square icon-over-label tiles when narrow; icon beside label when at/above `extendedBreakpoint` (default `LdNavigationRail.defaultExtendedBreakpoint`). Use `LdNavigationRail.defaultWidth` / `defaultMinWidth` with scaffold `drawerWidth` / `drawerMinWidth`. Optional `leading` / `trailing`.
+- **LdNavigationRail**: Vertical primary nav for `LdScaffold.drawer`. Same `LdNavigationTab` destinations. Width-responsive: compact square icon-over-label tiles when narrow; icon beside label when at/above `extendedBreakpoint` (default `LdNavigationRail.defaultExtendedBreakpoint`). Use `LdNavigationRail.defaultWidth` / `defaultMinWidth` with scaffold `drawerWidth` / `drawerMinWidth`. Optional `leading` / `trailing`. A permanent rail should use `drawerCollapsible: false` so the drawer stays pinned and its close toggle is removed (avoids overflowing narrow rails).
 - **LdDrawerItemSection** / **LdSectionHeader**: Hierarchical drawer content (nested sections, search-heavy nav). Prefer these for deep trees; prefer `LdNavigationRail` for flat primary destinations.
 
 **App-owned chrome switch:** The app chooses tabs vs rail (e.g. mobile → `LdTabNavigation`, desktop → drawer + `LdNavigationRail`). Scaffold does not auto-switch.
@@ -310,4 +310,4 @@ Prefer Lucide icons over `Icons` / `CupertinoIcons` where applicable. The `lucid
 8. **Retrieve colors** from `LdTheme.of(context)` rather than hardcoding
 9. **Apply radius** using `LdTheme.of(context).radius()` for consistency
 10. **Use Lucide icons** wherever possible instead of the default Icons or CupertinoIcons
-11. **Primary nav**: Reuse `LdNavigationTab` for both `LdTabNavigation` and `LdNavigationRail`; app chooses which chrome to show. Use `drawerMinWidth: LdNavigationRail.defaultMinWidth` when the drawer hosts a rail.
+11. **Primary nav**: Reuse `LdNavigationTab` for both `LdTabNavigation` and `LdNavigationRail`; app chooses which chrome to show. Use `drawerMinWidth: LdNavigationRail.defaultMinWidth` when the drawer hosts a rail, and `drawerCollapsible: false` when the rail is permanent (pinned drawer, no close toggle).

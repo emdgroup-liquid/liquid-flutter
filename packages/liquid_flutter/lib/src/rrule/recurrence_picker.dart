@@ -33,72 +33,61 @@ class LdRecurrencePicker extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = LiquidLocalizations.of(context);
     final theme = LdTheme.of(context, listen: true);
+    final scope = LdControlGroupScope.of(context);
+    final size = scope?.size ?? this.size;
     final summary = ldRecurrenceRuleSummary(
       value,
       l10n: l10n,
       localeName: Localizations.localeOf(context).toString(),
     );
-    final lineBoxHeight = theme.labelSize(size) * ldLineHeight(LdTextType.label, size: size);
-    final fieldPadding = theme.controlContentPadding(size) - EdgeInsets.all(theme.borderWidth);
 
     return LdBundle(
       children: [
-        if (label != null)
+        if (label != null && scope == null)
           LdText.l(
             label!,
             size: size,
           ),
-        LdTouchableSurface(
-          allowTapOutside: true,
-          key: const Key('recurrence_picker_button'),
-          disabled: disabled,
-          onPressed: () async {
-            final navigator = useRootNavigator ? Navigator.of(context, rootNavigator: true) : Navigator.of(context);
-            final result = await navigator.push<RecurrenceRule?>(
-              LdModalRoute(
-                context: context,
-                pageBuilder: (context) => LdRecurrencePickerModal(
-                  initialValue: value,
-                  start: start,
-                  title: label ?? l10n.selectRecurrence,
-                  config: config,
-                ),
-              ),
-            );
-            if (result != null) {
-              onChanged(result);
-            }
-          },
-          builder: (context, status, _) => Builder(
-            builder: (context) {
-              final colorBundle = inputColor(theme, status, isValid: true);
-              return Container(
-                clipBehavior: Clip.hardEdge,
-                padding: fieldPadding,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: colorBundle.surface,
-                  borderRadius: theme.radius(LdSize.s),
-                  border: Border.all(
-                    color: colorBundle.border,
-                    width: theme.borderWidth,
-                  ),
-                ),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: lineBoxHeight,
-                  ),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: LdText.l(
-                      summary,
-                      size: size,
-                      color: colorBundle.text,
-                    ),
+        ldGroupLabelTooltip(
+          context: context,
+          label: label,
+          child: LdTouchableSurface(
+            allowTapOutside: true,
+            key: const Key('recurrence_picker_button'),
+            disabled: disabled,
+            onPressed: () async {
+              final navigator = useRootNavigator ? Navigator.of(context, rootNavigator: true) : Navigator.of(context);
+              final result = await navigator.push<RecurrenceRule?>(
+                LdModalRoute(
+                  context: context,
+                  pageBuilder: (context) => LdRecurrencePickerModal(
+                    initialValue: value,
+                    start: start,
+                    title: label ?? l10n.selectRecurrence,
+                    config: config,
                   ),
                 ),
               );
+              if (result != null) {
+                onChanged(result);
+              }
             },
+            builder: (context, status, _) => Builder(
+              builder: (context) {
+                final colorBundle = inputColor(theme, status, isValid: true);
+                return LdFieldFrame(
+                  colors: colorBundle,
+                  size: size,
+                  child: LdText.l(
+                    summary,
+                    size: size,
+                    color: colorBundle.text,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                );
+              },
+            ),
           ),
         ),
       ],

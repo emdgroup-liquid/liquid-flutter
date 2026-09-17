@@ -478,6 +478,24 @@ LdMonkeySubmitAction<Task, int, void>(
 )
 ```
 
+### `LdMonkeyActionGroup`
+
+Wrap related actions so they render with dividers from neighbors and overflow as one app bar item. Mix groups with standalone actions in the same list. Child visibility still applies; [appBarOverflowMode] on the group applies to every member.
+
+```dart
+actions: [
+  refreshAction<Task, int>(),
+  reactiveCreateAction<Task, int>(routeConfig: routeConfig),
+  LdMonkeyActionGroup(
+    actions: [
+      markDone,
+      markUndone,
+    ],
+  ),
+  deleteAction<Task, int>(),
+]
+```
+
 ### Built-in Action Factories
 
 | Factory Function | Location | Behavior |
@@ -984,7 +1002,7 @@ The provider stack is:
 3. **Always use `LdMonkeyRouteConfig.identifiableString` or `.identifiableInt`** — custom serialization only when IDs contain underscores or special characters.
 4. **Keep `itemName` unique across the entire monkey tree** to avoid URL parameter collisions.
 5. **Use the built-in action factories** (`toggleSelectionControls`, `showSelection`, `showFilterContextMenu`, `refreshAction`, `deleteAction`, `reactiveCreateAction`) before writing custom ones.
-6. **Prefer `LdMonkeyBareChildAction` for simple buttons** and `LdMonkeySubmitAction` for async operations.
+6. **Prefer `LdMonkeyBareChildAction` for simple buttons** and `LdMonkeySubmitAction` for async operations. Use `LdMonkeyActionGroup` to keep related actions together in the app bar and menus.
 7. **Use `LdMonkeyActionVisibility` to control action placement** — set the `location`, `minSelectionCount`, and `layoutModes` to match your UX requirements.
 8. **Add `LdFilterSearch` to enable search** — it automatically adds a search bar to the master app bar and syncs with URL query params.
 9. **Use `LdMonkeyDetailPage.scrollable` for multiple viewing items** and `.stacked` for animated transitions.

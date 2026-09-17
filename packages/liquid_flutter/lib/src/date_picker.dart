@@ -72,66 +72,54 @@ class _LdDatePickerState extends State<LdDatePicker> {
   @override
   Widget build(BuildContext context) {
     final theme = LdTheme.of(context, listen: true);
-    final size = widget.size;
-    final lineBoxHeight = theme.labelSize(size) * ldLineHeight(LdTextType.label, size: size);
-    final fieldPadding = theme.controlContentPadding(size) - EdgeInsets.all(theme.borderWidth);
+    final scope = LdControlGroupScope.of(context);
+    final size = scope?.size ?? widget.size;
     return LdBundle(
       children: [
-        if (widget.label != null)
+        if (widget.label != null && scope == null)
           LdText.l(
             widget.label!,
             size: size,
           ),
-        LdTouchableSurface(
-          allowTapOutside: true,
-          key: const Key("date_picker_button"),
-          onPressed: () async {
-            final result = await Navigator.of(context).push<DateTime?>(LdModalRoute(
-                context: context,
-                pageBuilder: (context) => LdDatePickerModal(
-                      selectedDate: _selectedDate,
-                      minDate: widget.minDate,
-                      maxDate: widget.maxDate,
-                      label: widget.label ?? LiquidLocalizations.of(context).selectDate,
-                    )));
+        ldGroupLabelTooltip(
+          context: context,
+          label: widget.label,
+          child: LdTouchableSurface(
+            allowTapOutside: true,
+            key: const Key("date_picker_button"),
+            onPressed: () async {
+              final result = await Navigator.of(context).push<DateTime?>(LdModalRoute(
+                  context: context,
+                  pageBuilder: (context) => LdDatePickerModal(
+                        selectedDate: _selectedDate,
+                        minDate: widget.minDate,
+                        maxDate: widget.maxDate,
+                        label: widget.label ?? LiquidLocalizations.of(context).selectDate,
+                      )));
 
-            if (result != null && mounted) {
-              setState(() {
-                _selectedDate = result;
-              });
-              widget.onChanged(_selectedDate);
-            }
-          },
-          disabled: widget.disabled,
-          builder: (context, status, _) => Builder(builder: (context) {
-            final colorBundle = inputColor(theme, status, isValid: true);
-            return Container(
-              clipBehavior: Clip.hardEdge,
-              padding: fieldPadding,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: colorBundle.surface,
-                borderRadius: theme.radius(LdSize.s),
-                border: Border.all(
-                  color: colorBundle.border,
-                  width: theme.borderWidth,
+              if (result != null && mounted) {
+                setState(() {
+                  _selectedDate = result;
+                });
+                widget.onChanged(_selectedDate);
+              }
+            },
+            disabled: widget.disabled,
+            builder: (context, status, _) => Builder(builder: (context) {
+              final colorBundle = inputColor(theme, status, isValid: true);
+              return LdFieldFrame(
+                colors: colorBundle,
+                size: size,
+                child: LdText.l(
+                  initialDateString,
+                  size: size,
+                  color: colorBundle.text,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minHeight: lineBoxHeight,
-                ),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: LdText.l(
-                    initialDateString,
-                    size: size,
-                    color: colorBundle.text,
-                  ),
-                ),
-              ),
-            );
-          }),
+              );
+            }),
+          ),
         )
       ],
     );

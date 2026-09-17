@@ -240,19 +240,39 @@ class _LdInputState extends State<LdInput> {
   @override
   Widget build(BuildContext context) {
     final theme = LdTheme.of(context, listen: true);
+    final scope = LdControlGroupScope.of(context);
+    final textDirection = Directionality.of(context);
+    final size = scope?.size ?? widget.size;
 
     final contentPadding = widget.padding ?? EdgeInsets.zero;
 
     final labelStyle = ldBuildTextStyle(
       theme,
       LdTextType.label,
-      widget.size,
+      size,
       fontWeight: FontWeight.w400,
     );
     final hintStyle = labelStyle.copyWith(color: theme.textMuted);
     final lineBoxHeight = labelStyle.fontSize! * labelStyle.height!;
     final cursorHeight = lineBoxHeight;
-    final fieldPadding = theme.controlContentPadding(widget.size) - EdgeInsets.all(theme.borderWidth);
+
+    // Border widths compensate the field padding so text aligns independently
+    // of the group position (outer edges full, seam edges half).
+    final groupBorder = scope?.borderFor(theme, theme.border, textDirection);
+    final controlPadding = theme.controlContentPadding(size);
+    final borderWidth = theme.borderWidth;
+    final fieldPadding = groupBorder != null
+        ? EdgeInsets.fromLTRB(
+            controlPadding.left - groupBorder.left.width,
+            controlPadding.top - groupBorder.top.width,
+            controlPadding.right - groupBorder.right.width,
+            controlPadding.bottom - groupBorder.bottom.width,
+          )
+        : controlPadding - EdgeInsets.all(borderWidth);
+
+    final borderRadius = scope != null
+        ? scope.radiusFor(theme, textDirection, explicit: widget.borderRadius)
+        : widget.borderRadius ?? theme.radius(LdSize.s);
 
     var clearButton = widget.showClear && _controller.text.isNotEmpty && !widget.disabled
         ? GestureDetector(
@@ -260,7 +280,7 @@ class _LdInputState extends State<LdInput> {
               _controller.clear();
               widget.onCleared?.call();
             },
-            child: Icon(LucideIcons.x, size: theme.labelSize(widget.size), color: theme.primaryColor))
+            child: Icon(LucideIcons.x, size: theme.labelSize(size), color: theme.primaryColor))
         : null;
 
     final suffix = AnimatedSwitcher(
@@ -277,113 +297,117 @@ class _LdInputState extends State<LdInput> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (widget.label != null)
+          if (widget.label != null && scope == null)
             LdText.l(
               widget.label!,
-              size: widget.size,
+              size: size,
             ),
-          CallbackShortcuts(
-            bindings: _shortcutBindings(context),
-            child: LdTouchableSurface(
-              allowTapOutside: widget.allowTapOutside,
-              textFieldTapRegion: true,
-              focusNode: _focusScopeNode,
-              onPressed: () {
-                _focusNode.requestFocus();
-              },
-              active: _focusScopeNode.hasFocus,
-              disabled: widget.disabled,
-              onPressedKeys: {},
-              builder: (context, status, _) => Builder(builder: (context) {
-                final colors = inputColor(theme, status, isValid: widget.valid);
-                return Container(
-                  clipBehavior: Clip.hardEdge,
-                  decoration: BoxDecoration(
-                    color: colors.surface,
-                    borderRadius: widget.borderRadius ?? theme.radius(LdSize.s),
-                    border: Border.all(
-                      color: colors.border,
-                      width: theme.borderWidth,
+          ldGroupLabelTooltip(
+            context: context,
+            label: widget.label,
+            child: CallbackShortcuts(
+              bindings: _shortcutBindings(context),
+              child: LdTouchableSurface(
+                allowTapOutside: widget.allowTapOutside,
+                textFieldTapRegion: true,
+                focusNode: _focusScopeNode,
+                onPressed: () {
+                  _focusNode.requestFocus();
+                },
+                active: _focusScopeNode.hasFocus,
+                disabled: widget.disabled,
+                onPressedKeys: {},
+                builder: (context, status, _) => Builder(builder: (context) {
+                  final colors = inputColor(theme, status, isValid: widget.valid);
+                  return Container(
+                    key: const Key('ldInput_container'),
+                    clipBehavior: Clip.hardEdge,
+                    decoration: BoxDecoration(
+                      color: colors.surface,
+                      borderRadius: borderRadius,
+                      border: scope != null
+                          ? scope.borderFor(theme, colors.border, textDirection)
+                          : Border.all(color: colors.border, width: theme.borderWidth),
                     ),
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Padding(
-                        padding: contentPadding,
-                        child: Padding(
-                          padding: fieldPadding,
-                          child: ConstrainedBox(
-                            constraints: BoxConstraints(
-                              minHeight: lineBoxHeight,
-                            ),
-                            child: Row(
-                              children: [
-                                if (widget.leading != null) ...[
-                                  IconTheme(
-                                    data: IconThemeData(
-                                      color: colors.icon,
-                                      size: theme.labelSize(widget.size),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Padding(
+                          padding: contentPadding,
+                          child: Padding(
+                            padding: fieldPadding,
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                minHeight: lineBoxHeight,
+                              ),
+                              child: Row(
+                                children: [
+                                  if (widget.leading != null) ...[
+                                    IconTheme(
+                                      data: IconThemeData(
+                                        color: colors.icon,
+                                        size: theme.labelSize(size),
+                                      ),
+                                      child: widget.leading!,
                                     ),
-                                    child: widget.leading!,
+                                    ldSpacerS
+                                  ],
+                                  Flexible(
+                                    child: TextField(
+                                      focusNode: _focusNode,
+                                      contextMenuBuilder:
+                                          widget.onCustomPaste == null ? _defaultContextMenuBuilder : _buildContextMenu,
+                                      enabled: !widget.disabled,
+                                      controller: _controller,
+                                      cursorColor: theme.palette.primary.idle(
+                                        theme.isDark,
+                                      ),
+                                      selectAllOnFocus: widget.selectAllOnFocus,
+                                      cursorHeight: cursorHeight,
+                                      maxLines: widget.maxLines,
+                                      autofillHints: widget.autofillHints,
+                                      keyboardType: widget.keyboardType,
+                                      enableInteractiveSelection: true,
+                                      minLines: widget.minLines,
+                                      decoration: InputDecoration(
+                                        hintText: widget.hint,
+                                        border: InputBorder.none,
+                                        hintStyle: hintStyle,
+                                        isCollapsed: true,
+                                        filled: false,
+                                        isDense: true,
+                                        contentPadding: EdgeInsets.zero,
+                                      ),
+                                      obscureText: widget.obscureText,
+                                      autofocus: widget.autofocus,
+                                      textInputAction: widget.textInputAction,
+                                      scrollPadding: theme.pad() * 5,
+                                      onSubmitted: widget.onSubmitted,
+                                      cursorWidth: 1,
+                                      style: widget.style ??
+                                          labelStyle.copyWith(
+                                            color: colors.text,
+                                          ),
+                                    ),
                                   ),
-                                  ldSpacerS
+                                  suffix,
+                                  if (widget.trailing != null) widget.trailing!,
                                 ],
-                                Flexible(
-                                  child: TextField(
-                                    focusNode: _focusNode,
-                                    contextMenuBuilder:
-                                        widget.onCustomPaste == null ? _defaultContextMenuBuilder : _buildContextMenu,
-                                    enabled: !widget.disabled,
-                                    controller: _controller,
-                                    cursorColor: theme.palette.primary.idle(
-                                      theme.isDark,
-                                    ),
-                                    selectAllOnFocus: widget.selectAllOnFocus,
-                                    cursorHeight: cursorHeight,
-                                    maxLines: widget.maxLines,
-                                    autofillHints: widget.autofillHints,
-                                    keyboardType: widget.keyboardType,
-                                    enableInteractiveSelection: true,
-                                    minLines: widget.minLines,
-                                    decoration: InputDecoration(
-                                      hintText: widget.hint,
-                                      border: InputBorder.none,
-                                      hintStyle: hintStyle,
-                                      isCollapsed: true,
-                                      filled: false,
-                                      isDense: true,
-                                      contentPadding: EdgeInsets.zero,
-                                    ),
-                                    obscureText: widget.obscureText,
-                                    autofocus: widget.autofocus,
-                                    textInputAction: widget.textInputAction,
-                                    scrollPadding: theme.pad() * 5,
-                                    onSubmitted: widget.onSubmitted,
-                                    cursorWidth: 1,
-                                    style: widget.style ??
-                                        labelStyle.copyWith(
-                                          color: colors.text,
-                                        ),
-                                  ),
-                                ),
-                                suffix,
-                                if (widget.trailing != null) widget.trailing!,
-                              ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      if (widget.loading)
-                        LinearProgressIndicator(
-                          minHeight: theme.borderWidth,
-                          color: colors.icon,
-                          backgroundColor: Colors.transparent,
-                        )
-                    ],
-                  ),
-                );
-              }),
+                        if (widget.loading)
+                          LinearProgressIndicator(
+                            minHeight: theme.borderWidth,
+                            color: colors.icon,
+                            backgroundColor: Colors.transparent,
+                          )
+                      ],
+                    ),
+                  );
+                }),
+              ),
             ),
           )
         ],

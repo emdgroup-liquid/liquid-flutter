@@ -27,6 +27,11 @@ class LdTouchableSurface extends StatefulWidget {
   final Function() onPressed;
   final bool allowTapOutside;
 
+  /// When true, tapping does not request focus for this surface — the
+  /// currently focused node keeps focus (e.g. a compose input's soft
+  /// keyboard stays open).
+  final bool noFocusOnTap;
+
   /// When true, uses [TextFieldTapRegion] so taps on text selection handles and
   /// toolbars do not trigger [onTapOutside] / unfocus (same group as [TextField]).
   final bool textFieldTapRegion;
@@ -48,6 +53,7 @@ class LdTouchableSurface extends StatefulWidget {
     this.onHover,
     required this.builder,
     this.allowTapOutside = false,
+    this.noFocusOnTap = false,
     this.textFieldTapRegion = false,
     this.focusNode,
     this.active = false,
@@ -144,7 +150,9 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
       behavior: innerBehavior,
       onTapDown: (d) => _safeSetState(() {
         if (!widget.disabled) {
-          _focusNode?.requestFocus();
+          if (!widget.noFocusOnTap) {
+            _focusNode?.requestFocus();
+          }
           _pressed = true;
         }
       }),

@@ -252,33 +252,39 @@ class LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Stat
           } while (averageHeight == 0 && attempts < 10);
 
           if (averageHeight > 0) {
-            _scrollController.animateTo(offset.toDouble() * averageHeight,
+            final halfPage = _scrollController.position.viewportDimension / 2;
+            _scrollController.animateTo((max(0, offset.toDouble()) * averageHeight - halfPage),
                 duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
           }
         }
       }
     } else {
-      // Item is already loaded and might be in the list,
-
-      final itemContext = _selectionController.getKeyForItem(initialSelectedItems.first).currentContext;
-
-      if (itemContext != null && itemContext.mounted) {
-        await Scrollable.ensureVisible(
-          itemContext,
-          alignment: 0.5,
-          alignmentPolicy: ScrollPositionAlignmentPolicy.keepVisibleAtStart,
-        );
-        _selectionController.getFocusNodeForItem(initialSelectedItems.first).requestFocus();
-      } else {
-        // Item is not rendered but loaded, we try to scroll to the item based on the index
-        final index = listController?.getItemIndexById(initialSelectedItems.first);
-        final averageHeight = _selectionController.getAverageItemHeight();
-        if (index != null) {
-          _scrollController.animateTo(index.toDouble() * averageHeight,
-              duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
-          await Future.delayed(const Duration(milliseconds: 500));
-          _selectionController.getFocusNodeForItem(initialSelectedItems.first).requestFocus();
+      // Item is already loaded, but might not be rendered yet: LdList
+      // populates its entries after the first frame, so averageHeight is 0
+      // right after mount. Wait until the list has laid out so the index-based
+      // scroll below lands on the right item — otherwise it would scroll by 0
+      // and the picker would silently fail to reveal the selection on a reopen.
+      final id = initialSelectedItems.first;
+      double averageHeight = 0;
+      int attempts = 0;
+      do {
+        averageHeight = _selectionController.getAverageItemHeight();
+        if (averageHeight == 0) {
+          await Future<void>.delayed(const Duration(milliseconds: 100));
         }
+        attempts++;
+      } while (averageHeight == 0 && attempts < 10);
+
+      if (!mounted) {
+        return;
+      }
+
+      final laidOutIndex = listController?.getItemIndexById(id);
+      if (laidOutIndex != null && averageHeight > 0) {
+        final halfPage = _scrollController.position.viewportDimension / 2;
+        _scrollController.animateTo(max(0, laidOutIndex.toDouble() * averageHeight - halfPage),
+            duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+        _selectionController.getFocusNodeForItem(id).requestFocus();
       }
     }
   }

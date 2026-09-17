@@ -10,6 +10,24 @@ typedef OnSelectionChanged = void Function(bool selected);
 
 enum LdSelectionControl { none, radio, checkbox }
 
+class LdListItemDragConfig {
+  final void Function() onDragStarted;
+  final void Function(DragUpdateDetails details) onDragUpdate;
+  final void Function(DraggableDetails details) onDragEnd;
+  final void Function(Velocity velocity, Offset offset) onDragCanceled;
+  final void Function(BuildContext context) feedbackBuilder;
+  final bool isDragging;
+
+  const LdListItemDragConfig({
+    required this.onDragStarted,
+    required this.onDragUpdate,
+    required this.onDragEnd,
+    required this.onDragCanceled,
+    required this.feedbackBuilder,
+    required this.isDragging,
+  });
+}
+
 @Variants([
   Variant('trailingForward', defaults: {'trailing': 'const LdListDefaultTrailingForward()'}),
 ])
@@ -35,6 +53,12 @@ class LdListItemWidget extends StatefulWidget {
   final bool isOdd;
   final BoxShadow? shadow;
 
+  final bool showDragHandle;
+
+  final LdListItemDragConfig? dragCallbacks;
+
+  final bool tradeTrailingForDragHandle;
+
   @ContextConfigurable()
   const LdListItemWidget({
     super.key,
@@ -51,6 +75,9 @@ class LdListItemWidget extends StatefulWidget {
     this.subtitle,
     this.title,
     this.tradeLeadingForSelectionControl = true,
+    this.showDragHandle = false,
+    this.dragCallbacks,
+    this.tradeTrailingForDragHandle = true,
     this.shadow,
     this.focusNode,
     this.trailing,
@@ -64,8 +91,26 @@ class LdListItemWidget extends StatefulWidget {
   State<LdListItemWidget> createState() => _LdListItemWidgetState();
 }
 
-class _LdListItemWidgetState extends State<LdListItemWidget> {
+class _LdListItemWidgetState extends State<LdListItemWidget> with AutomaticKeepAliveClientMixin {
   final _innerContentKey = GlobalKey();
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
+  didUpdateWidget(LdListItemWidget oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.dragCallbacks?.isDragging != oldWidget.dragCallbacks?.isDragging) {
+      updateKeepAlive();
+    }
+  }
+
+  // We need to keep the item alive while it is being dragged so that
+  // the drag callbacks are not lost.
+  @override
+  bool get wantKeepAlive => widget.dragCallbacks?.isDragging ?? false;
 
   Widget _buildSelectionControls(BuildContext context, bool disabledState) {
     if (widget.selectionControl == LdSelectionControl.none) return const SizedBox.shrink();
@@ -135,11 +180,16 @@ class _LdListItemWidgetState extends State<LdListItemWidget> {
 
   Widget _buildTrailing(BuildContext context, LdTheme theme) {
     if (widget.trailing == null) return const SizedBox.shrink();
-    return _buildIconTheme(
-      Row(
-        children: [ldSpacerM, widget.trailing!],
+    return LdReveal.quick(
+      axes: const {Axis.horizontal},
+      revealed: !(widget.showDragHandle && widget.tradeTrailingForDragHandle),
+      initialRevealed: !(widget.showDragHandle && widget.tradeTrailingForDragHandle),
+      child: _buildIconTheme(
+        Row(
+          children: [ldSpacerM, widget.trailing!],
+        ),
+        theme,
       ),
-      theme,
     );
   }
 
@@ -216,6 +266,7 @@ class _LdListItemWidgetState extends State<LdListItemWidget> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           LdReveal.quick(
+            key: Key("selection-controls"),
             axes: const {Axis.horizontal},
             revealed: widget.selectionControl != LdSelectionControl.none,
             initialRevealed: widget.selectionControl != LdSelectionControl.none,
@@ -234,6 +285,19 @@ class _LdListItemWidgetState extends State<LdListItemWidget> {
             ),
           ),
           if (widget.trailing != null) _buildTrailing(context, theme),
+          LdReveal.quick(
+            key: Key("drag-handle"),
+            axes: const {Axis.horizontal},
+            revealed: widget.showDragHandle,
+            initialRevealed: widget.showDragHandle,
+            child: Draggable(
+                feedback: Icon(LucideIcons.gripHorizontal),
+                onDragStarted: widget.dragCallbacks?.onDragStarted,
+                onDragUpdate: widget.dragCallbacks?.onDragUpdate,
+                onDragEnd: widget.dragCallbacks?.onDragEnd,
+                onDraggableCanceled: widget.dragCallbacks?.onDragCanceled,
+                child: Icon(LucideIcons.gripHorizontal)),
+          ),
         ],
       ),
     );
@@ -241,6 +305,7 @@ class _LdListItemWidgetState extends State<LdListItemWidget> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final theme = LdTheme.of(context, listen: true);
 
     final isShuttle = Provider.of<LdIsShuttle?>(context, listen: true)?.value ?? false;
@@ -252,22 +317,25 @@ class _LdListItemWidgetState extends State<LdListItemWidget> {
       return _buildInnerContent(context, null);
     }
 
-    return LdTouchableSurface(
-      focusNode: effectiveFocusNode,
-      isOdd: widget.isOdd,
-      onPressed: () {
-        if (widget.selectionControl != LdSelectionControl.none) {
-          widget.onSelectionChanged?.call(!widget.isSelected);
-        } else {
-          widget.onPressed?.call();
-        }
-      },
-      active: widget.active || (widget.selectionControl != LdSelectionControl.none && widget.isSelected),
-      disabled: _isDisabled,
-      builder: (contxt, status, _) {
-        final colorBundle = neutralGhostColor(theme, status);
-        return _buildInnerContent(context, colorBundle);
-      },
+    return Opacity(
+      opacity: widget.dragCallbacks?.isDragging ?? false ? 0.5 : 1.0,
+      child: LdTouchableSurface(
+        focusNode: effectiveFocusNode,
+        isOdd: widget.isOdd,
+        onPressed: () {
+          if (widget.selectionControl != LdSelectionControl.none) {
+            widget.onSelectionChanged?.call(!widget.isSelected);
+          } else {
+            widget.onPressed?.call();
+          }
+        },
+        active: widget.active || (widget.selectionControl != LdSelectionControl.none && widget.isSelected),
+        disabled: _isDisabled || (widget.dragCallbacks?.isDragging ?? false),
+        builder: (contxt, status, _) {
+          final colorBundle = neutralGhostColor(theme, status);
+          return _buildInnerContent(context, colorBundle);
+        },
+      ),
     );
   }
 }

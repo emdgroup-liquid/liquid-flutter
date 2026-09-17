@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:liquid/components/data_display/markdown_demos.dart';
 import 'package:liquid/components/feedback/hint_demos.dart';
+import 'package:liquid/components/form_elements/input_group.dart';
 import 'package:liquid/components/interaction/button_demos.dart';
 
 /// Maps demo tag names (as used in `<!-- demo:TAG -->` markers inside
@@ -28,6 +29,9 @@ const Map<String, Widget Function()> demoRegistry = {
   'LdButtonCircular': LdButtonCircularDemo.new,
   'LdButtonFullWidth': LdButtonFullWidthDemo.new,
   'LdButtonConfig': LdButtonConfigDemo.new,
+
+  // LdInputGroup
+  'LdInputGroup': LdInputGroupDemo.new,
 
   // LdMarkdown
   'LdMarkdownLive': LdMarkdownLiveDemo.new,

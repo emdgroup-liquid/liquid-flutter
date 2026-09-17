@@ -2,6 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/theme/adaptive_radius.dart';
+import 'package:provider/provider.dart';
 
 /// Resolved fill and surface state for one app bar frame.
 ///
@@ -125,12 +127,6 @@ class LdAppBarDecorationBuilder {
     );
   }
 
-  double borderRadius(BuildContext context) {
-    final theme = LdTheme.of(context);
-    final radius = theme.radiusSize(LdSize.l);
-    return radius;
-  }
-
   BoxDecoration buildOutsideDecoration({
     required BuildContext context,
     required bool isScrolledUnder,
@@ -196,7 +192,7 @@ class LdAppBarDecorationBuilder {
 
     final isInBottomSlot = position == LdAppBarPosition.bottom;
     return BoxDecoration(
-      borderRadius: BorderRadius.circular(borderRadius(context)),
+      borderRadius: context.adaptiveRadius.childRadius.max,
       color: appearance.paintedColor,
       boxShadow: [
         ldShadowSticky.copyWith(
@@ -247,6 +243,198 @@ extension TrimToAppBarPosition on EdgeInsets {
       bottom: position == LdAppBarPosition.bottom ? bottom : 0,
       left: 0,
       right: 0,
+    );
+  }
+}
+
+class AppbarOutsideContainer extends StatelessWidget {
+  final Widget child;
+  final LdAppBarFrameMetrics metrics;
+  final LdAppBarBorderMode borderMode;
+  final LdAppBarShadowMode shadowMode;
+  final LdAppBarBackgroundMode backgroundMode;
+  final Color? backgroundColor;
+
+  const AppbarOutsideContainer({
+    super.key,
+    required this.child,
+    required this.borderMode,
+    required this.shadowMode,
+    required this.backgroundMode,
+    required this.backgroundColor,
+    required this.metrics,
+  });
+
+  bool get showsFill => switch (metrics.isAttached) {
+        false => false,
+        true => switch (backgroundMode) {
+            LdAppBarBackgroundMode.hidden => false,
+            LdAppBarBackgroundMode.visible => true,
+            LdAppBarBackgroundMode.whenScrolled => metrics.isScrolledUnder,
+            LdAppBarBackgroundMode.adaptive => (metrics.willHide && metrics.isScrolledUnder) || !metrics.willHide,
+          }
+      };
+
+  bool _showShadow() {
+    return switch (shadowMode) {
+      LdAppBarShadowMode.visible => true,
+      LdAppBarShadowMode.whenScrolled => metrics.isScrolledUnder,
+      LdAppBarShadowMode.hidden => false,
+      LdAppBarShadowMode.adaptive => (metrics.willHide && metrics.isScrolledUnder) || !metrics.willHide,
+    };
+  }
+
+  bool _showBorder() {
+    return switch (metrics.isAttached) {
+      true => switch (borderMode) {
+          LdAppBarBorderMode.visible => true,
+          LdAppBarBorderMode.whenScrolled => metrics.isScrolledUnder,
+          LdAppBarBorderMode.hidden => false,
+          LdAppBarBorderMode.adaptive => showsFill
+        },
+      false => false,
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = LdTheme.of(context, listen: true);
+    final color = backgroundColor ?? theme.surface;
+    final borderColor = theme.floatingBorder.withAlpha(_showBorder() ? 255 : 0);
+
+    return Container(
+      padding: metrics.outerMargin,
+      decoration: BoxDecoration(
+          boxShadow: [
+            if (!metrics.isAttached)
+              ldShadowSticky.copyWith(
+                color: ldShadowSticky.color.withAlpha(_showShadow() ? 20 : 0),
+              )
+          ],
+          color: (backgroundColor ?? theme.surface).withAlpha(showsFill ? 255 : 0),
+          border: Border(
+            bottom: switch (metrics.position) {
+              LdAppBarPosition.top => BorderSide(
+                  color: borderColor,
+                  width: theme.borderWidth,
+                ),
+              _ => BorderSide.none,
+            },
+            top: switch (metrics.position) {
+              LdAppBarPosition.bottom => BorderSide(
+                  color: borderColor,
+                  width: theme.borderWidth,
+                ),
+              _ => BorderSide.none,
+            },
+          )),
+      child: Provider.value(
+        value: LdSurfaceInfo(
+          isSurface: showsFill && color == theme.surface,
+        ),
+        child: Provider.value(
+          value: context.adaptiveRadius.shrinkByInsets(metrics.outerMargin).collapseToSide(metrics.position),
+          child: child,
+        ),
+      ),
+    );
+  }
+}
+
+class AppbarInsideContainer extends StatelessWidget {
+  final Widget child;
+  final LdAppBarFrameMetrics metrics;
+
+  final LdAppBarBorderMode borderMode;
+  final LdAppBarShadowMode shadowMode;
+  final LdAppBarBackgroundMode backgroundMode;
+  final Color? backgroundColor;
+  final EdgeInsets? padding;
+
+  const AppbarInsideContainer({
+    super.key,
+    required this.child,
+    required this.metrics,
+    required this.borderMode,
+    required this.shadowMode,
+    required this.backgroundMode,
+    required this.backgroundColor,
+    this.padding,
+  });
+
+  bool get showsFill => switch (metrics.isAttached) {
+        true => false,
+        false => switch (backgroundMode) {
+            LdAppBarBackgroundMode.hidden => false,
+            LdAppBarBackgroundMode.visible => true,
+            LdAppBarBackgroundMode.whenScrolled => metrics.isScrolledUnder,
+            LdAppBarBackgroundMode.adaptive => (metrics.willHide && metrics.isScrolledUnder) || !metrics.willHide,
+          }
+      };
+
+  bool _showBorder() {
+    return switch (metrics.isAttached) {
+      true => false,
+      false => switch (borderMode) {
+          LdAppBarBorderMode.visible => true,
+          LdAppBarBorderMode.whenScrolled => metrics.isScrolledUnder,
+          LdAppBarBorderMode.hidden => false,
+          LdAppBarBorderMode.adaptive => showsFill,
+        },
+    };
+  }
+
+  bool _showShadow() {
+    return switch (shadowMode) {
+      LdAppBarShadowMode.visible => true,
+      LdAppBarShadowMode.whenScrolled => metrics.isScrolledUnder,
+      LdAppBarShadowMode.hidden => false,
+      LdAppBarShadowMode.adaptive => showsFill,
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = LdTheme.of(context, listen: true);
+    final color = backgroundColor ?? theme.surface;
+    final borderColor = theme.floatingBorder.withAlpha(_showBorder() ? 255 : 0);
+    final shadowColor = ldShadowSticky.color.withAlpha(_showShadow() ? 20 : 0);
+    final padding = this.padding ?? theme.pad(size: LdSize.s);
+
+    final ownRadius = context.adaptiveRadius.childRadius.max.atLeast(
+      theme.radius(LdSize.m),
+    );
+
+    return Container(
+      decoration: BoxDecoration(
+        color: color.withAlpha(showsFill ? 255 : 0),
+        boxShadow: [
+          if (!metrics.isAttached)
+            ldShadowSticky.copyWith(
+              color: shadowColor,
+            )
+        ],
+        borderRadius: ownRadius,
+        border: Border.all(
+          color: borderColor,
+          width: theme.borderWidth,
+        ),
+      ),
+      padding: padding,
+      child: Provider.value(
+        value: LdSurfaceInfo(
+            isSurface: switch (showsFill) {
+          true => color == theme.surface,
+          false => context.isSurface,
+        }),
+        child: Provider.value(
+          value: LdAdaptiveRadius(
+            ownRadius: ownRadius,
+            insets: padding,
+          ).collapseToSide(metrics.position),
+          child: child,
+        ),
+      ),
     );
   }
 }

@@ -1,3 +1,5 @@
+import 'package:flutter/widgets.dart';
+import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 /// This class defines the keys that are provided to the router
@@ -33,6 +35,28 @@ class LdMonkeyRouteConfig<T extends Identifiable<IdType>, IdType> {
       serialiseIdType: (ids) => ids.join("_"),
       parseIdType: (selected) => selected.split("_").map(int.tryParse).nonNulls.toSet(),
     );
+  }
+
+  /// Push the detail route with the given ids
+  Future<T?> pushDetailRoute(BuildContext context, Set<IdType> ids) async {
+    final pathParameters = serialiseIdType(ids);
+    return context.pushNamed<T>(detailRouteName, pathParameters: {viewingParamName: pathParameters});
+  }
+
+  /// Push the create route
+  Future<T?> pushCreateRoute(BuildContext context) async {
+    return context.pushNamed<T>(createRouteName);
+  }
+
+  /// Push the master route with the given selection
+  /// If the selection is null, the selection query parameter will not be included
+  Future<T?> pushMasterRoute(
+    BuildContext context, {
+    Set<IdType>? selection,
+  }) async {
+    return context.pushNamed<T>(masterRouteName, pathParameters: {
+      if (selection != null) selectionQueryKey: serialiseIdType(selection),
+    });
   }
 
   final String itemName;

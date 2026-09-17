@@ -12,6 +12,11 @@ enum LdAppBarActionOverflowMode {
 
   /// Stays visible in the app bar; other overflowable siblings move first.
   pinned,
+
+  /// Always moves into the overflow menu, regardless of available space.
+  ///
+  /// Useful for secondary actions that would otherwise clutter the app bar.
+  always,
 }
 
 /// Controls how an [LdAppBarAction] compacts when space in the app bar is tight.
@@ -43,7 +48,8 @@ enum LdAppBarActionCompactMode {
 ///
 /// Actions that overflow from the app bar are automatically moved to the overflow menu
 /// by the app bar's overflow handling system unless [overflowMode] is
-/// [LdAppBarActionOverflowMode.pinned].
+/// [LdAppBarActionOverflowMode.pinned] (always visible) or
+/// [LdAppBarActionOverflowMode.always] (always in the overflow menu).
 ///
 /// [overflowMode] controls menu overflow; [compactMode] controls icon-only compaction.
 /// Both can apply independently.
@@ -129,6 +135,7 @@ class LdAppBarAction extends StatelessWidget {
     return switch (overflowMode) {
       LdAppBarActionOverflowMode.overflowable => action,
       LdAppBarActionOverflowMode.pinned => LdOverflowPinnedChild(child: action),
+      LdAppBarActionOverflowMode.always => LdOverflowAlwaysChild(child: action),
     };
   }
 

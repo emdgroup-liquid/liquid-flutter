@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,15 +12,27 @@ import 'package:provider/provider.dart';
 /// [loadingBuilder].
 ///
 /// Wrap an [LdList] child that reads its configuration from context.
+///
+/// While a drag is active, the list auto-scrolls via [EdgeDraggingAutoScroller]
+/// when the dragged item is held near the top or bottom edge of the scrollable
+/// viewport, so items can be reordered beyond the visible region. Set
+/// [velocityScalar] to 0 to disable auto-scrolling.
 class LdListReorderScope<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
   const LdListReorderScope({
     super.key,
     required this.onReorder,
     required this.child,
+    this.velocityScalar = 50,
   });
 
   final Future<void> Function(IdType id, int fromIndex, int toIndex) onReorder;
   final Widget child;
+
+  /// The auto-scroll velocity scalar, as described in
+  /// [EdgeDraggingAutoScroller.velocityScalar]: a higher value makes the list
+  /// scroll faster while dragging near an edge. Defaults to Flutter's
+  /// [ReorderableListView] default of 50. Set to 0 to disable auto-scrolling.
+  final double velocityScalar;
 
   @override
   State<LdListReorderScope<T, IdType>> createState() => _LdListReorderScopeState<T, IdType>();
@@ -37,6 +50,10 @@ class _LdListReorderScopeState<T extends Identifiable<IdType>, IdType> extends S
 
   LdListItemBuilder<T>? _innerItemBuilder;
 
+  ScrollableState? _scrollable;
+  EdgeDraggingAutoScroller? _autoScroller;
+  Offset? _lastDragPosition;
+
   LdPaginator<T, IdType> get _paginator => Provider.of<LdListConfig<T, IdType>>(context, listen: false).paginator!;
 
   GlobalKey _slotKey(int position) =>
@@ -44,6 +61,7 @@ class _LdListReorderScopeState<T extends Identifiable<IdType>, IdType> extends S
 
   @override
   void dispose() {
+    _autoScroller?.stopAutoScroll();
     _removeOverlay();
     super.dispose();
   }
@@ -51,6 +69,46 @@ class _LdListReorderScopeState<T extends Identifiable<IdType>, IdType> extends S
   void _removeOverlay() {
     _overlayEntry?.remove();
     _overlayEntry = null;
+  }
+
+  void _ensureAutoScroller() {
+    final scrollable = _scrollable;
+    _autoScroller?.stopAutoScroll();
+    _autoScroller = (widget.velocityScalar > 0 && scrollable != null)
+        ? EdgeDraggingAutoScroller(
+            scrollable,
+            onScrollViewScrolled: _onAutoScrollTick,
+            velocityScalar: widget.velocityScalar,
+          )
+        : null;
+  }
+
+  /// The rect of the dragged item used by [EdgeDraggingAutoScroller] to decide
+  /// whether the drag is close enough to the viewport edge to scroll. Sized to
+  /// the dragged item and centered on the pointer.
+  Rect _dragTargetRect(Offset globalPosition) {
+    var width = _dragFeedbackWidth ?? 1.0;
+    var height = max(100.0, MediaQuery.paddingOf(context).vertical);
+    return Rect.fromCenter(center: globalPosition, width: width, height: height);
+  }
+
+  /// Updates the drop indicator when the list is auto-scrolled under the
+  /// pointer, and keeps the auto-scroll loop aware of the drag position.
+  void _onAutoScrollTick() {
+    if (_draggingId == null) {
+      return;
+    }
+
+    final lastDragPosition = _lastDragPosition;
+    if (lastDragPosition != null) {
+      _dropIndex = _nearestDropIndex(lastDragPosition.dy);
+      _markOverlayNeedsBuild();
+    }
+
+    final autoScroller = _autoScroller;
+    if (autoScroller != null && lastDragPosition != null) {
+      autoScroller.startAutoScrollIfNecessary(_dragTargetRect(lastDragPosition));
+    }
   }
 
   Rect? _slotBounds(int position) {
@@ -102,7 +160,9 @@ class _LdListReorderScopeState<T extends Identifiable<IdType>, IdType> extends S
   void _insertOverlay() {
     _overlayEntry?.remove();
     _overlayEntry = OverlayEntry(builder: _buildDropIndicatorOverlay);
-    Overlay.of(context, rootOverlay: true).insert(_overlayEntry!);
+    Overlay.of(
+      context,
+    ).insert(_overlayEntry!);
   }
 
   void _markOverlayNeedsBuild() {
@@ -110,6 +170,7 @@ class _LdListReorderScopeState<T extends Identifiable<IdType>, IdType> extends S
   }
 
   void _onDragStarted(IdType id, int fromIndex) {
+    debugPrint('[reorder] _onDragStarted id=$id fromIndex=$fromIndex');
     if (_draggingId != null) {
       return;
     }
@@ -122,12 +183,13 @@ class _LdListReorderScopeState<T extends Identifiable<IdType>, IdType> extends S
       _dropIndex = fromIndex;
     });
 
-    // Check if we have the width of the drag feedback
+    // Check if we have the size of the drag feedback
     final dragStartRect = _slotKey(fromIndex).currentContext?.findRenderObject() as RenderBox?;
-    if (dragStartRect != null) {
+    if (dragStartRect != null && dragStartRect.hasSize) {
       _dragFeedbackWidth = dragStartRect.size.width;
     }
 
+    _ensureAutoScroller();
     _insertOverlay();
   }
 
@@ -137,10 +199,20 @@ class _LdListReorderScopeState<T extends Identifiable<IdType>, IdType> extends S
     }
 
     _dropIndex = _nearestDropIndex(details.globalPosition.dy);
+
     _markOverlayNeedsBuild();
+
+    _lastDragPosition = details.globalPosition;
+    final autoScroller = _autoScroller;
+    if (autoScroller != null) {
+      autoScroller.startAutoScrollIfNecessary(_dragTargetRect(details.globalPosition));
+    }
   }
 
   Future<void> _onDragEnd(DraggableDetails details) async {
+    _autoScroller?.stopAutoScroll();
+    _lastDragPosition = null;
+
     final id = _draggingId;
     final from = _fromIndex;
     final to = _nearestDropIndex(details.offset.dy);
@@ -161,6 +233,9 @@ class _LdListReorderScopeState<T extends Identifiable<IdType>, IdType> extends S
   }
 
   void _onDragCanceled() {
+    _autoScroller?.stopAutoScroll();
+    _lastDragPosition = null;
+
     _removeOverlay();
     setState(() {
       _draggingId = null;
@@ -250,52 +325,30 @@ class _LdListReorderScopeState<T extends Identifiable<IdType>, IdType> extends S
   ) {
     final slotKey = _slotKey(index);
     final id = item.value.id;
-    final feedback = _buildFeedback(context, item, index);
-    child = KeyedSubtree(
+    final isDraggingItem = _draggingId == id;
+
+    // Capture the enclosing scroll view so drags can auto-scroll the list when
+    // the pointer is held near the viewport edge. The item context is a
+    // descendant of the [CustomScrollView]'s [Scrollable].
+    _scrollable ??= context.findAncestorStateOfType<ScrollableState>();
+
+    return KeyedSubtree(
       key: slotKey,
-      child: child,
-    );
-    final childWhenDragging = Opacity(
-      opacity: 0.4,
-      child: Provider<LdIsShuttle>.value(
-        value: const LdIsShuttle(true),
+      child: LdListItemConfigProvider(
+        config: LdListItemConfig(
+          showDragHandle: true,
+          dragCallbacks: LdListItemDragConfig(
+            onDragStarted: () => _onDragStarted(id, index),
+            onDragUpdate: _onDragUpdate,
+            onDragEnd: _onDragEnd,
+            onDragCanceled: (velocity, offset) => _onDragCanceled(),
+            feedbackBuilder: (context) => _buildFeedback(context, item, index),
+            isDragging: isDraggingItem,
+          ),
+        ),
         child: child,
       ),
     );
-
-    Widget draggable;
-
-    if (LdTheme.of(context).platform.isMobile) {
-      draggable = LongPressDraggable<Object>(
-        key: ValueKey('reorder_lp_$id'),
-        data: id,
-        axis: Axis.vertical,
-        maxSimultaneousDrags: 1,
-        feedback: feedback,
-        childWhenDragging: childWhenDragging,
-        onDragStarted: () => _onDragStarted(id, index),
-        onDragUpdate: _onDragUpdate,
-        onDragEnd: _onDragEnd,
-        onDraggableCanceled: (_, __) => _onDragCanceled(),
-        child: child,
-      );
-    } else {
-      draggable = Draggable<Object>(
-        key: ValueKey('reorder_dr_$id'),
-        data: id,
-        axis: Axis.vertical,
-        maxSimultaneousDrags: 1,
-        feedback: feedback,
-        childWhenDragging: childWhenDragging,
-        onDragStarted: () => _onDragStarted(id, index),
-        onDragUpdate: _onDragUpdate,
-        onDragEnd: _onDragEnd,
-        onDraggableCanceled: (_, __) => _onDragCanceled(),
-        child: child,
-      );
-    }
-
-    return draggable;
   }
 
   @override

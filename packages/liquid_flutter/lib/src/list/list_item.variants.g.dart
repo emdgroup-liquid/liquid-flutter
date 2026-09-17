@@ -15,6 +15,9 @@ class LdListItemConfig {
     this.subtitle,
     this.title,
     this.tradeLeadingForSelectionControl,
+    this.showDragHandle,
+    this.dragCallbacks,
+    this.tradeTrailingForDragHandle,
     this.shadow,
     this.focusNode,
     this.trailing,
@@ -50,6 +53,12 @@ class LdListItemConfig {
 
   final bool? tradeLeadingForSelectionControl;
 
+  final bool? showDragHandle;
+
+  final LdListItemDragConfig? dragCallbacks;
+
+  final bool? tradeTrailingForDragHandle;
+
   final BoxShadow? shadow;
 
   final FocusNode? focusNode;
@@ -78,6 +87,9 @@ class LdListItemConfig {
     Widget? subtitle,
     Widget? title,
     bool? tradeLeadingForSelectionControl,
+    bool? showDragHandle,
+    LdListItemDragConfig? dragCallbacks,
+    bool? tradeTrailingForDragHandle,
     BoxShadow? shadow,
     FocusNode? focusNode,
     Widget? trailing,
@@ -101,6 +113,10 @@ class LdListItemConfig {
       title: title ?? this.title,
       tradeLeadingForSelectionControl: tradeLeadingForSelectionControl ??
           this.tradeLeadingForSelectionControl,
+      showDragHandle: showDragHandle ?? this.showDragHandle,
+      dragCallbacks: dragCallbacks ?? this.dragCallbacks,
+      tradeTrailingForDragHandle:
+          tradeTrailingForDragHandle ?? this.tradeTrailingForDragHandle,
       shadow: shadow ?? this.shadow,
       focusNode: focusNode ?? this.focusNode,
       trailing: trailing ?? this.trailing,
@@ -128,6 +144,10 @@ class LdListItemConfig {
       title: other.title ?? this.title,
       tradeLeadingForSelectionControl: other.tradeLeadingForSelectionControl ??
           this.tradeLeadingForSelectionControl,
+      showDragHandle: other.showDragHandle ?? this.showDragHandle,
+      dragCallbacks: other.dragCallbacks ?? this.dragCallbacks,
+      tradeTrailingForDragHandle:
+          other.tradeTrailingForDragHandle ?? this.tradeTrailingForDragHandle,
       shadow: other.shadow ?? this.shadow,
       focusNode: other.focusNode ?? this.focusNode,
       trailing: other.trailing ?? this.trailing,
@@ -181,6 +201,11 @@ class LdListItemConfigProvider extends StatelessWidget {
             tradeLeadingForSelectionControl:
                 config.tradeLeadingForSelectionControl ??
                     parentConfig.tradeLeadingForSelectionControl,
+            showDragHandle:
+                config.showDragHandle ?? parentConfig.showDragHandle,
+            dragCallbacks: config.dragCallbacks ?? parentConfig.dragCallbacks,
+            tradeTrailingForDragHandle: config.tradeTrailingForDragHandle ??
+                parentConfig.tradeTrailingForDragHandle,
             shadow: config.shadow ?? parentConfig.shadow,
             focusNode: config.focusNode ?? parentConfig.focusNode,
             trailing: config.trailing ?? parentConfig.trailing,
@@ -212,6 +237,9 @@ class LdListItem extends StatelessWidget {
     this.subtitle,
     this.title,
     this.tradeLeadingForSelectionControl,
+    this.showDragHandle,
+    this.dragCallbacks,
+    this.tradeTrailingForDragHandle,
     this.shadow,
     this.focusNode,
     this.trailing,
@@ -240,6 +268,9 @@ class LdListItem extends StatelessWidget {
       subtitle: config.subtitle,
       title: config.title,
       tradeLeadingForSelectionControl: config.tradeLeadingForSelectionControl,
+      showDragHandle: config.showDragHandle,
+      dragCallbacks: config.dragCallbacks,
+      tradeTrailingForDragHandle: config.tradeTrailingForDragHandle,
       shadow: config.shadow,
       focusNode: config.focusNode,
       trailing: config.trailing,
@@ -265,6 +296,9 @@ class LdListItem extends StatelessWidget {
     Widget? subtitle,
     Widget? title,
     bool? tradeLeadingForSelectionControl,
+    bool? showDragHandle,
+    LdListItemDragConfig? dragCallbacks,
+    bool? tradeTrailingForDragHandle,
     BoxShadow? shadow,
     FocusNode? focusNode,
     LdColor? color,
@@ -287,6 +321,9 @@ class LdListItem extends StatelessWidget {
       subtitle: subtitle,
       title: title,
       tradeLeadingForSelectionControl: tradeLeadingForSelectionControl,
+      showDragHandle: showDragHandle,
+      dragCallbacks: dragCallbacks,
+      tradeTrailingForDragHandle: tradeTrailingForDragHandle,
       shadow: shadow,
       focusNode: focusNode,
       trailing: const LdListDefaultTrailingForward(),
@@ -338,6 +375,12 @@ class LdListItem extends StatelessWidget {
 
   final BoxShadow? shadow;
 
+  final bool? showDragHandle;
+
+  final LdListItemDragConfig? dragCallbacks;
+
+  final bool? tradeTrailingForDragHandle;
+
   @override
   Widget build(BuildContext context) {
     final config = Provider.of<LdListItemConfig?>(context, listen: true);
@@ -356,6 +399,11 @@ class LdListItem extends StatelessWidget {
       title: title ?? config?.title,
       tradeLeadingForSelectionControl: tradeLeadingForSelectionControl ??
           config?.tradeLeadingForSelectionControl ??
+          true,
+      showDragHandle: showDragHandle ?? config?.showDragHandle ?? false,
+      dragCallbacks: dragCallbacks ?? config?.dragCallbacks,
+      tradeTrailingForDragHandle: tradeTrailingForDragHandle ??
+          config?.tradeTrailingForDragHandle ??
           true,
       shadow: shadow ?? config?.shadow,
       focusNode: focusNode ?? config?.focusNode,

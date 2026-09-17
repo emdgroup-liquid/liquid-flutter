@@ -179,6 +179,99 @@ void main() {
       expect(_ParentSyncedSelectableList.lastReportedSelection, isEmpty);
     });
 
+    testWidgets('scrolls to initial selection on fresh mount and on re-mount', (tester) async {
+      const itemHeight = 56.0;
+      final items = List.generate(50, (index) => _SampleStringItem('item-$index'));
+      // Paged, non-greedy repository with getOffsetById — mirrors the LdChoose
+      // demo. pageSize 10 keeps the initial selection ('item-8') inside page 0
+      // so a re-mount finds it already loaded and must reveal it via the
+      // item-render path.
+      final paginator = LdListController<_SampleStringItem, String>(
+        LdCallbackModel<_SampleStringItem, String, _SampleStringItem, _SampleStringItem>(
+          pageSize: 10,
+          getOffsetByIdFn: (params) async => items.indexWhere((e) => e.id == params.id),
+          getById: (context, id) async => items.firstWhere((e) => e.id == id),
+          fetchListWithParameters: (params) async {
+            final page = items.skip(params.offset).take(params.pageSize).toList();
+            return LdListPage<_SampleStringItem>(
+              newItems: page,
+              hasMore: params.offset + params.pageSize < items.length,
+              total: items.length,
+            );
+          },
+        ),
+      );
+
+      Widget build() {
+        return LdThemeProvider(
+          theme: LdTheme()..platform = LdPlatform.macos,
+          child: MaterialApp(
+            localizationsDelegates: const [LiquidLocalizations.delegate],
+            home: Scaffold(
+              body: SizedBox(
+                height: 400,
+                child: LdListConfigProvider<_SampleStringItem, String>(
+                  config: LdListConfig<_SampleStringItem, String>(
+                    paginator: paginator,
+                    itemBuilder: (context, item, index) {
+                      return SizedBox(
+                        height: itemHeight,
+                        child: LdListItem(title: Text(item.value.value)),
+                      );
+                    },
+                  ),
+                  child: LdSelectableList<_SampleStringItem, String>(
+                    listController: paginator,
+                    initialSelectedItems: {'item-8'},
+                    showSelectionControls: true,
+                    onSelectionChange: (selection) {
+                      selected = Set.from(selection);
+                    },
+                    child: LdList<_SampleStringItem, String>(),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+
+      Future<double> scrollOffset() async {
+        final scrollable = tester.widget<Scrollable>(
+          find.descendant(
+            of: find.byType(LdSelectableList<_SampleStringItem, String>),
+            matching: find.byType(Scrollable),
+          ),
+        );
+        return scrollable.controller!.offset;
+      }
+
+      // The scroll-to-initial-selection logic waits for items to lay out via
+      // delayed futures, so drive time explicitly instead of pumpAndSettle.
+      Future<void> pumpScrollSettle() async {
+        for (var i = 0; i < 20; i++) {
+          await tester.pump(const Duration(milliseconds: 100));
+        }
+        await tester.pumpAndSettle();
+      }
+
+      await tester.pumpWidget(build());
+      await pumpScrollSettle();
+      expect(await scrollOffset(), greaterThan(0));
+
+      // Unmount, then re-mount with the SAME paginator (items already loaded) —
+      // simulates closing and reopening a picker. The list must scroll to the
+      // initial selection again instead of silently staying at the top.
+      await tester.pumpWidget(const SizedBox());
+      await tester.pump();
+
+      await tester.pumpWidget(build());
+      await pumpScrollSettle();
+      expect(await scrollOffset(), greaterThan(0));
+
+      paginator.dispose();
+    });
+
     testWidgets('keeps scroll position when parent echoes selection change', (tester) async {
       const itemHeight = 56.0;
       final items = List.generate(50, (index) => _SampleStringItem('item-$index'));

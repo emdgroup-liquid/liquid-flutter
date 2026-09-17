@@ -13,18 +13,21 @@ class MonkeyActionsDemo extends StatelessWidget {
       path: "lib/patterns/monkey_actions.dart",
       category: "Patterns",
       title: "LdMonkey - Actions",
-      demo: LdAutoSpace(children: [
-        LdText.h("LdMonkey Actions"),
-        LdText.p(
-            "Actions in the monkey pattern allow users to perform operations on selected items. Actions can appear in different locations throughout the interface and have various visibility conditions."),
-        ComponentsAccordion(components: {"LdMonkeyAction", "LdMonkeyActionVisibility"}),
-        LdText.hs("1. Basic Action Structure"),
-        LdText.p(
+      demo: LdAutoSpace(
+        children: [
+          LdText.h("LdMonkey Actions"),
+          LdText.p(
+            "Actions in the monkey pattern allow users to perform operations on selected items. Actions can appear in different locations throughout the interface and have various visibility conditions.",
+          ),
+          ComponentsAccordion(components: {"LdMonkeyAction", "LdMonkeyActionGroup", "LdMonkeyActionVisibility"}),
+          LdText.hs("1. Basic Action Structure"),
+          LdText.p(
             "Actions use [LdMonkeyActionContext] for selection, list controller, and app-level providers. "
-            "Use ctx.appContext for modals and feature providers; use ctx.selectedIds and ctx.model<...>() for monkey data."),
-        CodeBlock(
-          language: "dart",
-          code: '''LdMonkeySubmitAction<Task, int, void>(
+            "Use ctx.appContext for modals and feature providers; use ctx.selectedIds and ctx.model<...>() for monkey data.",
+          ),
+          CodeBlock(
+            language: "dart",
+            code: '''LdMonkeySubmitAction<Task, int, void>(
   id: 'create-task',           // required unique identifier
   tooltip: (_) => 'Create new task',
   visibility: {
@@ -44,36 +47,38 @@ class MonkeyActionsDemo extends StatelessWidget {
     // ctx.selectedIds, ctx.model<LdCallbackModel<Task, int>>(), providers via ctx.appContext
   },
 )''',
-        ),
-        LdText.hs("2. Action Locations"),
-        LdText.p("Actions can be placed in different locations throughout the monkey pattern interface:"),
-        LdAutoSpace(children: [
-          LdCard(
-            header: Text("LdMonkeyActionLocation.masterAppBar"),
-            child: LdText.p("Primary app bar in the master view — typically for create and filter actions"),
           ),
-          LdCard(
-            header: Text("LdMonkeyActionLocation.masterSecondary"),
-            child: LdText.p("Secondary app bar in the master view — for bulk operations and selection controls"),
+          LdText.hs("2. Action Locations"),
+          LdText.p("Actions can be placed in different locations throughout the monkey pattern interface:"),
+          LdAutoSpace(
+            children: [
+              LdCard(
+                header: Text("LdMonkeyActionLocation.masterAppBar"),
+                child: LdText.p("Primary app bar in the master view — typically for create and filter actions"),
+              ),
+              LdCard(
+                header: Text("LdMonkeyActionLocation.masterSecondary"),
+                child: LdText.p("Secondary app bar in the master view — for bulk operations and selection controls"),
+              ),
+              LdCard(
+                header: Text("LdMonkeyActionLocation.detailAppBar"),
+                child: LdText.p("Primary app bar in the detail view — for item-specific actions"),
+              ),
+              LdCard(
+                header: Text("LdMonkeyActionLocation.detailSecondary"),
+                child: LdText.p("Secondary app bar in the detail view — for additional item actions"),
+              ),
+              LdCard(
+                header: Text("LdMonkeyActionLocation.context"),
+                child: LdText.p("Context menu when right-clicking or long-pressing items — for quick actions"),
+              ),
+            ],
           ),
-          LdCard(
-            header: Text("LdMonkeyActionLocation.detailAppBar"),
-            child: LdText.p("Primary app bar in the detail view — for item-specific actions"),
-          ),
-          LdCard(
-            header: Text("LdMonkeyActionLocation.detailSecondary"),
-            child: LdText.p("Secondary app bar in the detail view — for additional item actions"),
-          ),
-          LdCard(
-            header: Text("LdMonkeyActionLocation.context"),
-            child: LdText.p("Context menu when right-clicking or long-pressing items — for quick actions"),
-          ),
-        ]),
-        LdText.hs("3. Action Visibility Conditions"),
-        LdText.p("Control when actions are visible using LdMonkeyActionVisibility:"),
-        CodeBlock(
-          language: "dart",
-          code: '''LdMonkeyActionVisibility(
+          LdText.hs("3. Action Visibility Conditions"),
+          LdText.p("Control when actions are visible using LdMonkeyActionVisibility:"),
+          CodeBlock(
+            language: "dart",
+            code: '''LdMonkeyActionVisibility(
   location: LdMonkeyActionLocation.detailAppBar,
   
   // Selection count constraints
@@ -92,14 +97,15 @@ class MonkeyActionsDemo extends StatelessWidget {
   // Custom predicate — receives the full LdMonkeyActionContext
   isVisible: (ctx) => ctx.selectedIds.length == 1,
 )''',
-        ),
-        LdText.hs("4. Create Action Example"),
-        LdText.p(
+          ),
+          LdText.hs("4. Create Action Example"),
+          LdText.p(
             "A typical create action that appears in the master app bar. "
-            "Use reactiveCreateAction if you have a dedicated create route."),
-        CodeBlock(
-          language: "dart",
-          code: '''LdMonkeySubmitAction<Task, int, void>(
+            "Use reactiveCreateAction if you have a dedicated create route.",
+          ),
+          CodeBlock(
+            language: "dart",
+            code: '''LdMonkeySubmitAction<Task, int, void>(
   id: 'create-task',
   tooltip: (_) => 'Create new task',
   visibility: {
@@ -134,22 +140,21 @@ class MonkeyActionsDemo extends StatelessWidget {
 
 // Alternative: use reactiveCreateAction for a dedicated create route
 reactiveCreateAction<Task, int>(routeConfig: taskRouteConfig)''',
-        ),
-        LdText.hs("5. Delete Action"),
-        LdText.p(
+          ),
+          LdText.hs("5. Delete Action"),
+          LdText.p(
             "Use the built-in deleteAction factory for standard item deletion. "
-            "It handles confirmation, batch deletion, and selection cleanup automatically."),
-        CodeBlock(
-          language: "dart",
-          code: '''deleteAction<Task, int>()''',
-        ),
-        LdText.hs("6. Conditional Actions"),
-        LdText.p(
+            "It handles confirmation, batch deletion, and selection cleanup automatically.",
+          ),
+          CodeBlock(language: "dart", code: '''deleteAction<Task, int>()'''),
+          LdText.hs("6. Conditional Actions"),
+          LdText.p(
             "Use isVisible on LdMonkeyActionVisibility to gate actions on custom logic, "
-            "such as the state of the selected items:"),
-        CodeBlock(
-          language: "dart",
-          code: '''LdMonkeySubmitAction<Task, int, void>(
+            "such as the state of the selected items:",
+          ),
+          CodeBlock(
+            language: "dart",
+            code: '''LdMonkeySubmitAction<Task, int, void>(
   id: 'mark-done',
   tooltip: (_) => 'Mark as done',
   visibility: {
@@ -179,12 +184,12 @@ reactiveCreateAction<Task, int>(routeConfig: taskRouteConfig)''',
     );
   },
 )''',
-        ),
-        LdText.hs("7. Single Item Actions"),
-        LdText.p("Actions that work on exactly one item at a time:"),
-        CodeBlock(
-          language: "dart",
-          code: '''LdMonkeySubmitAction<Task, int, void>(
+          ),
+          LdText.hs("7. Single Item Actions"),
+          LdText.p("Actions that work on exactly one item at a time:"),
+          CodeBlock(
+            language: "dart",
+            code: '''LdMonkeySubmitAction<Task, int, void>(
   id: 'duplicate',
   tooltip: (_) => 'Duplicate',
   visibility: {
@@ -207,12 +212,12 @@ reactiveCreateAction<Task, int>(routeConfig: taskRouteConfig)''',
     }
   },
 )''',
-        ),
-        LdText.hs("8. Built-in Actions"),
-        LdText.p("The monkey pattern provides factory functions for common actions:"),
-        CodeBlock(
-          language: "dart",
-          code: '''actions: [
+          ),
+          LdText.hs("8. Built-in Actions"),
+          LdText.p("The monkey pattern provides factory functions for common actions:"),
+          CodeBlock(
+            language: "dart",
+            code: '''actions: [
   // Toggle checkbox selection mode
   toggleSelectionControls<Task, int>(),
   
@@ -229,44 +234,70 @@ reactiveCreateAction<Task, int>(routeConfig: taskRouteConfig)''',
   // Push to the create route (requires createPage on buildMonkeyRoutes)
   reactiveCreateAction<Task, int>(routeConfig: taskRouteConfig),
 ],''',
-        ),
-        LdText.hs("9. Action Properties"),
-        LdText.p("Key properties on LdMonkeySubmitAction:"),
-        LdAutoSpace(children: [
-          LdCard(
-            header: Text("id"),
-            child: LdText.p("Required unique Object (String or enum) — coordinates the offstage LdSubmit host with app bar triggers"),
           ),
-          LdCard(
-            header: Text("submitConfig"),
-            child: LdText.p("Function(BuildContext) returning LdMonkeySubmitConfig with loadingText and other submit options"),
+          LdText.hs("9. Action Properties"),
+          LdText.p("Key properties on LdMonkeySubmitAction:"),
+          LdAutoSpace(
+            children: [
+              LdCard(
+                header: Text("id"),
+                child: LdText.p(
+                  "Required unique Object (String or enum) — coordinates the offstage LdSubmit host with app bar triggers",
+                ),
+              ),
+              LdCard(
+                header: Text("submitConfig"),
+                child: LdText.p(
+                  "Function(BuildContext) returning LdMonkeySubmitConfig with loadingText and other submit options",
+                ),
+              ),
+              LdCard(
+                header: Text("child / childBuilder"),
+                child: LdText.p("Static label widget (child) or reactive builder (childBuilder) for the action button"),
+              ),
+              LdCard(header: Text("icon"), child: LdText.p("Icon widget displayed with the action")),
+              LdCard(
+                header: Text("color"),
+                child: LdText.p("LdColor for the action button — use LdColor.error for destructive actions"),
+              ),
+              LdCard(
+                header: Text("multiSelect"),
+                child: LdText.p("Whether the action applies to multi-item selections (default: true)"),
+              ),
+              LdCard(
+                header: Text("appBarOverflowMode"),
+                child: LdText.p(
+                  "LdAppBarActionOverflowMode controlling whether this action can move into the app bar overflow menu. On LdMonkeyActionGroup this applies to the whole group.",
+                ),
+              ),
+            ],
           ),
-          LdCard(
-            header: Text("child / childBuilder"),
-            child: LdText.p("Static label widget (child) or reactive builder (childBuilder) for the action button"),
+          LdText.hs("10. Action groups"),
+          LdText.p(
+            "Wrap related actions in LdMonkeyActionGroup so they overflow as one app bar item "
+            "and are separated from neighbors with a divider in the app bar and in menus. "
+            "Mix groups with standalone actions in the same list. Child visibility still applies.",
           ),
-          LdCard(
-            header: Text("icon"),
-            child: LdText.p("Icon widget displayed with the action"),
+          CodeBlock(
+            language: "dart",
+            code: '''actions: [
+  refreshAction<Task, int>(),
+  reactiveCreateAction<Task, int>(routeConfig: taskRouteConfig),
+  LdMonkeyActionGroup(
+    appBarOverflowMode: LdAppBarActionOverflowMode.overflowable,
+    actions: [
+      markDone,
+      markUndone,
+    ],
+  ),
+  deleteAction<Task, int>(),
+],''',
           ),
-          LdCard(
-            header: Text("color"),
-            child: LdText.p("LdColor for the action button — use LdColor.error for destructive actions"),
-          ),
-          LdCard(
-            header: Text("multiSelect"),
-            child: LdText.p("Whether the action applies to multi-item selections (default: true)"),
-          ),
-          LdCard(
-            header: Text("appBarOverflowMode"),
-            child: LdText.p("LdAppBarActionOverflowMode controlling whether this action can move into the app bar overflow menu"),
-          ),
-        ]),
-        LdText.hs("10. Keyboard Shortcuts"),
-        LdText.p("Actions can have keyboard shortcuts using Flutter's ShortcutActivator system:"),
-        CodeBlock(
-          language: "dart",
-          code: '''shortcutActivators: {
+          LdText.hs("11. Keyboard Shortcuts"),
+          LdText.p("Actions can have keyboard shortcuts using Flutter's ShortcutActivator system:"),
+          CodeBlock(
+            language: "dart",
+            code: '''shortcutActivators: {
   // Single key
   SingleActivator(LogicalKeyboardKey.delete),
   
@@ -277,15 +308,16 @@ reactiveCreateAction<Task, int>(routeConfig: taskRouteConfig)''',
   SingleActivator(LogicalKeyboardKey.delete),
   SingleActivator(LogicalKeyboardKey.backspace),
 },''',
-        ),
-        LdText.hs("11. Custom Button Actions (LdMonkeyBareChildAction)"),
-        LdText.p(
+          ),
+          LdText.hs("12. Custom Button Actions (LdMonkeyBareChildAction)"),
+          LdText.p(
             "For actions that render a fully custom widget rather than a submit button, "
             "use LdMonkeyBareChildAction. builder receives ctx and a trigger function — "
-            "wire onPressed: trigger so press-time snapshots stay fresh."),
-        CodeBlock(
-          language: "dart",
-          code: '''LdMonkeyBareChildAction<Task, int>(
+            "wire onPressed: trigger so press-time snapshots stay fresh.",
+          ),
+          CodeBlock(
+            language: "dart",
+            code: '''LdMonkeyBareChildAction<Task, int>(
   visibility: {
     LdMonkeyActionVisibility(
       location: LdMonkeyActionLocation.masterAppBar,
@@ -302,12 +334,12 @@ reactiveCreateAction<Task, int>(routeConfig: taskRouteConfig)''',
     // Action logic — also invoked for keyboard shortcut
   },
 )''',
-        ),
-        LdText.hs("12. Complete Actions Example"),
-        LdText.p("A complete set of actions for a task management system:"),
-        CodeBlock(
-          language: "dart",
-          code: '''actions: [
+          ),
+          LdText.hs("13. Complete Actions Example"),
+          LdText.p("A complete set of actions for a task management system:"),
+          CodeBlock(
+            language: "dart",
+            code: '''actions: [
   reactiveCreateAction<Task, int>(routeConfig: taskRouteConfig),
   LdMonkeySubmitAction<Task, int, void>(
     id: 'mark-done',
@@ -328,8 +360,9 @@ reactiveCreateAction<Task, int>(routeConfig: taskRouteConfig)''',
   showFilterContextMenu<Task, int>(),
   refreshAction<Task, int>(),
 ],''',
-        ),
-      ]),
+          ),
+        ],
+      ),
     );
   }
 }

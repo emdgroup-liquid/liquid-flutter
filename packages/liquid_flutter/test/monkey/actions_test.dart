@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -275,6 +276,236 @@ void main() {
       });
     });
 
+    group('LdMonkeyActionGroup', () {
+      LdMonkeyBareChildAction<TestItem, int> labeledAction({
+        required String label,
+        LdMonkeyActionLocation location = LdMonkeyActionLocation.masterAppBar,
+        int minSelectionCount = 0,
+        Set<ShortcutActivator> shortcutActivators = const {},
+        Future<void> Function(LdMonkeyActionContext<TestItem, int> ctx)? onTrigger,
+      }) {
+        return LdMonkeyBareChildAction<TestItem, int>(
+          visibility: {
+            LdMonkeyActionVisibility(
+              location: location,
+              minSelectionCount: minSelectionCount,
+            ),
+          },
+          shortcutActivators: shortcutActivators,
+          builder: (ctx, trigger) => Text(label),
+          onTrigger: onTrigger ?? (ctx) async {},
+        );
+      }
+
+      test('ldFlattenMonkeyActions yields grouped members', () {
+        final inner = labeledAction(label: 'Inner');
+        final standalone = labeledAction(label: 'Solo');
+        final flattened = ldFlattenMonkeyActions<TestItem, int>([
+          standalone,
+          LdMonkeyActionGroup(actions: [inner, labeledAction(label: 'Other')]),
+        ]).toList();
+
+        expect(flattened, hasLength(3));
+        expect(flattened.first, same(standalone));
+        expect(flattened[1], same(inner));
+      });
+
+      testWidgets('isVisible is true when any child is visible', (tester) async {
+        final repository = createTestListController();
+        final shellState = TestSortAndFilterState<TestItem, int>();
+        final group = LdMonkeyActionGroup<TestItem, int>(
+          actions: [
+            labeledAction(
+              label: 'Hidden',
+              location: LdMonkeyActionLocation.detailAppBar,
+            ),
+            labeledAction(label: 'Shown'),
+          ],
+        );
+
+        await tester.pumpWidget(
+          wrapMonkeyActionVisibility(
+            repository: repository,
+            shellState: shellState,
+            location: LdMonkeyActionLocation.masterAppBar,
+            child: Builder(
+              builder: (context) {
+                expect(group.isVisible(context), isTrue);
+                expect(group.visibleActions(context), hasLength(1));
+                return const SizedBox();
+              },
+            ),
+          ),
+        );
+      });
+
+      testWidgets('isVisible is false when every child is hidden', (tester) async {
+        final repository = createTestListController();
+        final shellState = TestSortAndFilterState<TestItem, int>();
+        final group = LdMonkeyActionGroup<TestItem, int>(
+          actions: [
+            labeledAction(
+              label: 'A',
+              location: LdMonkeyActionLocation.detailAppBar,
+            ),
+            labeledAction(
+              label: 'B',
+              location: LdMonkeyActionLocation.context,
+            ),
+          ],
+        );
+
+        await tester.pumpWidget(
+          wrapMonkeyActionVisibility(
+            repository: repository,
+            shellState: shellState,
+            location: LdMonkeyActionLocation.masterAppBar,
+            child: Builder(
+              builder: (context) {
+                expect(group.isVisible(context), isFalse);
+                expect(group.visibleActions(context), isEmpty);
+                return const SizedBox();
+              },
+            ),
+          ),
+        );
+      });
+
+      testWidgets('hiding one member does not drop the rest', (tester) async {
+        final repository = createTestListController();
+        final shellState = TestSortAndFilterState<TestItem, int>();
+        final selection = LdMonkeySelection<TestItem, int>(
+          selection: {1},
+          viewing: {},
+          showSelectionControls: false,
+        );
+        final group = LdMonkeyActionGroup<TestItem, int>(
+          actions: [
+            labeledAction(label: 'Always'),
+            labeledAction(label: 'NeedsTwo', minSelectionCount: 2),
+          ],
+        );
+
+        await tester.pumpWidget(
+          wrapMonkeyActionVisibility(
+            repository: repository,
+            shellState: shellState,
+            location: LdMonkeyActionLocation.masterAppBar,
+            selection: selection,
+            child: Builder(
+              builder: (context) {
+                expect(group.isVisible(context), isTrue);
+                expect(
+                  group.visibleActions(context).single,
+                  same(group.actions.first),
+                );
+                return const SizedBox();
+              },
+            ),
+          ),
+        );
+      });
+
+      testWidgets('LdMonkeyActionHost registers submit ids inside a group', (tester) async {
+        final grouped = LdMonkeySubmitAction<TestItem, int, String>(
+          id: 'grouped-submit',
+          visibility: {
+            LdMonkeyActionVisibility(
+              location: LdMonkeyActionLocation.masterAppBar,
+              minSelectionCount: 0,
+            ),
+          },
+          tooltip: (_) => 'Grouped',
+          submitConfig: (_) => const LdMonkeySubmitConfig(),
+          onSubmit: (ctx) async => 'ok',
+          child: const Text('Grouped'),
+        );
+
+        final repository = createTestListController();
+        final shellState = TestSortAndFilterState<TestItem, int>();
+
+        await tester.pumpWidget(
+          LdThemeProvider(
+            child: MaterialApp(
+              localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+              home: LdScaffold(
+                body: wrapMonkeyActionBuild(
+                  repository: repository,
+                  shellState: shellState,
+                  location: LdMonkeyActionLocation.masterAppBar,
+                  actions: [
+                    LdMonkeyActionGroup(actions: [grouped]),
+                  ],
+                  child: Builder(
+                    builder: (context) => grouped.buildTrigger(
+                      context,
+                      LdMonkeyActionScope.of<TestItem, int>(context),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        // The offstage LdSubmit registers its controller after its initial
+        // render delay, so drive time forward instead of pumpAndSettle.
+        await tester.pump(const Duration(milliseconds: 400));
+        await tester.pumpAndSettle();
+        expect(find.text('Grouped'), findsOneWidget);
+      });
+
+      testWidgets('LdMonkeyMultiShortcuts applies shortcuts from grouped actions', (tester) async {
+        var shortcutPressed = false;
+        final grouped = labeledAction(
+          label: 'Hot',
+          shortcutActivators: {
+            const SingleActivator(LogicalKeyboardKey.keyD, meta: true),
+          },
+          onTrigger: (ctx) async {
+            shortcutPressed = true;
+          },
+        );
+
+        final shellState = TestSortAndFilterState<TestItem, int>();
+        final selection = LdMonkeySelection<TestItem, int>(
+          selection: {1, 2},
+          viewing: {},
+          showSelectionControls: false,
+        );
+        final focusNode = FocusNode();
+        final repository = createTestListController();
+
+        await tester.pumpWidget(
+          wrapMonkeyActionShortcuts(
+            repository: repository,
+            shellState: shellState,
+            selection: selection,
+            child: LdMonkeyMultiShortcuts<TestItem, int>(
+              actions: [
+                LdMonkeyActionGroup(actions: [grouped]),
+              ],
+              child: Focus(
+                focusNode: focusNode,
+                child: const SizedBox(),
+              ),
+            ),
+          ),
+        );
+
+        focusNode.requestFocus();
+        await tester.pumpAndSettle();
+
+        await tester.sendKeyDownEvent(LogicalKeyboardKey.meta);
+        await tester.sendKeyDownEvent(LogicalKeyboardKey.keyD);
+        await tester.sendKeyUpEvent(LogicalKeyboardKey.keyD);
+        await tester.sendKeyUpEvent(LogicalKeyboardKey.meta);
+        await tester.pumpAndSettle();
+
+        expect(shortcutPressed, isTrue);
+      });
+    });
+
     group('LdMonkeyBareChildAction', () {
       testWidgets('build() returns widget from builder', (WidgetTester tester) async {
         final action = LdMonkeyBareChildAction<TestItem, int>(
@@ -373,14 +604,16 @@ void main() {
           ),
         );
 
+        // The offstage LdSubmit registers its controller after its initial
+        // render delay, so drive time forward instead of pumpAndSettle.
+        await tester.pump(const Duration(milliseconds: 400));
         await tester.pumpAndSettle();
         expect(find.text('Submit'), findsOneWidget);
       });
     });
 
     group('Keyboard Shortcuts', () {
-      testWidgets('LdMonkeyMultiShortcuts applies shortcuts when multiple items selected',
-          (WidgetTester tester) async {
+      testWidgets('LdMonkeyMultiShortcuts applies shortcuts when multiple items selected', (WidgetTester tester) async {
         var shortcutPressed = false;
         final action = LdMonkeyBareChildAction<TestItem, int>(
           visibility: const {},
@@ -947,8 +1180,8 @@ void main() {
         final routeConfig = LdMonkeyRouteConfig.identifiableInt<TestItem>(itemName: 'task');
         final repository = createTestListController();
         final shellState = TestSortAndFilterState<TestItem, int>();
-        final action = reactiveCreateAction<TestItem, int>(routeConfig: routeConfig)
-            as LdMonkeyBareChildAction<TestItem, int>;
+        final action =
+            reactiveCreateAction<TestItem, int>(routeConfig: routeConfig) as LdMonkeyBareChildAction<TestItem, int>;
 
         final router = GoRouter(
           routes: [
@@ -1040,6 +1273,81 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.text('Child'), findsOneWidget);
         expect(find.byType(LdContextMenu), findsOneWidget);
+      });
+
+      testWidgets('opens grouped actions as full-width menu rows', (WidgetTester tester) async {
+        ldDisableAnimations = true;
+        final repository = createTestListController();
+        final shellState = TestSortAndFilterState<TestItem, int>();
+        final item = LdPaginatorItem<TestItem>(
+          value: createTestItem(1),
+          state: LdPaginatorItemState.loaded,
+        );
+        final selection = LdMonkeySelection<TestItem, int>(
+          selection: {},
+          viewing: {},
+          showSelectionControls: false,
+        );
+
+        LdMonkeyBareChildAction<TestItem, int> menuAction(String label) {
+          return LdMonkeyBareChildAction<TestItem, int>(
+            visibility: {
+              LdMonkeyActionVisibility(
+                location: LdMonkeyActionLocation.context,
+                minSelectionCount: 0,
+              ),
+            },
+            builder: (ctx, trigger) => LdAppBarAction(
+              onPressed: trigger,
+              child: Text(label),
+            ),
+            onTrigger: (ctx) async {},
+          );
+        }
+
+        final groupedA = menuAction('GroupedA');
+        final groupedB = menuAction('GroupedB');
+        final solo = menuAction('SoloMenu');
+        final actions = <LdMonkeyAction<TestItem, int>>[
+          LdMonkeyActionGroup(actions: [groupedA, groupedB]),
+          solo,
+        ];
+
+        await tester.pumpWidget(
+          LdThemeProvider(
+            child: MaterialApp(
+              localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+              home: wrapMonkeyActionBuild(
+                repository: repository,
+                shellState: shellState,
+                location: LdMonkeyActionLocation.context,
+                selection: selection,
+                actions: actions,
+                child: Provider<LdMonkeyActions<TestItem, int>>.value(
+                  value: actions,
+                  child: LdScaffold(
+                    body: Center(
+                      child: LdMonkeyContextMenu<TestItem, int>(
+                        item: item,
+                        child: const Text('Target'),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Target'), buttons: kSecondaryButton);
+        await tester.pumpAndSettle();
+
+        expect(tester.takeException(), isNull);
+        expect(find.text('GroupedA'), findsOneWidget);
+        expect(find.text('GroupedB'), findsOneWidget);
+        expect(find.text('SoloMenu'), findsOneWidget);
+        expect(find.byType(LdDivider), findsOneWidget);
       });
     });
   });

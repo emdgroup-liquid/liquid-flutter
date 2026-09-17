@@ -23,6 +23,7 @@ class LdMonkeyMasterPage<T extends Identifiable<IdType>, IdType> extends Statefu
 
 class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends State<LdMonkeyMasterPage<T, IdType>> {
   final _listKey = GlobalKey(debugLabel: 'master_page_list');
+  final _ldListKey = GlobalKey(debugLabel: 'master_page_ld_list');
 
   @override
   void dispose() {
@@ -42,10 +43,6 @@ class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends S
             title: Text(item.value!.toString()),
           ),
     );
-
-    if (canReorder) {
-      return content;
-    }
 
     return LdMonkeySingleShortcuts<T, IdType>(
       item: item.value!.id,
@@ -75,7 +72,7 @@ class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends S
     final canReorder = sortState.canReorder &&
         model.supportsReorder &&
         selection.selection.length <= 1 &&
-        !selection.showSelectionControls &&
+        selection.showSelectionControls &&
         interactionMode != LdMonkeyInteractionMode.pick;
 
     return LdListConfigProvider<T, IdType>(
@@ -112,7 +109,7 @@ class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends S
         listController: repository,
         initialSelectedItems: selection.showSelectionControls ? selection.selection : selection.viewing,
         multiSelect: widget.allowMultipleSelection,
-        disableDragGestures: canReorder,
+        disableDragGestures: false,
         child: canReorder
             ? LdListReorderScope<T, IdType>(
                 onReorder: (id, from, to) => repository.reorder(
@@ -122,9 +119,13 @@ class _LdMonkeyMasterPageState<T extends Identifiable<IdType>, IdType> extends S
                   toIndex: to,
                   activeSortOption: sortState.activeSortOptions.first,
                 ),
-                child: LdList<T, IdType>(),
+                child: LdList<T, IdType>(
+                  key: _ldListKey,
+                ),
               )
-            : LdList<T, IdType>(),
+            : LdList<T, IdType>(
+                key: _ldListKey,
+              ),
         onSelectionChange: (selected) async {
           await Future.delayed(Duration.zero);
           if (!context.mounted) {

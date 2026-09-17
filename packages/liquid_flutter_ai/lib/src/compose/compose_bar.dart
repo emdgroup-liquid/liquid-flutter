@@ -3,6 +3,10 @@ import 'dart:async';
 import 'package:cross_file/cross_file.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter_ai/src/attachments/attachment_config.dart';
+import 'package:liquid_flutter_ai/src/attachments/attachment_picker.dart';
+import 'package:liquid_flutter_ai/src/attachments/attachment_result.dart';
+import 'package:liquid_flutter_ai/src/attachments/platform/attachment_services.dart';
 import 'package:liquid_flutter_ai/src/compose/waveform_recorder.dart';
 import 'package:liquid_flutter_ai/src/models/compose_attachment.dart';
 import 'package:liquid_flutter_ai/src/send/send_fly_scope.dart';
@@ -30,6 +34,21 @@ class LdComposeBar extends StatefulWidget {
   final VoidCallback? onPickImage;
   final VoidCallback? onPickCamera;
   final VoidCallback? onPickFile;
+
+  /// When set, the attach button opens the rich [LdAttachmentPicker] and emits
+  /// the picked attachments here. Takes precedence over the individual
+  /// [onPickImage] / [onPickCamera] / [onPickFile] callbacks.
+  final ValueChanged<List<LdPickedAttachment>>? onAttachmentsPicked;
+
+  /// Configuration forwarded to [LdAttachmentPicker] when
+  /// [onAttachmentsPicked] is set.
+  final LdAttachmentPickerConfig? attachmentPickerConfig;
+
+  /// Optional services bundle forwarded to [LdAttachmentPicker]. When null the
+  /// picker resolves the nearest [LdAttachmentServicesScope] or the native
+  /// bundle.
+  final LdAttachmentServices? attachmentServices;
+
   final ValueChanged<LdComposeAttachment>? onRemoveAttachment;
   final Widget? leading;
   final String? hintText;
@@ -58,6 +77,9 @@ class LdComposeBar extends StatefulWidget {
     this.onPickImage,
     this.onPickCamera,
     this.onPickFile,
+    this.onAttachmentsPicked,
+    this.attachmentPickerConfig,
+    this.attachmentServices,
     this.onRemoveAttachment,
     this.leading,
     this.hintText,
@@ -210,27 +232,25 @@ class _LdComposeBarState extends State<LdComposeBar> {
   @override
   Widget build(BuildContext context) {
     final hasAttachments = widget.attachments.isNotEmpty && !_isRecording;
-    return AppBarFrame(
-      position: LdAppBarPosition.bottom,
-      insidePadding: LdTheme.of(context).pad(),
+    return LdRawAppBar(
+      positionMode: LdAppBarPositionMode.bottom,
+      addContainer: true,
+
       attached: false,
       scrollBehavior: LdAppBarScrollBehavior.static,
-      wrappedChild: widget.child,
 
-      child: Builder(
+      content: Builder(
         builder: (context) {
-          return Padding(
-            padding: MediaQuery.of(context).padding,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (hasAttachments) _buildAttachmentStrip(context),
-                _buildChrome(context),
-              ],
-            ).spaceM(),
-          );
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (hasAttachments) _buildAttachmentStrip(context),
+              _buildChrome(context),
+            ],
+          ).spaceM();
         },
       ),
+      child: widget.child,
     );
   }
 
@@ -292,6 +312,7 @@ class _LdComposeBarState extends State<LdComposeBar> {
 
   Widget _buildInputRow(BuildContext context) {
     final showAttachRow =
+        widget.onAttachmentsPicked != null ||
         widget.onPickImage != null ||
         widget.onPickCamera != null ||
         widget.onPickFile != null;
@@ -365,58 +386,67 @@ class _LdComposeBarState extends State<LdComposeBar> {
             ],
           ),
         ),
-        LdReveal.quick(
-          revealed: widget.isBusy && widget.onStop != null,
-          child: Row(
-            children: [
-              ldSpacerXS,
-              LdButton(
-                color: theme.error,
+        ldSpacerXS,
+        AnimatedSwitcher(
+          duration: ldDisableAnimations
+              ? Duration.zero
+              : const Duration(milliseconds: 150),
+          transitionBuilder: (child, animation) =>
+              ScaleTransition(scale: animation, child: child),
+          child: switch (_isRecording) {
+            true => LdButton.filled(
+              key: const ValueKey('ld-compose-confirm-recording'),
+              size: _controlSize,
+              onPressed: _handleConfirmRecording,
+              child: const Icon(LucideIcons.arrowUp),
+            ),
+            false => switch (widget.isBusy && widget.onStop != null) {
+              true => LdButton(
+                key: const ValueKey('ld-compose-stop'),
                 size: _controlSize,
-                onPressed: widget.onStop ?? () {},
-
+                onPressed: widget.onStop!,
                 child: const Icon(LucideIcons.square),
               ),
-            ],
-          ),
-        ),
-        LdReveal.quick(
-          revealed: !widget.isBusy && (_hasContent && widget.onSend != null),
-          child: Row(
-            children: [
-              ldSpacerXS,
-              LdButton.filled(
-                onPressed: _handleSend,
-                size: _controlSize,
-                child: const Icon(LucideIcons.arrowUp),
-              ),
-            ],
-          ),
-        ),
-        LdReveal.quick(
-          revealed: showMic,
-          axes: {Axis.horizontal},
-          child: Row(children: [ldSpacerXS, _buildMicButton(context)]),
-        ),
-        LdReveal.quick(
-          revealed: _isRecording,
-          axes: {Axis.horizontal},
-          child: Row(
-            children: [
-              ldSpacerXS,
-              LdButton.filled(
-                size: _controlSize,
-                onPressed: _handleConfirmRecording,
-                child: const Icon(LucideIcons.arrowUp),
-              ),
-            ],
-          ),
+              false => switch (_hasContent) {
+                true => LdButton.filled(
+                  key: const ValueKey('ld-compose-send'),
+                  size: _controlSize,
+                  noFocusOnTap: true,
+                  onPressed: _handleSend,
+                  child: const Icon(LucideIcons.arrowUp),
+                ),
+                false => switch (showMic) {
+                  true => _buildMicButton(context),
+                  false => const SizedBox.shrink(),
+                },
+              },
+            },
+          },
         ),
       ],
     );
   }
 
+  Future<void> _openAttachmentPicker() async {
+    final result = await showLdAttachmentPicker(
+      context,
+      services: widget.attachmentServices,
+      config: widget.attachmentPickerConfig ?? const LdAttachmentPickerConfig(),
+    );
+    if (!mounted || result == null || result.isEmpty) {
+      return;
+    }
+    widget.onAttachmentsPicked!(result);
+  }
+
   Widget _buildAttachButtons(BuildContext context) {
+    if (widget.onAttachmentsPicked != null) {
+      return LdButton.outline(
+        onPressed: _openAttachmentPicker,
+        size: LdSize.l,
+        child: const Icon(LucideIcons.plus),
+      );
+    }
     final theme = LdTheme.of(context);
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -525,6 +555,7 @@ class _LdComposeBarState extends State<LdComposeBar> {
 
   Widget _buildMicButton(BuildContext context) {
     return LdButton.outline(
+      key: const ValueKey('ld-compose-mic'),
       disabled: _startingRecording,
       size: _controlSize,
       onPressed: _handleStartRecording,

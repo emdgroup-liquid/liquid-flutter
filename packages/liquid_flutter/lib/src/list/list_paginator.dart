@@ -784,12 +784,11 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
 
   void rollbackItemCreation(int index) {
     final item = _items[index];
-    assert(
-      item?.state == LdPaginatorItemState.creating,
-      'Can not rollback item creation: $index, as it is not being created',
-    );
+    if (item == null) {
+      return;
+    }
     _items[index] = LdPaginatorItem<T>(
-      value: item!.value,
+      value: item.value,
       state: LdPaginatorItemState.rolledBackCreation,
     );
     _updated(_items[index]);
@@ -917,6 +916,20 @@ class LdPaginator<T extends Identifiable<IdType>, IdType> extends ChangeNotifier
       _items[i] = items[i];
     }
     _updated(null);
+  }
+
+  /// Sets the state of an item identified by [id] to [state].
+  ///
+  /// Optionally updates the item's [value] as well. If [value] is null the
+  /// existing value is preserved.
+  void setItemState(IdType id, LdPaginatorItemState state, {T? value}) {
+    final index = getItemIndexById(id);
+    if (index == null) return;
+    _items[index] = LdPaginatorItem<T>(
+      value: value ?? _items[index]?.value,
+      state: state,
+    );
+    _updated(_items[index]);
   }
 
   Stream<LdPaginatorItem<T>> watchItem(IdType id) {
@@ -1198,6 +1211,7 @@ enum LdPaginatorItemState {
   rolledBackCreation,
   deleted,
   pendingRefresh,
+  moved,
 }
 
 class LdPaginatorLoadedItem<T extends Identifiable> extends LdPaginatorItem<T> {

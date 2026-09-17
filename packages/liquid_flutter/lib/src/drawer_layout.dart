@@ -14,6 +14,10 @@ class LdDrawerLayout extends StatefulWidget {
   final double drawerMinWidth;
   final bool insetBody;
 
+  /// Whether the user may hide the drawer. When false, a side-by-side drawer
+  /// is kept open and no close toggle is shown (useful for navigation rails).
+  final bool collapsible;
+
   final void Function(LdDrawerState) onStateChange;
 
   final double drawerWidth;
@@ -27,6 +31,7 @@ class LdDrawerLayout extends StatefulWidget {
     this.drawerRight = false,
     this.insetBody = false,
     this.enableScaling = false,
+    this.collapsible = true,
     required this.onStateChange,
   });
 
@@ -132,7 +137,13 @@ class LdDrawerLayoutState extends State<LdDrawerLayout> {
   }
 
   void _onStateChange() {
-    widget.onStateChange(LdDrawerState(isOpen: _panelVisible, isSideBySide: _isSideBySide));
+    widget.onStateChange(
+      LdDrawerState(
+        isOpen: (!widget.collapsible && _isSideBySide) || _panelVisible,
+        isSideBySide: _isSideBySide,
+        isCollapsible: widget.collapsible,
+      ),
+    );
   }
 
   void _handleHistoryEntryRemoved() {
@@ -154,6 +165,10 @@ class LdDrawerLayoutState extends State<LdDrawerLayout> {
     if (_disposed || !mounted) {
       return;
     }
+    // A non-collapsible side-by-side drawer cannot be hidden.
+    if (!_canCollapse) {
+      return;
+    }
     setState(() {
       _panelVisible = false;
     });
@@ -164,6 +179,11 @@ class LdDrawerLayoutState extends State<LdDrawerLayout> {
   }
 
   bool get _isDrawerOpen => _panelVisible;
+
+  /// Whether the drawer may currently be hidden. A non-collapsible drawer is
+  /// only pinned while laid out side-by-side; in stacked mode it stays a
+  /// dismissible overlay.
+  bool get _canCollapse => widget.collapsible || !_isSideBySide;
 
   bool get _insetBody =>
       widget.insetBody || (context.findAncestorStateOfType<LdDrawerLayoutState>()?._insetBody != true && _isSideBySide);
@@ -203,13 +223,21 @@ class LdDrawerLayoutState extends State<LdDrawerLayout> {
 
             final mode = _isSideBySide ? LdMultiPanelLayoutMode.sideBySide : LdMultiPanelLayoutMode.stacked;
 
+            // A non-collapsible drawer is pinned open while side-by-side.
+            final effectivePanelVisible = (!widget.collapsible && _isSideBySide) || _panelVisible;
+            final drawerState = LdDrawerState(
+              isOpen: effectivePanelVisible,
+              isSideBySide: _isSideBySide,
+              isCollapsible: widget.collapsible,
+            );
+
             return Stack(
               children: [
                 LdMultiPanelLayout(
                   insetBody: _insetBody,
                   enableScaling: widget.enableScaling,
                   mode: mode,
-                  panelVisible: _panelVisible,
+                  panelVisible: effectivePanelVisible,
                   onPanelVisibilityChanged: _onPanelVisibilityChanged,
                   panelWidth: _effectiveDrawerWidth,
                   panelPosition: widget.drawerRight ? LdPanelPosition.right : LdPanelPosition.left,
@@ -221,20 +249,14 @@ class LdDrawerLayoutState extends State<LdDrawerLayout> {
                   panel: Provider.value(
                     value: LdDrawerSlot.drawer,
                     child: Provider.value(
-                      value: LdDrawerState(
-                        isOpen: _isDrawerOpen,
-                        isSideBySide: _isSideBySide,
-                      ),
+                      value: drawerState,
                       child: widget.drawer,
                     ),
                   ),
                   body: Provider.value(
                     value: LdDrawerSlot.body,
                     child: Provider.value(
-                      value: LdDrawerState(
-                        isOpen: _isDrawerOpen,
-                        isSideBySide: _isSideBySide,
-                      ),
+                      value: drawerState,
                       child: widget.body,
                     ),
                   ),

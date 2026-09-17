@@ -99,6 +99,8 @@ class _LdSubmitState<T, Arg> extends State<LdSubmit<T, Arg>> {
   LdSubmitController<T, Arg>? _controller;
   bool _createdController = false;
 
+  bool _isInitialRender = true;
+
   @override
   void initState() {
     super.initState();
@@ -113,6 +115,14 @@ class _LdSubmitState<T, Arg> extends State<LdSubmit<T, Arg>> {
     }
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _controller?.init();
+    });
+
+    Future.delayed(Durations.medium1, () {
+      if (mounted) {
+        setState(() {
+          _isInitialRender = false;
+        });
+      }
     });
   }
 
@@ -182,6 +192,10 @@ class _LdSubmitState<T, Arg> extends State<LdSubmit<T, Arg>> {
       widget.config != null || widget.controller != null,
       "You must provide either a config or a controller",
     );
+
+    if (_isInitialRender) {
+      return SizedBox.shrink();
+    }
 
     return _buildProvider(context);
   }

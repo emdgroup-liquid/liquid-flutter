@@ -67,33 +67,45 @@ class LdMonkeyContextMenu<T extends Identifiable<IdType>, IdType> extends Statel
                 Provider<List<LdMonkeyAction<T, IdType>>>.value(
                   value: visibleActions,
                 ),
-                Provider<LdMonkeyActionScope<T, IdType>>.value(
+                ChangeNotifierProvider<LdMonkeyActionScope<T, IdType>>.value(
                   value: context.read<LdMonkeyActionScope<T, IdType>>(),
                 ),
               ],
               menuBuilder: (menuContext) => ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 300),
                 child: Builder(builder: (context) {
+                  final scope = context.read<LdMonkeyActionScope<T, IdType>>();
+                  const buttonConfig = LdButtonConfig(
+                    borderRadius: BorderRadius.zero,
+                    disableSqueeze: true,
+                    alignment: MainAxisAlignment.start,
+                    autoLoading: false,
+                    width: double.infinity,
+                    mode: LdButtonMode.ghost,
+                  );
+                  final menuItems = <Widget>[];
+                  for (var i = 0; i < visibleActions.length; i++) {
+                    if (i > 0 &&
+                        (visibleActions[i] is LdMonkeyActionGroup<T, IdType> ||
+                            visibleActions[i - 1] is LdMonkeyActionGroup<T, IdType>)) {
+                      menuItems.add(const LdDivider());
+                    }
+                    final action = visibleActions[i];
+                    final triggers = action is LdMonkeyActionGroup<T, IdType>
+                        ? action.visibleActions(context).map((child) => child.buildTrigger(context, scope))
+                        : [action.buildTrigger(context, scope)];
+                    for (final trigger in triggers) {
+                      menuItems.add(
+                        LdButtonConfigProvider(
+                          config: buttonConfig,
+                          child: trigger,
+                        ),
+                      );
+                    }
+                  }
                   return Column(
                     mainAxisSize: MainAxisSize.min,
-                    children: visibleActions
-                        .map(
-                          (action) => LdButtonConfigProvider(
-                            config: const LdButtonConfig(
-                              borderRadius: BorderRadius.zero,
-                              disableSqueeze: true,
-                              alignment: MainAxisAlignment.start,
-                              autoLoading: false,
-                              width: double.infinity,
-                              mode: LdButtonMode.ghost,
-                            ),
-                            child: action.buildTrigger(
-                              context,
-                              context.read<LdMonkeyActionScope<T, IdType>>(),
-                            ),
-                          ),
-                        )
-                        .toList(),
+                    children: menuItems,
                   );
                 }),
               ),

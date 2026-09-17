@@ -166,6 +166,7 @@ class LdButton extends StatelessWidget {
     this.size,
     this.trailing,
     this.disableSqueeze,
+    this.noFocusOnTap = false,
     super.key,
   });
 
@@ -180,6 +181,7 @@ class LdButton extends StatelessWidget {
     String? errorText,
     double? progress,
     Widget? trailing,
+    bool noFocusOnTap = false,
     Key? key,
   }) {
     return LdButton(
@@ -204,6 +206,7 @@ class LdButton extends StatelessWidget {
       size: config.size,
       trailing: trailing,
       disableSqueeze: config.disableSqueeze,
+      noFocusOnTap: noFocusOnTap,
       key: key,
       child: child,
     );
@@ -231,6 +234,7 @@ class LdButton extends StatelessWidget {
     LdSize? size,
     Widget? trailing,
     bool? disableSqueeze,
+    bool noFocusOnTap = false,
     Key? key,
   }) {
     return LdButton(
@@ -255,6 +259,7 @@ class LdButton extends StatelessWidget {
       size: size,
       trailing: trailing,
       disableSqueeze: disableSqueeze,
+      noFocusOnTap: noFocusOnTap,
       key: key,
       child: child,
     );
@@ -282,6 +287,7 @@ class LdButton extends StatelessWidget {
     LdSize? size,
     Widget? trailing,
     bool? disableSqueeze,
+    bool noFocusOnTap = false,
     Key? key,
   }) {
     return LdButton(
@@ -306,6 +312,7 @@ class LdButton extends StatelessWidget {
       size: size,
       trailing: trailing,
       disableSqueeze: disableSqueeze,
+      noFocusOnTap: noFocusOnTap,
       key: key,
       child: child,
     );
@@ -333,6 +340,7 @@ class LdButton extends StatelessWidget {
     LdSize? size,
     Widget? trailing,
     bool? disableSqueeze,
+    bool noFocusOnTap = false,
     Key? key,
   }) {
     return LdButton(
@@ -357,6 +365,7 @@ class LdButton extends StatelessWidget {
       size: size,
       trailing: trailing,
       disableSqueeze: disableSqueeze,
+      noFocusOnTap: noFocusOnTap,
       key: key,
       child: child,
     );
@@ -384,6 +393,7 @@ class LdButton extends StatelessWidget {
     LdSize? size,
     Widget? trailing,
     bool? disableSqueeze,
+    bool noFocusOnTap = false,
     Key? key,
   }) {
     return LdButton(
@@ -408,6 +418,7 @@ class LdButton extends StatelessWidget {
       size: size,
       trailing: trailing,
       disableSqueeze: disableSqueeze,
+      noFocusOnTap: noFocusOnTap,
       key: key,
       child: child,
     );
@@ -440,6 +451,8 @@ class LdButton extends StatelessWidget {
   final bool autoFocus;
 
   final bool? disableSqueeze;
+
+  final bool noFocusOnTap;
 
   final LdButtonMode? mode;
 
@@ -480,6 +493,7 @@ class LdButton extends StatelessWidget {
     LdSize? size,
     Widget? trailing,
     bool? disableSqueeze,
+    bool noFocusOnTap = false,
     Key? key,
   }) {
     return Builder(
@@ -505,6 +519,7 @@ class LdButton extends StatelessWidget {
         size: size,
         trailing: trailing,
         disableSqueeze: disableSqueeze,
+        noFocusOnTap: noFocusOnTap,
         key: key,
         child: child,
       ),
@@ -534,6 +549,7 @@ class LdButton extends StatelessWidget {
     LdSize? size,
     Widget? trailing,
     bool? disableSqueeze,
+    bool noFocusOnTap = false,
     Key? key,
   }) {
     return Builder(
@@ -559,6 +575,7 @@ class LdButton extends StatelessWidget {
         size: size,
         trailing: trailing,
         disableSqueeze: disableSqueeze,
+        noFocusOnTap: noFocusOnTap,
         key: key,
         child: child,
       ),
@@ -588,6 +605,7 @@ class LdButton extends StatelessWidget {
     LdSize? size,
     Widget? trailing,
     bool? disableSqueeze,
+    bool noFocusOnTap = false,
     Key? key,
   }) {
     return Builder(
@@ -613,6 +631,7 @@ class LdButton extends StatelessWidget {
         size: size,
         trailing: trailing,
         disableSqueeze: disableSqueeze,
+        noFocusOnTap: noFocusOnTap,
         key: key,
         child: child,
       ),
@@ -644,6 +663,7 @@ class LdButton extends StatelessWidget {
       size: size ?? config?.size ?? LdSize.m,
       trailing: trailing,
       disableSqueeze: disableSqueeze ?? config?.disableSqueeze ?? false,
+      noFocusOnTap: noFocusOnTap,
       child: child,
     );
   }

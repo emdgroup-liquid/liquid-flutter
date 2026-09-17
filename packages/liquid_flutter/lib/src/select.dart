@@ -74,25 +74,33 @@ class _LdSelectState<T> extends State<LdSelect<T>> {
   }
 
   /// Builds the initial item (selected or placeholder)
-  Widget _buildInitialItem(LdSelectItem<T>? activeItem, Color placeholderColor, LdTheme theme) {
+  Widget _buildInitialItem(LdSelectItem<T>? activeItem, Color placeholderColor, LdTheme theme, LdSize size) {
     return Row(
       children: [
         Expanded(
-          child: activeItem?.child ??
-              Text(
-                widget.placeholder ?? "Select...",
-                style: ldBuildTextStyle(
-                  theme,
-                  LdTextType.label,
-                  widget.size,
-                  color: placeholderColor,
-                ),
-              ),
+          child: ClipRect(
+            child: Align(
+              alignment: Alignment.centerLeft,
+              heightFactor: 1,
+              child: activeItem?.child ??
+                  Text(
+                    widget.placeholder ?? "Select...",
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: ldBuildTextStyle(
+                      theme,
+                      LdTextType.label,
+                      size,
+                      color: placeholderColor,
+                    ),
+                  ),
+            ),
+          ),
         ),
         Icon(
           Icons.expand_more,
           color: theme.primaryColor,
-          size: theme.labelSize(widget.size),
+          size: theme.labelSize(size),
         )
       ],
     );
@@ -199,11 +207,15 @@ class _LdSelectState<T> extends State<LdSelect<T>> {
     required TextStyle defaultTextStyle,
     required VoidCallback open,
     required bool isOpen,
+    required LdSize size,
   }) {
+    final textDirection = Directionality.of(context);
+    final scope = LdControlGroupScope.of(context);
+    final borderRadius = scope != null ? scope.radiusFor(theme, textDirection) : theme.radius(LdSize.s);
     return Container(
       decoration: BoxDecoration(
         color: widget.onSurface ? theme.background : theme.surface,
-        borderRadius: theme.radius(LdSize.s),
+        borderRadius: borderRadius,
       ),
       child: LdTouchableSurface(
         disabled: widget.disabled,
@@ -217,20 +229,12 @@ class _LdSelectState<T> extends State<LdSelect<T>> {
           final colorBundle = inputColor(theme, status, isValid: widget.valid);
           final initialItem = DefaultTextStyle(
             style: defaultTextStyle,
-            child: _buildInitialItem(activeItem, colorBundle.placeholder, theme),
+            child: _buildInitialItem(activeItem, colorBundle.placeholder, theme, size),
           );
-          return Container(
-            width: double.infinity,
-            padding: theme.balPad(widget.size),
-            clipBehavior: Clip.hardEdge,
-            decoration: BoxDecoration(
-              color: colorBundle.surface,
-              borderRadius: theme.radius(LdSize.s),
-              border: Border.all(
-                color: colorBundle.border,
-                width: 1.5,
-              ),
-            ),
+          return LdFieldFrame(
+            colors: colorBundle,
+            size: size,
+            borderRadius: borderRadius,
             child: initialItem,
           );
         }),
@@ -241,7 +245,8 @@ class _LdSelectState<T> extends State<LdSelect<T>> {
   @override
   Widget build(BuildContext context) {
     var theme = LdTheme.of(context, listen: true);
-    final size = widget.size;
+    final scope = LdControlGroupScope.of(context);
+    final size = scope?.size ?? widget.size;
     var activeItem = widget.items.firstWhereOrNull((element) => element.value == widget.value);
     final defaultTextStyle = ldBuildTextStyle(
       theme,
@@ -255,36 +260,41 @@ class _LdSelectState<T> extends State<LdSelect<T>> {
       mainAxisSize: MainAxisSize.min,
       children: [
         // Include label if not null
-        if (widget.label != null)
+        if (widget.label != null && scope == null)
           LdText.l(
             widget.label!,
             size: size,
           ),
-        LdContextMenu(
-          positionMode: LdContextPositionMode.relativeTrigger,
-          zoomMode: LdContextZoomMode.never,
-          dismissOnOutsideTap: true,
-          inheritTriggerWidth: true,
-          scaleFromTrigger: false,
-          placeAboveTrigger: true,
-          builder: (context, isShuttle, open, isOpen, child) {
-            return _buildDropdownButton(
-              context: context,
-              isOpen: isOpen,
-              theme: theme,
-              activeItem: activeItem,
-              defaultTextStyle: defaultTextStyle,
-              open: open,
-            );
-          },
-          menuBuilder: (context) {
-            return _buildDropdownMenu(
-              context: context,
-              theme: theme,
-              activeItem: activeItem,
-              defaultTextStyle: defaultTextStyle,
-            );
-          },
+        ldGroupLabelTooltip(
+          context: context,
+          label: widget.label,
+          child: LdContextMenu(
+            positionMode: LdContextPositionMode.relativeTrigger,
+            zoomMode: LdContextZoomMode.never,
+            dismissOnOutsideTap: true,
+            inheritTriggerWidth: true,
+            scaleFromTrigger: false,
+            placeAboveTrigger: true,
+            builder: (context, isShuttle, open, isOpen, child) {
+              return _buildDropdownButton(
+                context: context,
+                isOpen: isOpen,
+                theme: theme,
+                activeItem: activeItem,
+                defaultTextStyle: defaultTextStyle,
+                open: open,
+                size: size,
+              );
+            },
+            menuBuilder: (context) {
+              return _buildDropdownMenu(
+                context: context,
+                theme: theme,
+                activeItem: activeItem,
+                defaultTextStyle: defaultTextStyle,
+              );
+            },
+          ),
         ),
       ],
     ).spaceS();

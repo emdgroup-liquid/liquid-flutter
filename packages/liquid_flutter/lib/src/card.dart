@@ -48,6 +48,11 @@ class LdCard extends StatelessWidget {
               final crossAlign = constraints.hasBoundedWidth
                   ? CrossAxisAlignment.stretch
                   : CrossAxisAlignment.start;
+              // `Expanded` requires a bounded main-axis extent. In layouts
+              // that size the card to its content (e.g. a masonry grid or a
+              // scrolling column) the height is unbounded, so fall back to the
+              // child's natural size instead of asserting.
+              final canExpand = expandChild && constraints.hasBoundedHeight;
               return Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: crossAlign,
@@ -63,7 +68,7 @@ class LdCard extends StatelessWidget {
                       height: 1,
                     ),
                   ],
-                  expandChild
+                  canExpand
                       ? Expanded(
                           child: Padding(
                             padding: padding ?? theme.pad(size: LdSize.m),

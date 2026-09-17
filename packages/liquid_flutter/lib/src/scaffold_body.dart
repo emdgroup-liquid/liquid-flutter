@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 /// Whether the keyboard (or another UI) is obscuring part of the viewport.
@@ -43,9 +45,8 @@ Widget _mediaQueryForScrollChild(BuildContext context, Widget child) {
   // Always wrap in [MediaQuery] so the scroll subtree keeps a stable widget
   // structure when the keyboard opens. Toggling between a wrapper and a bare
   // [child] remounts scroll content and drops body input focus.
-  final verticalPadding = _hasKeyboardViewInsets(mediaQuery)
-      ? mediaQuery.padding
-      : mediaQuery.padding.copyWith(top: 0, bottom: 0);
+  final verticalPadding =
+      _hasKeyboardViewInsets(mediaQuery) ? mediaQuery.padding : mediaQuery.padding.copyWith(top: 0, bottom: 0);
   return MediaQuery(
     data: mediaQuery.copyWith(padding: verticalPadding),
     child: child,
@@ -69,9 +70,7 @@ class LdScaffoldBodyCentered extends StatelessWidget {
     final theme = LdTheme.of(context, listen: true);
 
     final themePadding = minimumPadding ?? theme.pad();
-    var padding = MediaQuery.paddingOf(context)
-            .atLeast(MediaQuery.viewPaddingOf(context)) +
-        (themePadding);
+    var padding = MediaQuery.paddingOf(context).atLeast(MediaQuery.viewPaddingOf(context)) + (themePadding);
 
     return LayoutBuilder(builder: (context, constraints) {
       if (addContainer) {
@@ -121,6 +120,8 @@ class LdScaffoldBody extends StatelessWidget {
   /// (e.g. inserting above an existing row) instead of remounting them.
   final ChildIndexGetter? findChildIndexCallback;
 
+  final ScrollViewKeyboardDismissBehavior? keyboardDismissBehavior;
+
   const LdScaffoldBody({
     super.key,
     this.children = const [],
@@ -140,7 +141,24 @@ class LdScaffoldBody extends StatelessWidget {
     this.itemBuilder,
     this.itemCount,
     this.findChildIndexCallback,
+    this.keyboardDismissBehavior,
   });
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    properties.add(IterableProperty<Widget>('children', children));
+    properties.add(IterableProperty<Widget>('slivers', slivers));
+    properties.add(FlagProperty('autoSpaceChildren', value: autoSpaceChildren));
+    properties.add(FlagProperty('reverse', value: reverse));
+    properties.add(FlagProperty('addContainer', value: addContainer));
+    properties.add(FlagProperty('shrinkWrap', value: shrinkWrap));
+    properties.add(FlagProperty('scrollEdgeFade', value: scrollEdgeFade));
+    properties.add(FlagProperty('resizeToAvoidBottomInset', value: resizeToAvoidBottomInset));
+
+    properties.add(ColorProperty('backgroundColor', backgroundColor));
+
+    super.debugFillProperties(properties);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -155,8 +173,7 @@ class LdScaffoldBody extends StatelessWidget {
       bottom: themePadding.bottom + padding.bottom,
     );
 
-    final effectiveChildren =
-        autoSpaceChildren ? children.autoSpace(context) : children;
+    final effectiveChildren = autoSpaceChildren ? children.autoSpace(context) : children;
 
     // Only pass an explicit [scrollController] when the caller provides one.
     // [LdScaffold] already wraps the body in [PrimaryScrollController]; attaching
@@ -194,6 +211,7 @@ class LdScaffoldBody extends StatelessWidget {
         );
       } else {
         scrollView = CustomScrollView(
+          keyboardDismissBehavior: keyboardDismissBehavior,
           controller: scrollController,
           shrinkWrap: shrinkWrap,
           slivers: [
@@ -229,8 +247,7 @@ class LdScaffoldBody extends StatelessWidget {
         );
       }
 
-      final effectiveColor = backgroundColor ??
-          (context.isSurface ? theme.surface : theme.background);
+      final effectiveColor = backgroundColor ?? (context.isSurface ? theme.surface : theme.background);
 
       final scrollContent = scrollEdgeFade
           ? LdScrollEdgeFade(

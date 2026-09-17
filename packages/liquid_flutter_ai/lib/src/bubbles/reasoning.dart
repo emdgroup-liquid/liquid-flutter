@@ -36,16 +36,11 @@ class _LdReasoningCardState extends State<LdReasoningCard> {
   bool get reasoningIsShort =>
       widget.item.content.trim().split('\n').length <= 3;
 
-  bool get _shortenReasoning => switch (widget.item.isStreaming) {
-    true => true,
-    false => switch (reasoningIsShort) {
-      true => true,
-      false => switch (widget.isSingleton) {
-        true => false,
-        false => !_userExpanded,
-      },
-    },
-  };
+  /// Bounds the reasoning text to the 5-line ticker window (with scrolling)
+  /// only for singleton reasoning. Inside a shared activity group the group is
+  /// the collapse boundary, so expanded content shows in full.
+  bool get _shortenReasoning => widget.isSingleton &&
+      (widget.item.isStreaming || !reasoningIsShort);
 
   @override
   Widget build(BuildContext context) {

@@ -28,30 +28,41 @@ class LdSwitch<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = LdTheme.of(context, listen: true);
+    final scope = LdControlGroupScope.of(context);
+    final textDirection = Directionality.of(context);
+    final effectiveSize = scope?.size ?? size;
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (label != null)
+        if (label != null && scope == null)
           LdText.l(
             label!,
-            size: size,
+            size: effectiveSize,
           ),
-        Container(
-          clipBehavior: Clip.hardEdge,
-          decoration: BoxDecoration(
-            borderRadius: theme.radius(LdSize.s),
-            border: Border.all(
-              color: theme.border,
-              width: theme.borderWidth,
-              strokeAlign: BorderSide.strokeAlignOutside,
+        ldGroupLabelTooltip(
+          context: context,
+          label: label,
+          child: Container(
+            clipBehavior: Clip.hardEdge,
+            decoration: BoxDecoration(
+              borderRadius: scope?.radiusFor(theme, textDirection) ?? theme.radius(LdSize.s),
+              border: scope != null
+                  ? scope.borderFor(theme, theme.border, textDirection)
+                  : Border.all(
+                      color: theme.border,
+                      width: theme.borderWidth,
+                      strokeAlign: BorderSide.strokeAlignOutside,
+                    ),
             ),
-          ),
-          child: IntrinsicHeight(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [for (var entry in children.entries) ..._buildItem(theme, entry.key, entry.value)],
+            child: IntrinsicHeight(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (var entry in children.entries) ..._buildItem(theme, entry.key, entry.value, effectiveSize)
+                ],
+              ),
             ),
           ),
         ),
@@ -61,7 +72,7 @@ class LdSwitch<T> extends StatelessWidget {
 
   int get activeIndex => children.keys.toList().indexOf(value);
 
-  List<Widget> _buildItem(LdTheme theme, T key, Widget child) {
+  List<Widget> _buildItem(LdTheme theme, T key, Widget child, LdSize size) {
     var isSelected = key == value;
 
     var index = children.keys.toList().indexOf(key);

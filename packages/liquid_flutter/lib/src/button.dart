@@ -182,6 +182,11 @@ class _LdButtonWidget extends StatefulWidget {
   /// Disables the press-squeeze scale animation.
   final bool disableSqueeze;
 
+  /// When `true`, tapping does not request focus for the button — the
+  /// currently focused node keeps focus (e.g. a compose input's soft
+  /// keyboard stays open).
+  final bool noFocusOnTap;
+
   /// The visual style of the button. Defaults to [LdButtonMode.filled].
   final LdButtonMode mode;
 
@@ -230,6 +235,7 @@ class _LdButtonWidget extends StatefulWidget {
     @ContextConfigurable() this.size = LdSize.m,
     this.trailing,
     @ContextConfigurable() this.disableSqueeze = false,
+    this.noFocusOnTap = false,
   });
 
   @override
@@ -276,6 +282,12 @@ class _LdButtonState extends State<_LdButtonWidget> {
   // Button themes are determined using the theme provider
   LdTheme get _theme => Provider.of<LdTheme>(context, listen: true);
 
+  LdControlGroupScope? get _scope => LdControlGroupScope.of(context);
+
+  /// The button reads its size from an enclosing [LdInputGroup] when present so
+  /// every member of the group renders uniformly.
+  LdSize get _size => _scope?.size ?? widget.size;
+
   Widget get _child {
     return Flexible(
       fit: FlexFit.loose,
@@ -301,7 +313,7 @@ class _LdButtonState extends State<_LdButtonWidget> {
       mainAxisSize: widget.width == double.infinity ? MainAxisSize.max : MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisAlignment: _alignment,
-      spacing: theme.labelSize(widget.size) / 2,
+      spacing: theme.labelSize(_size) / 2,
       children: [
         if (widget.leading != null) _leading!,
         _child,
@@ -319,8 +331,8 @@ class _LdButtonState extends State<_LdButtonWidget> {
       mainAxisSize: MainAxisSize.min,
       children: [
         SizedBox(
-            height: _theme.paragraphSize(widget.size) / 1.5,
-            width: _theme.paragraphSize(widget.size) / 1.5,
+            height: _theme.paragraphSize(_size) / 1.5,
+            width: _theme.paragraphSize(_size) / 1.5,
             child: CircularProgressIndicator(
               value: widget.progress ?? (ldDisableAnimations ? 0.5 : null),
               strokeWidth: 2,
@@ -417,6 +429,7 @@ class _LdButtonState extends State<_LdButtonWidget> {
 
     return LdTouchableSurface(
       focusNode: widget.focusNode,
+      noFocusOnTap: widget.noFocusOnTap,
       hitTestBehavior: HitTestBehavior.opaque,
       autoFocus: widget.autoFocus,
       onHover: widget.onHover,
@@ -444,8 +457,10 @@ class _LdButtonState extends State<_LdButtonWidget> {
               width: widget.width,
               disableSqueeze: widget.disableSqueeze,
               mode: widget.mode,
-              borderRadius: widget.borderRadius ?? _theme.radius(LdSize.s),
-              size: widget.size,
+              borderRadius: _scope != null
+                  ? _scope!.radiusFor(_theme, Directionality.of(context), explicit: widget.borderRadius)
+                  : widget.borderRadius ?? _theme.radius(LdSize.s),
+              size: _size,
               child: AnimatedSize(
                   duration: 200.ms,
                   child: Stack(alignment: Alignment.center, children: [
@@ -547,9 +562,14 @@ class _ButtonShape extends StatelessWidget {
   Border? _border(BuildContext context) {
     switch (mode) {
       case LdButtonMode.outline:
+        final theme = LdTheme.of(context, listen: true);
+        final scope = LdControlGroupScope.of(context);
+        if (scope != null) {
+          return scope.borderFor(theme, colors.border, Directionality.of(context));
+        }
         return Border.all(
           color: colors.border,
-          width: LdTheme.of(context, listen: true).borderWidth,
+          width: theme.borderWidth,
         );
       default:
         return null;
@@ -590,7 +610,14 @@ class _ButtonShape extends StatelessWidget {
   EdgeInsets _padding(BuildContext context) {
     final theme = LdTheme.of(context);
 
-    final borderInsets = EdgeInsets.all(_border(context)?.left.width ?? 0);
+    final border = _border(context);
+    // Per-side compensation: seam edges carry half the border width.
+    final borderInsets = EdgeInsets.fromLTRB(
+      border?.left.width ?? 0,
+      border?.top.width ?? 0,
+      border?.right.width ?? 0,
+      border?.bottom.width ?? 0,
+    );
     final inset = theme.controlContentPadding(size);
     // Icon grows by [_circularSizeBump]; split that across both sides so the
     // outer diameter still matches text buttons / inputs.

@@ -75,7 +75,7 @@ class LdMonkeyRouteScope<T extends Identifiable<IdType>, IdType> extends Statele
       value: routeConfig,
       child: Provider<LdMonkeyActions<T, IdType>>.value(
         value: actions,
-        child: Provider<LdMonkeyActionScope<T, IdType>>(
+        child: ChangeNotifierProvider<LdMonkeyActionScope<T, IdType>>(
           create: (_) => LdMonkeyActionScope<T, IdType>(),
           child: LdMonkeyDataProvider<T, IdType, LdModel<T, IdType, Object?, Object?>>(
             modelBuilder: (context) => modelBuilder(context, routeState),

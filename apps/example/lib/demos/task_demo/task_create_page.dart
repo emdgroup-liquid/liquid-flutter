@@ -11,7 +11,7 @@ class TaskCreatePage extends StatelessWidget {
     return LdScaffold(
       body: LdAppBar.top(
         title: LdText.h('New task'),
-        child: LdScaffoldBody(addContainer: true, children: [LdTaskDetailForm(mode: LdFormMode.create)]),
+        child: LdTaskDetailForm(mode: LdFormMode.create),
       ),
     );
   }

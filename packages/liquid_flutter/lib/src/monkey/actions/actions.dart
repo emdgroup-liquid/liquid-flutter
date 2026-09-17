@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:provider/provider.dart';
 
-
 enum LdMonkeyActionLocation {
   masterAppBar,
   masterSecondary,
@@ -45,6 +44,82 @@ abstract class LdMonkeyAction<T extends Identifiable<IdType>, IdType> {
   Future<void> onShortcutPressed(BuildContext triggerContext, LdMonkeyActionScope<T, IdType> scope);
 
   Widget buildTrigger(BuildContext triggerContext, LdMonkeyActionScope<T, IdType> scope);
+}
+
+/// Walks [actions], yielding grouped members in place of each [LdMonkeyActionGroup].
+Iterable<LdMonkeyAction<T, IdType>> ldFlattenMonkeyActions<T extends Identifiable<IdType>, IdType>(
+  Iterable<LdMonkeyAction<T, IdType>> actions,
+) sync* {
+  for (final action in actions) {
+    if (action is LdMonkeyActionGroup<T, IdType>) {
+      yield* action.actions;
+    } else {
+      yield action;
+    }
+  }
+}
+
+/// A named group of [LdMonkeyAction]s that render and overflow as one app bar item.
+///
+/// Mix with standalone actions in the same list. Child visibility still applies;
+/// an empty visible group is omitted. [appBarOverflowMode] applies to the group
+/// as a whole — children's overflow modes are ignored.
+class LdMonkeyActionGroup<T extends Identifiable<IdType>, IdType> extends LdMonkeyAction<T, IdType> {
+  final List<LdMonkeyAction<T, IdType>> actions;
+
+  LdMonkeyActionGroup({
+    required this.actions,
+    super.appBarOverflowMode,
+  }) : assert(
+          actions.isNotEmpty,
+          'LdMonkeyActionGroup.actions must not be empty',
+        ) {
+    assert(
+      actions.every((action) => action is! LdMonkeyActionGroup),
+      'LdMonkeyActionGroup cannot contain nested groups',
+    );
+  }
+
+  List<LdMonkeyAction<T, IdType>> visibleActions(
+    BuildContext context, {
+    LdMonkeyActionLocation? location,
+  }) {
+    return actions.where((action) => action.isVisible(context, location: location)).toList();
+  }
+
+  @override
+  bool isVisible(BuildContext context, {LdMonkeyActionLocation? location}) {
+    return actions.any((action) => action.isVisible(context, location: location));
+  }
+
+  @override
+  Future<void> onShortcutPressed(
+    BuildContext triggerContext,
+    LdMonkeyActionScope<T, IdType> scope,
+  ) async {}
+
+  Widget buildGroupedTrigger(
+    BuildContext triggerContext,
+    LdMonkeyActionScope<T, IdType> scope, {
+    bool leadingDivider = false,
+    bool trailingDivider = false,
+  }) {
+    final children =
+        visibleActions(triggerContext).map((action) => action.buildTrigger(triggerContext, scope)).toList();
+    if (children.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    return LdAppBarActionGroup(
+      leadingDivider: leadingDivider,
+      trailingDivider: trailingDivider,
+      children: children,
+    );
+  }
+
+  @override
+  Widget buildTrigger(BuildContext triggerContext, LdMonkeyActionScope<T, IdType> scope) {
+    return buildGroupedTrigger(triggerContext, scope);
+  }
 }
 
 class LdMonkeyBareChildAction<T extends Identifiable<IdType>, IdType> extends LdMonkeyAction<T, IdType> {
@@ -170,23 +245,28 @@ class LdMonkeySubmitAction<T extends Identifiable<IdType>, IdType, Result> exten
   Widget buildTrigger(BuildContext triggerContext, LdMonkeyActionScope<T, IdType> scope) {
     assert(builder != null || (child != null || childBuilder != null),
         "You must provide a builder, child, or childBuilder");
-    final controller = scope.submitController<Result>(id);
-    if (controller == null) {
-      return const SizedBox.shrink();
-    }
-
     return ListenableBuilder(
-      listenable: controller,
+      listenable: scope,
       builder: (context, _) {
-        return LdAppBarAction(
-          color: color?.call(triggerContext),
-          loading: controller.state.type == LdSubmitStateType.loading,
-          loadingText: controller.config.loadingText,
-          tooltip: tooltip(triggerContext),
-          disabled: !controller.canTrigger,
-          onPressed: () => _invokeSubmit(triggerContext, scope),
-          leading: icon,
-          child: childBuilder?.call(triggerContext) ?? child ?? const SizedBox.shrink(),
+        final controller = scope.submitController<Result>(id);
+        if (controller == null) {
+          return const SizedBox.shrink();
+        }
+
+        return ListenableBuilder(
+          listenable: controller,
+          builder: (context, _) {
+            return LdAppBarAction(
+              color: color?.call(triggerContext),
+              loading: controller.state.type == LdSubmitStateType.loading,
+              loadingText: controller.config.loadingText,
+              tooltip: tooltip(triggerContext),
+              disabled: !controller.canTrigger,
+              onPressed: () => _invokeSubmit(triggerContext, scope),
+              leading: icon,
+              child: childBuilder?.call(triggerContext) ?? child ?? const SizedBox.shrink(),
+            );
+          },
         );
       },
     );

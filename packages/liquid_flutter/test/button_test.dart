@@ -195,4 +195,54 @@ void main() {
 
     expect(find.byType(CircularProgressIndicator), findsNothing);
   });
+
+  testWidgets('LdButton noFocusOnTap keeps input focus', (WidgetTester tester) async {
+    final theme = LdTheme();
+    final inputFocusNode = FocusNode();
+    addTearDown(inputFocusNode.dispose);
+
+    Widget buildButton({bool noFocusOnTap = false}) {
+      return LdThemeProvider(
+        theme: theme,
+        child: MaterialApp(
+          home: Scaffold(
+            body: Column(
+              children: [
+                LdInput(
+                  hint: 'Message',
+                  focusNode: inputFocusNode,
+                  allowTapOutside: true,
+                ),
+                LdButton(
+                  noFocusOnTap: noFocusOnTap,
+                  onPressed: () {},
+                  child: const Text('Send'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(buildButton(noFocusOnTap: true));
+    inputFocusNode.requestFocus();
+    await tester.pump();
+
+    await tester.tap(find.text('Send'));
+    await tester.pump();
+
+    expect(inputFocusNode.hasPrimaryFocus, isTrue,
+        reason: 'noFocusOnTap should keep focus on the input');
+
+    await tester.pumpWidget(buildButton(noFocusOnTap: false));
+    inputFocusNode.requestFocus();
+    await tester.pump();
+
+    await tester.tap(find.text('Send'));
+    await tester.pump();
+
+    expect(inputFocusNode.hasPrimaryFocus, isFalse,
+        reason: 'default button tap should move focus away from the input');
+  });
 }

@@ -34,7 +34,7 @@ class _LdMonkeyActionHostState<T extends Identifiable<IdType>, IdType> extends S
 
   void _assertUniqueSubmitIds() {
     final ids = <Object>{};
-    for (final action in widget.actions) {
+    for (final action in ldFlattenMonkeyActions(widget.actions)) {
       if (action is LdMonkeySubmitAction<T, IdType, dynamic>) {
         assert(
           ids.add(action.id),
@@ -51,7 +51,7 @@ class _LdMonkeyActionHostState<T extends Identifiable<IdType>, IdType> extends S
       scope.appContext = context;
     }
 
-    final submitHosts = widget.actions
+    final submitHosts = ldFlattenMonkeyActions(widget.actions)
         .whereType<LdMonkeySubmitAction<T, IdType, dynamic>>()
         .map((action) => Offstage(child: action.buildHost(context, scope)))
         .toList();

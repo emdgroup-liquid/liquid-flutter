@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
@@ -17,19 +18,43 @@ class LdAdaptiveRadius {
 
   BorderRadius get childRadius => shrinkBy(insets);
 
+  static double minRadius = 3;
+
+  LdAdaptiveRadius shrinkByInsets(EdgeInsets insets) {
+    return LdAdaptiveRadius(
+      ownRadius: shrinkBy(this.insets),
+      insets: insets,
+      isRoot: false,
+    );
+  }
+
+  LdAdaptiveRadius collapseToSide(LdAppBarPosition position) {
+    return LdAdaptiveRadius(
+      ownRadius: BorderRadius.only(
+        topLeft: Radius.circular(position == LdAppBarPosition.top ? ownRadius.topLeft.x : 0),
+        topRight: Radius.circular(position == LdAppBarPosition.top ? ownRadius.topRight.x : 0),
+        bottomLeft: Radius.circular(position == LdAppBarPosition.bottom ? ownRadius.bottomLeft.x : 0),
+        bottomRight: Radius.circular(position == LdAppBarPosition.bottom ? ownRadius.bottomRight.x : 0),
+      ),
+      insets: insets,
+      isRoot: isRoot,
+    );
+  }
+
   BorderRadius shrinkBy(EdgeInsets insets) {
     return BorderRadius.only(
-      topLeft: Radius.circular(math.max(0, ownRadius.topLeft.x - math.max(insets.top, insets.left))),
-      topRight: Radius.circular(math.max(0, ownRadius.topRight.x - math.max(insets.top, insets.right))),
-      bottomLeft: Radius.circular(math.max(0, ownRadius.bottomLeft.x - math.max(insets.bottom, insets.left))),
-      bottomRight: Radius.circular(math.max(0, ownRadius.bottomRight.x - math.max(insets.bottom, insets.right))),
+      topLeft: Radius.circular(math.max(minRadius, ownRadius.topLeft.x - math.max(insets.top, insets.left))),
+      topRight: Radius.circular(math.max(minRadius, ownRadius.topRight.x - math.max(insets.top, insets.right))),
+      bottomLeft: Radius.circular(math.max(minRadius, ownRadius.bottomLeft.x - math.max(insets.bottom, insets.left))),
+      bottomRight:
+          Radius.circular(math.max(minRadius, ownRadius.bottomRight.x - math.max(insets.bottom, insets.right))),
     );
   }
 
   factory LdAdaptiveRadius.fromTheme(LdTheme theme, BuildContext context) {
     return LdAdaptiveRadius(
-      ownRadius: BorderRadius.circular(theme.screenRadius),
-      insets: MediaQuery.of(context).padding,
+      ownRadius: BorderRadius.circular(max(theme.screenRadius, theme.radiusSize(LdSize.l))),
+      insets: EdgeInsets.zero,
       isRoot: true,
     );
   }

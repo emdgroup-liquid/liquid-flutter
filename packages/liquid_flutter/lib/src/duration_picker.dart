@@ -185,67 +185,56 @@ class LdDurationPicker extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = LiquidLocalizations.of(context);
     final theme = LdTheme.of(context, listen: true);
-    final lineBoxHeight = theme.labelSize(size) * ldLineHeight(LdTextType.label, size: size);
-    final fieldPadding = theme.controlContentPadding(size) - EdgeInsets.all(theme.borderWidth);
+    final scope = LdControlGroupScope.of(context);
+    final size = scope?.size ?? this.size;
     final display = value == null ? l10n.selectDuration : ldFormatDuration(value!, l10n: l10n, compact: true);
 
     return LdBundle(
       children: [
-        if (label != null)
+        if (label != null && scope == null)
           LdText.l(
             label!,
             size: size,
           ),
-        LdTouchableSurface(
-          allowTapOutside: true,
-          disabled: disabled,
-          focusNode: focusNode,
-          key: const Key('duration_picker_button'),
-          onPressed: () async {
-            final navigator = useRootNavigator ? Navigator.of(context, rootNavigator: true) : Navigator.of(context);
-            final next = await navigator.push(
-              LdModalRoute(
-                context: context,
-                pageBuilder: (context) => LdDurationPickerModal(
-                  initialValue: value,
-                  config: config,
-                ),
-              ),
-            ) as LdDuration?;
-            if (next != null) {
-              onChanged(next);
-            }
-          },
-          builder: (context, status, _) => Builder(
-            builder: (context) {
-              final colorBundle = inputColor(theme, status, isValid: true);
-              return Container(
-                clipBehavior: Clip.hardEdge,
-                padding: fieldPadding,
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: colorBundle.surface,
-                  borderRadius: theme.radius(LdSize.s),
-                  border: Border.all(
-                    color: colorBundle.border,
-                    width: theme.borderWidth,
+        ldGroupLabelTooltip(
+          context: context,
+          label: label,
+          child: LdTouchableSurface(
+            allowTapOutside: true,
+            disabled: disabled,
+            focusNode: focusNode,
+            key: const Key('duration_picker_button'),
+            onPressed: () async {
+              final navigator = useRootNavigator ? Navigator.of(context, rootNavigator: true) : Navigator.of(context);
+              final next = await navigator.push(
+                LdModalRoute(
+                  context: context,
+                  pageBuilder: (context) => LdDurationPickerModal(
+                    initialValue: value,
+                    config: config,
                   ),
                 ),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: lineBoxHeight,
-                  ),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: LdText.l(
-                      display,
-                      size: size,
-                      color: colorBundle.text,
-                    ),
-                  ),
-                ),
-              );
+              ) as LdDuration?;
+              if (next != null) {
+                onChanged(next);
+              }
             },
+            builder: (context, status, _) => Builder(
+              builder: (context) {
+                final colorBundle = inputColor(theme, status, isValid: true);
+                return LdFieldFrame(
+                  colors: colorBundle,
+                  size: size,
+                  child: LdText.l(
+                    display,
+                    size: size,
+                    color: colorBundle.text,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                );
+              },
+            ),
           ),
         ),
       ],
@@ -282,6 +271,7 @@ class _LdDurationPickerModalState extends State<LdDurationPickerModal> {
             LdFlexibleChild(
               child: LdButton.vague(
                 width: double.infinity,
+                size: LdSize.l,
                 child: Text(l10n.done),
                 onPressed: () => Navigator.pop(context, _value),
               ),

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter_test_utils/ld_frame.dart';
+import 'package:liquid_flutter_test_utils/ld_frame_options.dart';
 
 void main() {
   group('LdScaffold Widget Tests', () {
@@ -704,5 +705,60 @@ void main() {
         expect(tester.takeException(), isNull);
       },
     );
+  });
+
+  group('LdScaffold drawerCollapsible', () {
+    Widget wrap({required bool collapsible, LdPlatform? platform}) {
+      return MaterialApp(
+        localizationsDelegates: const [LiquidLocalizations.delegate],
+        home: ldFrame(
+          size: LdThemeSize.m,
+          brightnessMode: LdThemeBrightnessMode.light,
+          ldFrameOptions: LdFrameOptions(platform: platform),
+          child: LdScaffold(
+            drawerCollapsible: collapsible,
+            drawer: LdAppBar.top(
+              title: const Text('Drawer Bar'),
+              child: const Center(child: Text('Drawer Content')),
+            ),
+            body: LdAppBar.top(
+              title: const Text('Body Bar'),
+              child: const Center(child: Text('Test Body')),
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets('pins a non-collapsible drawer open and hides the close toggle', (tester) async {
+      ldDisableAnimations = true;
+      await tester.binding.setSurfaceSize(const Size(1000, 600));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      await tester.pumpWidget(wrap(collapsible: false));
+      await tester.pumpAndSettle();
+
+      final scaffoldState = tester.state<LdScaffoldState>(find.byType(LdScaffold));
+      expect(scaffoldState.isDrawerOpen, isTrue);
+
+      final closeButtons = tester
+          .widgetList<LdDrawerButton>(find.byType(LdDrawerButton))
+          .where((button) => button.type == LdDrawerButtonType.close);
+      expect(closeButtons, isEmpty);
+    });
+
+    testWidgets('shows the close toggle for a collapsible side-by-side drawer', (tester) async {
+      ldDisableAnimations = true;
+      await tester.binding.setSurfaceSize(const Size(1000, 600));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+
+      await tester.pumpWidget(wrap(collapsible: true, platform: LdPlatform.macos));
+      await tester.pumpAndSettle();
+
+      final closeButtons = tester
+          .widgetList<LdDrawerButton>(find.byType(LdDrawerButton))
+          .where((button) => button.type == LdDrawerButtonType.close);
+      expect(closeButtons, isNotEmpty);
+    });
   });
 }

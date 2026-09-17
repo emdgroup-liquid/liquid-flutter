@@ -160,6 +160,8 @@ class _ChooseDemoState extends State<ChooseDemo> {
           ldSpacerM,
           const _TagSelectorSection(),
           ldSpacerM,
+          const _LargeRepositorySection(),
+          ldSpacerM,
         ],
       ),
     );
@@ -354,6 +356,124 @@ class _TagSelectorSectionState extends State<_TagSelectorSection> {
                     );
                   }).toList(),
                 ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Large repository-backed demo — many items, initial selection, simulated
+// network latency so the picker's loading state is visible.
+// ---------------------------------------------------------------------------
+
+class _LargeRepositorySection extends StatefulWidget {
+  const _LargeRepositorySection();
+
+  @override
+  State<_LargeRepositorySection> createState() => _LargeRepositorySectionState();
+}
+
+class _LargeRepositorySectionState extends State<_LargeRepositorySection> {
+  static const _flavors = [
+    'Raspberry',
+    'Strawberry',
+    'Apple',
+    'Blueberry',
+    'Cherry',
+    'Peach',
+    'Chocolate',
+    'Banana',
+    'Pumpkin',
+    'Lemon',
+    'Rhubarb',
+    'Mince',
+    'Key lime',
+    'Blackberry',
+    'Custard',
+  ];
+
+  // A fairly large dataset that would be served page by page from a backend.
+  static const _count = 240;
+
+  // Simulated network latency so the loading indicators stay visible.
+  static const _latency = Duration(milliseconds: 400);
+
+  late final List<LdSelectItem<String>> _pies = List.generate(
+    _count,
+    (i) => LdSelectItem<String>(
+      value: 'pie-$i',
+      searchString: '${_flavors[i % _flavors.length]} pie #${i + 1}',
+      child: Text('${_flavors[i % _flavors.length]} pie #${i + 1}'),
+    ),
+  );
+
+  Set<String> _selected = {'pie-50'};
+
+  late final LdCallbackModel<LdSelectItem<String>, String, LdSelectItem<String>, LdSelectItem<String>> _model;
+  late final LdListController<LdSelectItem<String>, String> _repo;
+
+  @override
+  void initState() {
+    super.initState();
+    _model = LdCallbackModel<LdSelectItem<String>, String, LdSelectItem<String>, LdSelectItem<String>>(
+      pageSize: 40,
+      getById: (context, id) async {
+        await Future.delayed(_latency);
+        return _pies.firstWhere((pie) => pie.id == id);
+      },
+      getOffsetByIdFn: (params) async {
+        await Future.delayed(_latency);
+        return _pies.indexWhere((pie) => pie.id == params.id);
+      },
+      fetchListWithParameters: (params) async {
+        await Future.delayed(_latency);
+        final page = _pies.skip(params.offset).take(params.pageSize).toList();
+        return LdListPage<LdSelectItem<String>>(
+          newItems: page,
+          hasMore: params.offset + params.pageSize < _pies.length,
+          total: _pies.length,
+        );
+      },
+    );
+    _repo = LdListController(_model);
+  }
+
+  @override
+  void dispose() {
+    _repo.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LdAutoSpace(
+      children: [
+        LdText.h('Large list, initial selection & loading'),
+        LdText.p(
+          'A repository-backed picker with $_count pies. Each page is fetched '
+          'with a simulated network delay so you can see the loading '
+          'indicators, and the picker opens scrolled to the initial selection.',
+        ),
+        ComponentWell(
+          padding: const EdgeInsets.all(32),
+          minHeight: 160,
+          child: LdAutoSpace(
+            children: [
+              LdChoose<LdSelectItem<String>, String>(
+                repository: _repo,
+                multiple: true,
+                allowEmpty: true,
+                label: 'Your pie choice',
+                hint: const Text('Choose a pie'),
+                value: _selected,
+                onChanged: (ids) => setState(() => _selected = ids),
+                itemBuilder: (context, item, _) => LdListItem(title: item.value?.child),
+                selectedItemBuilder: (context, item) => item.child,
+              ),
+              if (_selected.isNotEmpty) LdText.p('Selected: ${(_selected.toList()..sort()).join(', ')}'),
             ],
           ),
         ),

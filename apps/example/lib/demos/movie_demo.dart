@@ -199,14 +199,12 @@ class MovieDetail extends StatelessWidget {
               .map((genre) => LdSelectItem(value: genre, child: Text(genre)))
               .toList();
 
-          return LdScaffoldBody(
+          return LdAutoSpace(
             children: [
               LdFormInput<String>(formKey: 'title', label: 'Title', hint: 'Movie title'),
               LdFormChoose<String>(formKey: 'genre', label: 'Genre', items: genreItems),
               LdFormSlider(formKey: 'rating', label: 'Rating', min: 1, max: 5),
               LdText.p('Last updated: ${Jiffy.parseFromDateTime(movie.value!.lastUpdate).fromNow()}'),
-
-              Row(children: [LdFormSubmitButton(), LdFormResetButton()]).spaceS(),
             ],
           );
         },

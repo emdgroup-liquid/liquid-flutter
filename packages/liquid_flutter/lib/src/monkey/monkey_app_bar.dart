@@ -149,7 +149,7 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
                     value: selection.selection.length.toDouble(),
                   )
                 : null,
-            debugName: debugName,
+            debugName: debugName ?? location.name,
             scrollBehavior: !showBar ? LdAppBarScrollBehavior.hidden : null,
             searchConfig: searchConfig,
             overflowMenuProviders: (context) => [
@@ -161,18 +161,7 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
                   Provider.value(value: selection)
                 ],
             actions: [
-              ...actions.map(
-                (e) {
-                  final trigger = e.buildTrigger(
-                    innerCtx,
-                    LdMonkeyActionScope.of<T, IdType>(innerCtx),
-                  );
-                  return switch (e.appBarOverflowMode) {
-                    LdAppBarActionOverflowMode.pinned => LdOverflowPinnedChild(child: trigger),
-                    LdAppBarActionOverflowMode.overflowable => trigger,
-                  };
-                },
-              ),
+              ...ldMonkeyAppBarActionWidgets<T, IdType>(innerCtx, actions),
               ...monkeyBarConfig?.additionalActions ?? [],
             ],
             positionMode: switch (location) {

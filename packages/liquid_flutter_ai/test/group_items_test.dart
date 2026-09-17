@@ -199,6 +199,91 @@ void main() {
       );
     });
 
+    test('activity group stays last behind a pending approval', () {
+      final groups = groupConversationItems(const [
+        LdToolCallItem(
+          id: 't1',
+          name: 'shell',
+          toolCallId: 'tc1',
+          status: LdToolCallStatus.done,
+        ),
+        LdApprovalItem(
+          id: 'ap1',
+          title: 'Run shell?',
+          status: LdApprovalStatus.pending,
+        ),
+      ]);
+
+      expect(groups, hasLength(2));
+      final activity = groups[0] as LdConversationActivityGroup;
+      expect(activity.isLast, isTrue, reason: 'stays open behind an approval');
+      expect(activity.isActive, isTrue);
+      expect(
+        (groups[1] as LdConversationSingletonGroup).item,
+        isA<LdApprovalItem>(),
+      );
+    });
+
+    test('activity group behind a user message is not last', () {
+      final groups = groupConversationItems(const [
+        LdToolCallItem(
+          id: 't1',
+          name: 'shell',
+          toolCallId: 'tc1',
+          status: LdToolCallStatus.done,
+        ),
+        LdUserMessageItem(id: 'u1', text: 'thanks'),
+      ]);
+
+      expect(groups, hasLength(2));
+      final activity = groups[0] as LdConversationActivityGroup;
+      expect(activity.isLast, isFalse);
+      expect(activity.isActive, isFalse);
+    });
+
+    test('activity group is last when it ends the transcript', () {
+      final groups = groupConversationItems(const [
+        LdToolCallItem(
+          id: 't1',
+          name: 'shell',
+          toolCallId: 'tc1',
+          status: LdToolCallStatus.done,
+        ),
+      ]);
+
+      expect(groups, hasLength(1));
+      expect(
+        (groups.single as LdConversationActivityGroup).isLast,
+        isTrue,
+      );
+    });
+
+    test('pending approval does not inherit last from following activity',
+        () {
+      final groups = groupConversationItems(const [
+        LdApprovalItem(
+          id: 'ap1',
+          title: 'Run shell?',
+          status: LdApprovalStatus.pending,
+        ),
+        LdToolCallItem(
+          id: 't1',
+          name: 'shell',
+          toolCallId: 'tc1',
+          status: LdToolCallStatus.running,
+        ),
+      ]);
+
+      expect(groups, hasLength(2));
+      expect(
+        (groups[1] as LdConversationActivityGroup).isLast,
+        isTrue,
+        reason: 'only the trailing activity group is last',
+      );
+      final approval = groups[0] as LdConversationSingletonGroup;
+      expect(approval.item, isA<LdApprovalItem>());
+    });
+
     test('activity group isActive tracks tools and streaming reasoning', () {
       final idle = LdConversationActivityGroup([
         const LdReasoningItem(

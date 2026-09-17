@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:liquid/demos/task_demo/task.dart';
+import 'package:liquid/demos/task_demo/task_actions.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter_reactive_forms/liquid_flutter_reactive_forms.dart';
 import 'package:reactive_forms/reactive_forms.dart';
@@ -34,14 +35,27 @@ class LdTaskDetailForm extends StatelessWidget {
     return Task(0, '', now.add(const Duration(days: 1)), false, now);
   }
 
+  void _onCreated(BuildContext context, Task? task) {
+    taskRouteConfig.pushDetailRoute(context, {task!.id});
+  }
+
   @override
   Widget build(BuildContext context) {
     return LdForm<Task, int, Task, Task, Task>(
       mode: mode,
       item: task,
+      layoutMode: switch (mode) {
+        LdFormMode.edit => LdFormLayoutMode.inline,
+        LdFormMode.create => LdFormLayoutMode.page,
+      },
       itemToDetail: (context, task) => switch (mode) {
         LdFormMode.edit => Future.value(task),
         LdFormMode.create => Future.value(_initialTask()),
+      },
+      onSubmitted: (context, created) {
+        if (mode == LdFormMode.create && created != null) {
+          _onCreated(context, created);
+        }
       },
       formGroup: (context) => FormGroup({
         'task': FormControl<String>(validators: [Validators.required]),
@@ -56,24 +70,26 @@ class LdTaskDetailForm extends StatelessWidget {
       child: LdAutoSpace(
         children: [
           Center(
-            child: LdFormEmojiPicker(formKey: 'emoji', label: 'Emoji', size: LdSize.l),
-          ),
-          Center(
             child: LdReveal(
               revealed: task?.value?.done ?? false,
               initialRevealed: task?.value?.done ?? false,
               child: LdBadge.success(child: Text('Done')),
             ),
           ),
-          LdFormInput<String>(
-            formKey: 'task',
-            label: 'Task',
-            hint: 'What do you want to do?',
-            maxLines: null,
-            size: LdSize.l,
+          LdInputGroup(
+            children: [
+              LdFormEmojiPicker(formKey: 'emoji', label: 'Emoji'),
+              Expanded(
+                child: LdFormInput<String>(
+                  formKey: 'task',
+                  label: 'Task',
+                  hint: 'What do you want to do?',
+                  maxLines: null,
+                ),
+              ),
+            ],
           ),
           LdFormDatePicker(formKey: 'due', label: 'Due date', useRootNavigator: true),
-          Wrap(children: [LdFormSubmitButton(), LdFormResetButton()]).spaceM(),
         ],
       ),
     );

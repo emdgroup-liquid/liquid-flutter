@@ -40,9 +40,7 @@ class LdAppbarActionOverflowMenu extends StatelessWidget {
           child: ListView(
             shrinkWrap: true,
             padding: EdgeInsets.zero,
-            children: [
-              ...actions,
-            ],
+            children: ldAppBarActionGroupMenuChildren(actions),
           ),
         ),
       ),

@@ -1,6 +1,7 @@
 export 'appbar.dart';
 export 'raw_appbar.dart';
 export 'appbar_action.dart';
+export 'appbar_action_group.dart';
 export 'appbar_scroll_behavior.dart';
 export 'appbar_scroll_notifier.dart';
 export 'appbar_system_ui.dart';

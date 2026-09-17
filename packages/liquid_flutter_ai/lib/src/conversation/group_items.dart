@@ -114,14 +114,31 @@ List<LdConversationVisualGroup> groupConversationItems(
   }
 
   flushBuffer();
-  if (result.isNotEmpty) {
-    final last = result[result.length - 1];
-    if (last is LdConversationActivityGroup) {
-      last.isLast = true;
-    }
-  }
-
+  _markLastGroups(result);
   return result;
+}
+
+/// Walks from the newest group backwards and marks the first activity group it
+/// finds as [LdConversationActivityGroup.isLast].
+///
+/// A trailing pending approval is live (its card is singled out because it
+/// needs a human), so the activity group directly before it still counts as
+/// the last open group — otherwise appending an approval would collapse the
+/// expanded tool group it came from. Any other trailing singleton (user
+/// message, agent markdown, turn error, …) ends the walk with no `isLast`.
+void _markLastGroups(List<LdConversationVisualGroup> result) {
+  for (var i = result.length - 1; i >= 0; i--) {
+    final group = result[i];
+    if (group is LdConversationActivityGroup) {
+      group.isLast = true;
+      return;
+    }
+    if (group is LdConversationSingletonGroup &&
+        ldIsPendingApproval(group.item)) {
+      continue;
+    }
+    return;
+  }
 }
 
 /// Keeps the last tool item per [LdToolCallItem.toolCallId], preserving order

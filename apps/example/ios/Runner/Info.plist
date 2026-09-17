@@ -72,5 +72,15 @@
 	<false/>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Record voice messages for the conversation demo.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Take photos and scan documents to attach to your conversation.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Select photos and videos to attach to your conversation.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Save captured photos to your photo library.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Share your current location as an attachment.</string>
+	<key>NSContactsUsageDescription</key>
+	<string>Share a contact as an attachment.</string>
 </dict>
 </plist>

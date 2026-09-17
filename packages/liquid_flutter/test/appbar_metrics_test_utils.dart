@@ -53,7 +53,6 @@ LdAppBarMetrics testAppBarMetrics({
     scrollBehavior: scrollBehavior,
     parentMetrics: parentMetrics,
     appbarLayerMediaQuery: appbarLayerMediaQuery,
-    isTabNavigation: isTabNavigation,
   );
 }
 

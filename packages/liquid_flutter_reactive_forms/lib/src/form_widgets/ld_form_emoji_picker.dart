@@ -54,15 +54,9 @@ class LdFormEmojiPicker extends StatelessWidget {
     ).show(context, useRootNavigator: true);
   }
 
-  double _getEmojiSize(LdSize size) => switch (size) {
-        LdSize.xs => 16,
-        LdSize.s => 20,
-        LdSize.m => 24,
-        LdSize.l => 28,
-      };
-
   @override
   Widget build(BuildContext context) {
+    final theme = LdTheme.of(context);
     return ReactiveFormField<String, String>(
       formControlName: formKey,
       validationMessages: validationMessages ?? {},
@@ -82,36 +76,33 @@ class LdFormEmojiPicker extends StatelessWidget {
           context: context,
           field: Tooltip(
             message: label ?? '',
-            child: LdTouchableSurface(
+            child: LdButton.outline(
+              size: size,
               disabled: isDisabled,
-              onPressed: () =>
-                  _openPicker(context, currentEmoji, isRequired, (emoji) {
-                state.didChange(emoji);
-                state.control.markAsDirty();
-                scope?.onFieldCommitted(formKey);
-              }),
+              onPressed: () {
+                _openPicker(context, currentEmoji, isRequired, (emoji) {
+                  state.didChange(emoji);
+                  state.control.markAsDirty();
+                  scope?.onFieldCommitted(formKey);
+                });
+              },
               child: hasEmoji
                   ? LdEmoji(currentEmoji)
-                  : SizedBox(width: 20, height: 20, child: Placeholder()),
-              builder: (context, status, child) {
-                final colors = inputColor(
-                  LdTheme.of(context),
-                  status,
-                  isValid: state.control.valid,
-                );
-                return Container(
-                  padding: LdTheme.of(context).pad(),
-                  decoration: BoxDecoration(
-                    color: colors.surface,
-                    borderRadius: LdTheme.of(context).radius(LdSize.s),
-                    border: Border.all(color: colors.border),
-                  ),
-                  child: DefaultTextStyle(
-                    style: TextStyle(fontSize: _getEmojiSize(size)),
-                    child: child!,
-                  ),
-                );
-              },
+                  : Builder(
+                      builder: (context) {
+                        final textStyle = DefaultTextStyle.of(context).style;
+                        final fontSize = textStyle.fontSize;
+                        final color = textStyle.color;
+                        return SizedBox(
+                          width: fontSize,
+                          height: fontSize,
+                          child: Placeholder(
+                            strokeWidth: theme.borderWidth,
+                            color: color ?? theme.textMuted,
+                          ),
+                        );
+                      },
+                    ),
             ),
           ),
         );

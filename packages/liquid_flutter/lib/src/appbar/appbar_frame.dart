@@ -6,26 +6,7 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/appbar/appbar_decoration.dart';
 import 'package:liquid_flutter/src/appbar/appbar_scrolled_under.dart';
 import 'package:liquid_flutter/src/modal/size_notifier.dart';
-import 'package:liquid_flutter/src/theme/adaptive_radius.dart';
 import 'package:provider/provider.dart';
-
-/// Whether [scope] currently contains the primary focus, including inputs in
-/// nested scopes (e.g. [LdSearchInput]).
-bool ldAppBarFocusScopeHasInputFocus(FocusScopeNode scope) {
-  if (scope.hasFocus) {
-    return true;
-  }
-  final primary = FocusManager.instance.primaryFocus;
-  if (primary == null) {
-    return false;
-  }
-  for (FocusNode? node = primary; node != null; node = node.parent) {
-    if (node == scope) {
-      return true;
-    }
-  }
-  return false;
-}
 
 class AppBarFrame extends StatefulWidget {
   /// The bar surface content (the visual bar widget).
@@ -38,22 +19,15 @@ class AppBarFrame extends StatefulWidget {
 
   final LdAppBarPosition position;
 
-  final BoxDecoration? insideDecoration;
-  final BoxDecoration? outsideDecoration;
+  final Widget Function(BuildContext context, LdAppBarFrameMetrics metrics, Widget child) insideBuilder;
+  final Widget Function(BuildContext context, LdAppBarFrameMetrics metrics, Widget child) outsideBuilder;
 
-  /// Optional builders that override [insideDecoration] / [outsideDecoration]
-  /// when dynamic decoration based on scroll state is needed.
-  final BoxDecoration? Function(bool isScrolledUnder)? insideDecorationBuilder;
-  final BoxDecoration? Function(bool isScrolledUnder)? outsideDecorationBuilder;
-
-  final EdgeInsets? insidePadding;
   final EdgeInsets? outsideMinPadding;
 
   /// Additional padding to apply to the outside of the app bar. This is not merged into other
   /// insets but is always applied in addition.
   final EdgeInsets? outsideAdditionalPadding;
   final bool addContainer;
-  final bool useAdaptiveRadius;
   final bool avoidViewInsets;
 
   /// Tracks focus inside the bar surface for keyboard/view-inset padding.
@@ -70,9 +44,6 @@ class AppBarFrame extends StatefulWidget {
   /// Whether the appbar is attached to the scaffold or floating.
   final bool attached;
 
-  /// When true, metrics from this frame are tagged as tab navigation chrome.
-  final bool isTabNavigation;
-
   /// The scrim color
   final Color? Function(bool isScrolledUnder)? scrimColor;
 
@@ -83,20 +54,15 @@ class AppBarFrame extends StatefulWidget {
     required this.wrappedChild,
     this.attached = true,
     this.addContainer = false,
-    this.insideDecoration,
-    this.outsideDecoration,
     this.outsideAdditionalPadding,
-    this.insideDecorationBuilder,
-    this.outsideDecorationBuilder,
     this.avoidViewInsets = false,
     this.focusScopeNode,
-    this.useAdaptiveRadius = true,
-    this.insidePadding,
+    required this.insideBuilder,
+    required this.outsideBuilder,
     this.outsideMinPadding,
     this.debugName,
     this.scrimColor,
     this.scrollBehavior = LdAppBarScrollBehavior.static,
-    this.isTabNavigation = false,
   });
 
   @override
@@ -115,7 +81,7 @@ class AppBarFrame extends StatefulWidget {
 ///
 /// The threshold is intentionally low so the snap fires close to the moment
 /// the content visually "slows down" rather than at the very end.
-const double _kMomentumSnapVelocityThreshold = 200.0;
+const double _kMomentumSnapVelocityThreshold = 50.0;
 
 class _AppBarFrameState extends State<AppBarFrame> {
   late final FocusScopeNode _focusScopeNode;
@@ -158,11 +124,7 @@ class _AppBarFrameState extends State<AppBarFrame> {
     properties.add(StringProperty("position", widget.position.name));
     properties.add(StringProperty("attached", widget.attached.toString()));
     properties.add(StringProperty("addContainer", widget.addContainer.toString()));
-    properties.add(StringProperty("insetBorderRadius", widget.useAdaptiveRadius.toString()));
     properties.add(StringProperty("avoidViewInsets", widget.avoidViewInsets.toString()));
-    properties.add(StringProperty("insideDecoration", widget.insideDecoration?.toString()));
-    properties.add(StringProperty("outsideDecoration", widget.outsideDecoration?.toString()));
-    properties.add(StringProperty("insidePadding", widget.insidePadding?.toString()));
     properties.add(StringProperty("outsideMinPadding", widget.outsideMinPadding?.toString()));
     properties.add(StringProperty("child", widget.child.toString()));
   }
@@ -222,12 +184,6 @@ class _AppBarFrameState extends State<AppBarFrame> {
     return systemInsets;
   }
 
-  BorderRadius _adaptiveBorderRadius(BuildContext context, EdgeInsets outerPadding) {
-    final theme = LdTheme.of(context);
-    final parentRadius = context.adaptiveRadius;
-    return parentRadius.shrinkBy(outerPadding).max.atLeast(theme.radius(LdSize.s));
-  }
-
   /// Build the EdgeInsets we need to apply to place the app bar such that it is not overlapping
   /// system UI or other app bars.
   EdgeInsets _ownMargin(BoxConstraints constraints, LdAppBarMetrics? parentMetrics) {
@@ -255,7 +211,15 @@ class _AppBarFrameState extends State<AppBarFrame> {
 
   int _calculateLevel(LdAppBarMetrics? parentMetrics) {
     if (parentMetrics == null) return 0;
-    return parentMetrics.position == widget.position ? parentMetrics.level + 1 : parentMetrics.level;
+    if (parentMetrics.level == -1) return 0;
+
+    while (parentMetrics?.position != widget.position && parentMetrics != null) {
+      parentMetrics = parentMetrics.parentMetrics;
+    }
+
+    if (parentMetrics == null) return 0;
+
+    return parentMetrics.level + 1;
   }
 
   EdgeInsets _containerPadding(BoxConstraints constraints) {
@@ -280,18 +244,6 @@ class _AppBarFrameState extends State<AppBarFrame> {
     }
     final effectiveMediaQuery = parentMetrics?.appbarLayerMediaQuery ?? MediaQuery.of(context);
     return effectiveMediaQuery.viewInsets.atPosition(widget.position) > 0;
-  }
-
-  EdgeInsets _insidePadding(BoxConstraints constraints, BorderRadius? outsideRadius) {
-    EdgeInsets result = EdgeInsets.zero;
-    if (widget.insidePadding != null) {
-      result = widget.insidePadding!;
-    } else {
-      final theme = LdTheme.of(context);
-      result = theme.pad(size: LdSize.s);
-    }
-
-    return result;
   }
 
   @override
@@ -437,7 +389,7 @@ class _AppBarFrameState extends State<AppBarFrame> {
       return false;
     }
 
-    final scrollDelta = appbarNotification.scrollDelta;
+    var scrollDelta = appbarNotification.scrollDelta;
 
     final scrollingDown = scrollDelta > 0;
 
@@ -449,6 +401,10 @@ class _AppBarFrameState extends State<AppBarFrame> {
 
     // Remaining distance this bar still needs to travel to fully hide.
     final remainingHideOffset = maxOffset - _hideOffset;
+
+    // Adjust the scroll delta to the direction, hiding is slower than
+    // showing
+    scrollDelta = scrollDelta * (scrollingDown ? 0.2 : .5);
 
     // ScrollUpdate metrics are post-update; add this frame's delta so we
     // compare against remaining content at the start of the gesture update.
@@ -521,45 +477,25 @@ class _AppBarFrameState extends State<AppBarFrame> {
     required EdgeInsets outerMargin,
   }) {
     final isScrolledUnder = LdAppBarScrolledUnderScope.of(context);
-    var outsideDeco = widget.outsideDecorationBuilder != null
-        ? widget.outsideDecorationBuilder!(isScrolledUnder)
-        : widget.outsideDecoration;
-    var insideDeco = widget.insideDecorationBuilder != null
-        ? widget.insideDecorationBuilder!(isScrolledUnder)
-        : widget.insideDecoration;
 
     final effectiveOuterMargin = outerMargin.trimToAppBarPosition(widget.position);
 
-    BorderRadius? outsideRadius =
-        widget.useAdaptiveRadius ? _adaptiveBorderRadius(context, effectiveOuterMargin) : null;
-
-    if (widget.useAdaptiveRadius && !widget.attached) {
-      insideDeco = insideDeco?.copyWith(borderRadius: outsideRadius);
-    }
+    final metrics = LdAppBarFrameMetrics(
+      isAttached: widget.attached,
+      isScrolledUnder: isScrolledUnder,
+      willHide: widget.scrollBehavior.willHideAppBar(context),
+      position: widget.position,
+      outerMargin: effectiveOuterMargin,
+    );
 
     return FocusScope(
       node: _focusScopeNode,
-      child: AnimatedContainer(
-        duration: Duration(milliseconds: 100),
-        decoration: outsideDeco,
-        key: Key("appbar_frame_outside_${widget.position.name}"),
-        child: Padding(
-          padding: effectiveOuterMargin,
-          child: MeasureSize(
-            onSizeChange: _onInnerSizeChange,
-            child: AnimatedContainer(
-              duration: Duration(milliseconds: 100),
-              decoration: insideDeco,
-              clipBehavior: insideDeco != null ? Clip.hardEdge : Clip.none,
-              key: Key("appbar_frame_inside_${widget.position.name}"),
-              child: MediaQuery(
-                data: MediaQuery.of(context).copyWith(
-                  padding: _insidePadding(constraints, outsideRadius),
-                ),
-                child: widget.child,
-              ),
-            ),
-          ),
+      child: widget.outsideBuilder(
+        context,
+        metrics,
+        MeasureSize(
+          onSizeChange: _onInnerSizeChange,
+          child: widget.insideBuilder(context, metrics, widget.child),
         ),
       ),
     );
@@ -580,7 +516,6 @@ class _AppBarFrameState extends State<AppBarFrame> {
       configuredInsets: ownMargin,
       innerHeight: _innerHeight.toEdgeInsetsUsingPosition(widget.position),
       isScrolledUnder: LdAppBarScrolledUnderScope.of(context),
-      isTabNavigation: widget.isTabNavigation,
       level: _calculateLevel(parentMetrics),
       parentMetrics: parentMetrics,
       position: widget.position,
@@ -784,5 +719,45 @@ extension DoubleToEdgeInsets on double {
       LdAppBarPosition.top => EdgeInsets.only(top: this),
       LdAppBarPosition.bottom => EdgeInsets.only(bottom: this),
     };
+  }
+}
+
+/// Whether [scope] currently contains the primary focus, including inputs in
+/// nested scopes (e.g. [LdSearchInput]).
+bool ldAppBarFocusScopeHasInputFocus(FocusScopeNode scope) {
+  if (scope.hasFocus) {
+    return true;
+  }
+  final primary = FocusManager.instance.primaryFocus;
+  if (primary == null) {
+    return false;
+  }
+  for (FocusNode? node = primary; node != null; node = node.parent) {
+    if (node == scope) {
+      return true;
+    }
+  }
+  return false;
+}
+
+/// Metrics to build the visual frame of the appbar
+class LdAppBarFrameMetrics {
+  final bool isAttached;
+  final bool isScrolledUnder;
+  final bool willHide;
+  final LdAppBarPosition position;
+  final EdgeInsets outerMargin;
+
+  LdAppBarFrameMetrics({
+    required this.isAttached,
+    required this.isScrolledUnder,
+    required this.willHide,
+    required this.position,
+    required this.outerMargin,
+  });
+
+  @override
+  String toString() {
+    return 'LdAppBarFrameMetrics(isAttached: $isAttached, isScrolledUnder: $isScrolledUnder, willHide: $willHide, position: $position, outerMargin: $outerMargin)';
   }
 }

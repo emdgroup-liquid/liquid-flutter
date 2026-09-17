@@ -5,8 +5,14 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 class LdListItemAnimation extends StatelessWidget {
   final LdPaginatorItemState state;
   final Widget child;
+  final VoidCallback? onAnimationEnd;
 
-  const LdListItemAnimation({required this.state, required this.child, super.key});
+  const LdListItemAnimation({
+    required this.state,
+    required this.child,
+    this.onAnimationEnd,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -65,6 +71,13 @@ class LdListItemAnimation extends StatelessWidget {
       LdPaginatorItemState.rolledBackDeletion => LdReveal.quick(
           revealed: true,
           initialRevealed: false,
+          child: child,
+        ),
+      LdPaginatorItemState.moved => LdReveal(
+          revealed: true,
+          initialRevealed: false,
+          onAnimationEnd: (_, __) => onAnimationEnd?.call(),
+          axes: const {Axis.vertical},
           child: child,
         ),
       _ => child,

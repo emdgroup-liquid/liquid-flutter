@@ -772,6 +772,34 @@ class _ModalDemoState extends State<ModalDemo> {
               ),
             ),
           ),
+
+          ComponentWell(
+            title: LdText.h("Modal with action bar"),
+            child: LdModalBuilder(
+              useRootNavigator: true,
+              builder: (context, openModal) {
+                return LdButton(onPressed: openModal, child: const Text("Open modal"));
+              },
+              modal: LdModalRoute(
+                context: context,
+                pageBuilder: (context) => LdScaffold(
+                  body: LdRawAppBar.bottom(
+                    content: Row(
+                      children: [
+                        Expanded(child: Text("Left")),
+                        Expanded(child: Text("Center")),
+                        Expanded(child: Text("Right")),
+                      ],
+                    ),
+                    child: LdAppBar(
+                      title: const Text("This is a modal with action bar"),
+                      child: LdScaffoldBody(children: [LdText("This is a modal with action bar")]),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );

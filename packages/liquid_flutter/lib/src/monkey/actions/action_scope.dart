@@ -3,7 +3,7 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:provider/provider.dart';
 
 /// Route-scoped state for monkey actions: [appContext] and submit controller registry.
-class LdMonkeyActionScope<T extends Identifiable<IdType>, IdType> {
+class LdMonkeyActionScope<T extends Identifiable<IdType>, IdType> extends ChangeNotifier {
   BuildContext? appContext;
 
   final Map<Object, LdSubmitController<dynamic, LdMonkeyActionContext<T, IdType>>> _submitControllers = {};
@@ -27,6 +27,7 @@ class LdMonkeyActionScope<T extends Identifiable<IdType>, IdType> {
 
   void registerSubmit(Object actionId, LdSubmitController<dynamic, LdMonkeyActionContext<T, IdType>> controller) {
     _submitControllers[actionId] = controller;
+    WidgetsBinding.instance.addPostFrameCallback((_) => notifyListeners());
   }
 
   void unregisterSubmit(Object actionId) {

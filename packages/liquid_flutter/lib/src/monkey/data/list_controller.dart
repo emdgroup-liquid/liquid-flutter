@@ -45,7 +45,8 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
         _getOffsetById = model.getOffsetById,
         super(
           pageSize: model.pageSize,
-          initialItems: initialItems ?? (model is LdCallbackModel<T, IdType, Object?, Object?> ? model.initialItems : null),
+          initialItems:
+              initialItems ?? (model is LdCallbackModel<T, IdType, Object?, Object?> ? model.initialItems : null),
           listCache: model.cache,
           fetchListFunction: model.fetchListWithParametersCached,
         ) {
@@ -62,7 +63,8 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
         _getOffsetById = model.getOffsetById,
         super(
           pageSize: model.pageSize,
-          initialItems: initialItems ?? (model is LdCallbackModel<T, IdType, Object?, Object?> ? model.initialItems : null),
+          initialItems:
+              initialItems ?? (model is LdCallbackModel<T, IdType, Object?, Object?> ? model.initialItems : null),
           listCache: model.cache,
           fetchListFunction: model.fetchListWithParametersCached,
         ) {
@@ -442,17 +444,27 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
     }
 
     reorderIndices(fromIndex, toIndex);
+    _scheduleRevealAnimation(id);
 
     final item = getItemById(id)?.value ?? await getById(context, id);
     if (!context.mounted) {
       return;
     }
-    final model = _attachedModel;
-    final updated = await model.persistReorder(context, item, fromIndex, toIndex, activeSortOption);
-    if (!context.mounted) {
-      return;
-    }
-    await model.update(context, id, updated, skipLayout: true);
+
+    await _attachedModel.persistReorder(context, item, fromIndex, toIndex, activeSortOption);
+  }
+
+  /// Triggers a reveal animation on the moved item and resets to [loaded]
+  /// after the spring settles.
+  void _scheduleRevealAnimation(IdType id) {
+    final movedIndex = getItemIndexById(id);
+    if (movedIndex == null) return;
+
+    setItemState(id, LdPaginatorItemState.moved);
+
+    Future.delayed(const Duration(milliseconds: 500), () {
+      setItemState(id, LdPaginatorItemState.loaded);
+    });
   }
 
   /// Updates a batch of items. [items] maps each item's id to the update payload.

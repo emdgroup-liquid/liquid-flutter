@@ -9,6 +9,15 @@ import 'package:liquid_flutter_reactive_forms/liquid_flutter_reactive_forms.dart
 import 'package:provider/provider.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 
+enum LdFormControls {
+  appbar,
+  inline,
+  none,
+  adaptive,
+}
+
+enum LdFormLayoutMode { inline, page }
+
 typedef LdDetailToForm<TDetail> = Map<String, Object?> Function(TDetail detail);
 
 typedef LdFormToUpdatePayload<TUpdate, TDetail> = TUpdate Function(
@@ -26,7 +35,8 @@ typedef LdFormLoadDetail<TDetail, T> = Future<TDetail> Function(
   T? entity,
 );
 
-typedef LdFormOnSubmitted<T extends Identifiable<IdType>, IdType> = void Function(
+typedef LdFormOnSubmitted<T extends Identifiable<IdType>, IdType> = void
+    Function(
   BuildContext context,
   T? created,
 );
@@ -37,7 +47,8 @@ typedef LdFormOnSubmitted<T extends Identifiable<IdType>, IdType> = void Functio
 /// [childrenBuilder] returns the free widget tree rendered inside the form.
 /// Use [LdFormInput], [LdFormChoose], etc. to bind controls by key, and place
 /// any other widgets freely alongside them.
-class LdForm<T extends Identifiable<IdType>, IdType, TDetail extends Object, TCreate, TUpdate> extends StatefulWidget {
+class LdForm<T extends Identifiable<IdType>, IdType, TDetail extends Object,
+    TCreate, TUpdate> extends StatefulWidget {
   final LdFormMode mode;
   final LdPaginatorItem<T>? item;
 
@@ -53,7 +64,9 @@ class LdForm<T extends Identifiable<IdType>, IdType, TDetail extends Object, TCr
   final LdMonkeyFieldConflictResolver? onFieldConflict;
   final LdFormPreSaveCheck preSaveCheck;
   final LdFormOnSubmitted<T, IdType>? onSubmitted;
+  final LdFormControls controls;
 
+  final LdFormLayoutMode layoutMode;
   final void Function(FormGroup form)? onFormInit;
 
   final List<Validator<dynamic>> validators;
@@ -67,12 +80,14 @@ class LdForm<T extends Identifiable<IdType>, IdType, TDetail extends Object, TCr
     required this.detailToFormValues,
     required this.formToUpdatePayload,
     required this.itemToDetail,
+    this.controls = LdFormControls.adaptive,
     this.saveMode = LdReactiveFormSaveMode.adaptive,
     this.conflictPolicy = LdMonkeyFieldConflictPolicy.keepLocal,
     this.onFieldConflict,
     this.preSaveCheck = LdFormPreSaveCheck.none,
     this.onFormInit,
     this.validators = const [],
+    this.layoutMode = LdFormLayoutMode.page,
     this.validationMessages,
     required this.mode,
     this.formToCreatePayload,
@@ -84,8 +99,12 @@ class LdForm<T extends Identifiable<IdType>, IdType, TDetail extends Object, TCr
       _LdFormState<T, IdType, TDetail, TCreate, TUpdate>();
 }
 
-class _LdFormState<T extends Identifiable<IdType>, IdType, TDetail extends Object, TCreate, TUpdate>
-    extends State<LdForm<T, IdType, TDetail, TCreate, TUpdate>> {
+class _LdFormState<
+    T extends Identifiable<IdType>,
+    IdType,
+    TDetail extends Object,
+    TCreate,
+    TUpdate> extends State<LdForm<T, IdType, TDetail, TCreate, TUpdate>> {
   TDetail? _detail;
   IdType? _currentId;
   final Map<String, Object?> _lastServerFormValues = {};
@@ -263,9 +282,11 @@ class _LdFormState<T extends Identifiable<IdType>, IdType, TDetail extends Objec
         LdMonkeyFieldConflictResolution? resolution;
         if (widget.onFieldConflict != null) {
           resolution = await widget.onFieldConflict!(conflict);
-        } else if (widget.conflictPolicy == LdMonkeyFieldConflictPolicy.keepLocal) {
+        } else if (widget.conflictPolicy ==
+            LdMonkeyFieldConflictPolicy.keepLocal) {
           resolution = LdMonkeyFieldConflictResolution.keepLocal;
-        } else if (widget.conflictPolicy == LdMonkeyFieldConflictPolicy.preferServer) {
+        } else if (widget.conflictPolicy ==
+            LdMonkeyFieldConflictPolicy.preferServer) {
           resolution = LdMonkeyFieldConflictResolution.preferServer;
         }
 
@@ -301,7 +322,8 @@ class _LdFormState<T extends Identifiable<IdType>, IdType, TDetail extends Objec
   ) async {
     final Map<String, Object?> serverValues;
     if (exception.serverDetail != null) {
-      serverValues = widget.detailToFormValues(exception.serverDetail as TDetail);
+      serverValues =
+          widget.detailToFormValues(exception.serverDetail as TDetail);
     } else {
       serverValues = exception.serverFieldValues ?? {};
     }
@@ -354,12 +376,14 @@ class _LdFormState<T extends Identifiable<IdType>, IdType, TDetail extends Objec
   }
 
   Future<void> _runPreSaveCheck() async {
-    if (widget.mode != LdFormMode.edit || widget.preSaveCheck != LdFormPreSaveCheck.repositoryGetById) {
+    if (widget.mode != LdFormMode.edit ||
+        widget.preSaveCheck != LdFormPreSaveCheck.repositoryGetById) {
       return;
     }
     final id = _currentId;
     if (id == null) return;
-    final serverEntity = await LdListController.of<T, IdType>(context).getById(context, id, skipCache: true);
+    final serverEntity = await LdListController.of<T, IdType>(context)
+        .getById(context, id, skipCache: true);
     if (!mounted) return;
     final newDetail = await widget.itemToDetail(context, serverEntity);
     final serverValues = widget.detailToFormValues(newDetail);
@@ -493,6 +517,44 @@ class _LdFormState<T extends Identifiable<IdType>, IdType, TDetail extends Objec
       return const Center(child: LdLoader());
     }
 
+    final theme = LdTheme.of(context);
+
+    final isManualSubmit = !_blurSaveEnabled;
+
+    final showInlineControls = switch (widget.controls) {
+      LdFormControls.inline => isManualSubmit,
+      LdFormControls.adaptive => switch (theme.platform.isMobile) {
+          true => false,
+          false => true,
+        },
+      _ => false,
+    };
+
+    final showAppBarControls = isManualSubmit &&
+        switch (widget.controls) {
+          LdFormControls.appbar => true,
+          LdFormControls.adaptive => theme.platform.isMobile,
+          _ => false,
+        };
+
+    Widget child;
+
+    if (showInlineControls) {
+      child = LdAutoSpace(
+        children: [
+          widget.child,
+          Wrap(
+            children: [
+              LdFormResetButton(),
+              LdFormSubmitButton(),
+            ],
+          ).spaceS(),
+        ],
+      );
+    } else {
+      child = widget.child;
+    }
+
     return LdLocationLockGuard(
       locked: _editsAtRisk,
       pathPrefix: GoRouter.of(context).state.uri.path,
@@ -502,7 +564,34 @@ class _LdFormState<T extends Identifiable<IdType>, IdType, TDetail extends Objec
         formGroup: _form,
         child: Provider.value(
           value: _buildFormState(),
-          child: widget.child,
+          child: LdWrapConditional(
+            condition: showAppBarControls,
+            builder: (context, child) {
+              return LdAppBar(
+                positionMode: switch (theme.platform.isMobile) {
+                  true => LdAppBarPositionMode.bottom,
+                  false => LdAppBarPositionMode.top,
+                },
+                actions: [
+                  LdFlexibleChild(
+                    child: LdFormResetButton(),
+                  ),
+                  LdFlexibleChild(
+                    flex: 2,
+                    child: LdFormSubmitButton(),
+                  ),
+                ],
+                child: child,
+              );
+            },
+            child: LdWrapConditional(
+              condition: widget.layoutMode == LdFormLayoutMode.page,
+              builder: (context, child) => LdScaffoldBody(
+                children: [child],
+              ),
+              child: child,
+            ),
+          ),
         ),
       ),
     );

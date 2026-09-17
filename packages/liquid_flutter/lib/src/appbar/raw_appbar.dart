@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter/src/appbar/appbar_decoration.dart';
 
 /// How [LdRawAppBar] sizes and places its bar surface.
 enum LdRawAppBarLayout {
@@ -89,6 +90,9 @@ class LdRawAppBar extends StatelessWidget {
 
   final bool attached;
 
+  final EdgeInsets? outsideAdditionalPadding;
+  final EdgeInsets? outsideMinPadding;
+
   const LdRawAppBar({
     super.key,
     required this.child,
@@ -107,6 +111,8 @@ class LdRawAppBar extends StatelessWidget {
     this.attached = false,
     this.avoidViewInsets = false,
     this.debugName,
+    this.outsideAdditionalPadding,
+    this.outsideMinPadding,
   });
 
   factory LdRawAppBar.top({
@@ -129,7 +135,6 @@ class LdRawAppBar extends StatelessWidget {
   }) {
     return LdRawAppBar(
       key: key,
-      child: child,
       content: content,
       leading: leading,
       trailing: trailing,
@@ -145,6 +150,7 @@ class LdRawAppBar extends StatelessWidget {
       attached: floating,
       avoidViewInsets: avoidViewInsets,
       debugName: debugName,
+      child: child,
     );
   }
 
@@ -168,7 +174,6 @@ class LdRawAppBar extends StatelessWidget {
   }) {
     return LdRawAppBar(
       key: key,
-      child: child,
       content: content,
       leading: leading,
       trailing: trailing,
@@ -183,6 +188,7 @@ class LdRawAppBar extends StatelessWidget {
       addContainer: addContainer,
       avoidViewInsets: avoidViewInsets,
       debugName: debugName,
+      child: child,
     );
   }
 
@@ -249,21 +255,27 @@ class LdRawAppBar extends StatelessWidget {
             ],
           ).spaceS();
 
-          return Padding(
-            padding: MediaQuery.of(context).padding,
-            child: switch (isCenter) {
-              true => Align(
-                  alignment: Alignment.center,
-                  child: row,
-                ),
-              false => row,
-            },
-          );
+          return switch (isCenter) {
+            true => Align(
+                alignment: Alignment.center,
+                child: row,
+              ),
+            false => row,
+          };
         },
       ),
     );
 
     return AppBarFrame(
+      insideBuilder: (context, metrics, child) {
+        return child;
+      },
+      outsideBuilder: (context, metrics, child) {
+        return Padding(
+          padding: metrics.outerMargin,
+          child: child,
+        );
+      },
       addContainer: addContainer,
       avoidViewInsets: avoidViewInsets,
       debugName: debugName,
@@ -272,11 +284,8 @@ class LdRawAppBar extends StatelessWidget {
       scrollBehavior: scrollBehavior,
       wrappedChild: child,
       scrimColor: (scrolledUnder) => theme.primaryColor,
-      insidePadding: padding ?? theme.pad(),
-      insideDecoration: insideDecoration,
-      outsideDecoration: outsideDecoration,
-      insideDecorationBuilder: insideDecorationBuilder,
-      outsideDecorationBuilder: outsideDecorationBuilder,
+      outsideAdditionalPadding: outsideAdditionalPadding ?? (attached ? null : theme.pad(size: LdSize.m)),
+      outsideMinPadding: outsideMinPadding,
       child: barSurface,
     );
   }

@@ -4,8 +4,7 @@ List<Widget> _buildOneOfChips<T extends Identifiable<IdType>, IdType>(
   BuildContext context,
   LdFilterChipOneOfConfig<T, IdType> config,
 ) {
-  final filter =
-      findMonkeyFilterByName<T, IdType, LdFilterOneOf<T, IdType, dynamic>>(
+  final filter = findMonkeyFilterByName<T, IdType, LdFilterOneOf<T, IdType, dynamic>>(
     context,
     filterName: config.filterName,
     listen: true,
@@ -15,10 +14,8 @@ List<Widget> _buildOneOfChips<T extends Identifiable<IdType>, IdType>(
   }
 
   return switch (config.presentation) {
-    LdFilterChipChoicePresentation.choose =>
-      _buildOneOfChooseChips(context, filter, config),
-    LdFilterChipChoicePresentation.inline =>
-      _buildOneOfInlineChips(context, filter, config),
+    LdFilterChipChoicePresentation.choose => _buildOneOfChooseChips(context, filter, config),
+    LdFilterChipChoicePresentation.inline => _buildOneOfInlineChips(context, filter, config),
   };
 }
 
@@ -54,8 +51,8 @@ List<Widget> _buildOneOfChooseChips<T extends Identifiable<IdType>, IdType>(
   }
 
   final label = switch (filter.isOn && filter.selectedValue != null) {
-    true => filter.selectedValue.toString(),
-    false => filter.label(context),
+    true => filter.allValues[filter.selectedValue]?.call(context) ?? Text(filter.selectedValue.toString()),
+    false => Text(filter.label(context)),
   };
 
   return [
@@ -84,7 +81,7 @@ List<Widget> _buildOneOfChooseChips<T extends Identifiable<IdType>, IdType>(
           selected: filter.isOn,
           showChevron: true,
           onPressed: triggerConfig.onTap,
-          child: Text(label),
+          child: label,
         );
       },
     ),
@@ -122,9 +119,8 @@ List<Widget> _buildOneOfInlineChips<T extends Identifiable<IdType>, IdType>(
 
   for (final value in options) {
     final isSelected = filter.isOn && filter.selectedValue == value;
-    final child = config.optionChild?.call(context, value) ??
-        filter.allValues[value]?.call(context) ??
-        Text(value.toString());
+    final child =
+        config.optionChild?.call(context, value) ?? filter.allValues[value]?.call(context) ?? Text(value.toString());
     chips.add(
       ldFilterChipButton(
         selected: isSelected,

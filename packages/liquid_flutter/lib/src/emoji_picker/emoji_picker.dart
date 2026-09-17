@@ -357,7 +357,7 @@ class _LdEmojiPickerModalState extends State<LdEmojiPickerModal> {
         ],
         child: LdTabNavigation(
           tabs: tabs,
-          minTabWidth: 100,
+          minTabWidth: 64,
           activeRoute: activeCategory.name,
           onTabPressed: (route) {
             final idx = _ldEmojiData.indexWhere((cat) => cat.name == route);

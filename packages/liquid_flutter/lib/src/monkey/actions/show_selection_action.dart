@@ -29,8 +29,8 @@ LdMonkeyAction<T, IdType> showSelection<T extends Identifiable<IdType>, IdType>(
         return LdAppBarAction(
           key: const Key('show_selection'),
           buttonMode: LdButtonMode.filled,
-          leading: const Icon(LucideIcons.eye),
-          compactMode: LdAppBarActionCompactMode.never,
+          leading: const Icon(LucideIcons.chevronRight),
+          compactMode: LdAppBarActionCompactMode.always,
           onPressed: trigger,
           child: Text(LiquidLocalizations.of(ctx.appContext).showSelection),
         );

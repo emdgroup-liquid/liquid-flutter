@@ -16,7 +16,7 @@ class LdMonkeyMultiShortcuts<T extends Identifiable<IdType>, IdType> extends Sta
     final selection = LdMonkeySelection.of<T, IdType>(context);
     final scope = LdMonkeyActionScope.of<T, IdType>(context);
 
-    for (final action in actions) {
+    for (final action in ldFlattenMonkeyActions(actions)) {
       for (final activator in action.shortcutActivators) {
         if (bindings[activator] != null) {
           throw Exception(
@@ -58,7 +58,7 @@ class LdMonkeySingleShortcuts<T extends Identifiable<IdType>, IdType> extends St
       return child;
     }
 
-    for (final action in actions) {
+    for (final action in ldFlattenMonkeyActions(actions)) {
       for (final activator in action.shortcutActivators) {
         if (bindings[activator] != null) {
           throw Exception(

@@ -5,10 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/appbar/appbar_decoration.dart';
-import 'package:liquid_flutter/src/appbar/appbar_scrolled_under.dart';
 import 'package:liquid_flutter/src/haptics.dart';
 import 'package:liquid_flutter/src/theme/adaptive_radius.dart';
-import 'package:provider/provider.dart';
+
+part 'tab_navigation_components.dart';
 
 class LdTabNavigation extends StatefulWidget {
   /// The currently active route. Used to determine which tab is highlighted
@@ -29,6 +29,9 @@ class LdTabNavigation extends StatefulWidget {
   final LdAppBarScrollBehavior scrollBehavior;
   final bool addContainer;
   final bool enableGradient;
+
+  final Widget? trailing;
+  final Widget? leading;
 
   final double minTabWidth;
 
@@ -68,8 +71,10 @@ class LdTabNavigation extends StatefulWidget {
     this.backgroundMode = LdAppBarBackgroundMode.adaptive,
     this.position = LdAppBarPositionMode.adaptive,
     this.scrollBehavior = LdAppBarScrollBehavior.static,
-    this.minTabWidth = 75,
+    this.minTabWidth = 60,
     this.pageController,
+    this.trailing,
+    this.leading,
   }) : assert(
           activeRoute != null || pageController != null,
           'LdTabNavigation: either activeRoute or pageController must be provided.',
@@ -80,6 +85,9 @@ class LdTabNavigation extends StatefulWidget {
 }
 
 class _LdTabNavigationState extends State<LdTabNavigation> {
+  static const _pageAnimationDuration = Duration(milliseconds: 300);
+  static const _scrollAnimationDuration = Duration(milliseconds: 220);
+
   final FocusNode _focusNode = FocusNode();
   final ScrollController _scrollController = ScrollController();
 
@@ -90,6 +98,22 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
   /// When true, the [LdSpring] is bypassed and the indicator follows the
   /// [pageController] position directly (no lag during swipe).
   bool _springOverridden = false;
+
+  double _indicatorPosition = 0;
+  double _navWidth = 0;
+
+  double _dragStartPosition = 0;
+  int _lastDraggedTabIndex = 0;
+  double _dragStartIndicatorPosition = 0;
+
+  int get _tabCount => max(1, widget.tabs.length);
+
+  _TabBarMetrics get _metrics => _TabBarMetrics(
+        navWidth: _navWidth,
+        tabCount: _tabCount,
+        minTabWidth: widget.minTabWidth,
+        padding: LdTheme.of(context).paddingSize(size: LdSize.xs),
+      );
 
   // ── PageController wiring ──────────────────────────────────────────────────
 
@@ -125,7 +149,7 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
   /// directly, where the active tab only updates on drag end.
   void _updateIndicatorFromPage(double page) {
     final isScrolling = (page - page.roundToDouble()).abs() > 0.001;
-    final newPosition = page.clamp(0, _tabCount - 1) * _tabStride;
+    final newPosition = page.clamp(0, _tabCount - 1) * _metrics.tabStride;
 
     setState(() {
       // Only snap the active-tab highlight when the page has settled to an
@@ -140,6 +164,14 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
     if (!isScrolling) {
       _scrollToIndicator();
     }
+  }
+
+  void _animateToPage(int index) {
+    widget.pageController?.animateToPage(
+      index,
+      duration: _pageAnimationDuration,
+      curve: Curves.easeInOut,
+    );
   }
 
   // ── Lifecycle ──────────────────────────────────────────────────────────────
@@ -186,7 +218,7 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
 
   bool _effectivelyAttached(BuildContext context) {
     final position = _effectivePosition;
-    final attached = switch (widget.attachedMode) {
+    return switch (widget.attachedMode) {
       LdAppBarAttachedMode.attached => true,
       LdAppBarAttachedMode.adaptive => switch (position) {
           LdAppBarPosition.bottom => LdTheme.of(context).platform.isDesktop,
@@ -194,7 +226,6 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
         },
       LdAppBarAttachedMode.floating => false,
     };
-    return attached;
   }
 
   bool _isTabActive(LdNavigationTab tab) {
@@ -215,79 +246,72 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
     return widget.tabs.indexWhere(_isTabActive);
   }
 
-  double _indicatorPosition = 0;
-
-  double _navWidth = 0;
-
   void _updateIndicatorPosition() {
     final activeIndex = _activeIndex().clamp(0, _tabCount - 1);
     setState(() {
-      _indicatorPosition = activeIndex * _tabStride;
+      _indicatorPosition = activeIndex * _metrics.tabStride;
     });
     _scrollToIndicator();
   }
 
-  int get _tabCount => max(1, widget.tabs.length);
+  void _scheduleNavWidthSync(double width) {
+    if (width == _navWidth) {
+      return;
+    }
 
-  double get _tabSpacing => LdTheme.of(context).paddingSize(size: LdSize.s);
-
-  double get _tabStride => _tabWidth + _tabSpacing;
-
-  double get _contentWidth => _totalSpacing + _tabCount * _tabWidth;
-
-  double get _tabWidth => max(widget.minTabWidth, (_availableWidth - _totalSpacing) / _tabCount);
-
-  double get _availableWidth => _navWidth - LdTheme.of(context).paddingSize(size: LdSize.s) * 2;
-
-  double get _totalSpacing => _tabSpacing * (_tabCount - 1);
-
-  bool get _compactMode => _navWidth < 500;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _navWidth = width;
+        final activeIndex = _activeIndex().clamp(0, _tabCount - 1);
+        _indicatorPosition = activeIndex * _metrics.tabStride;
+      });
+      _scrollToIndicator();
+    });
+  }
 
   // ── Drag gesture on the indicator ─────────────────────────────────────────
 
-  double _dragStartPosition = 0;
-  int _lastDraggedTabIndex = 0;
-  double _dragStartIndicatorPosition = 0;
-
-  int _getClosestTab(BuildContext context) {
-    final closestTabIndex = (_indicatorPosition / _tabStride).round().clamp(0, _tabCount - 1);
-    return closestTabIndex;
+  int _closestTabIndex() {
+    return (_indicatorPosition / _metrics.tabStride).round().clamp(0, _tabCount - 1);
   }
 
-  void _onIndicatorDragEnd(DragEndDetails details) {
-    final closestTabIndex = _getClosestTab(context);
-    widget.onTabPressed(widget.tabs[closestTabIndex].route);
-    widget.pageController?.animateToPage(
-      closestTabIndex,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
-    _updateIndicatorPosition();
+  void _onIndicatorDragStart(DragStartDetails details) {
+    _dragStartPosition = details.localPosition.dx;
+    _dragStartIndicatorPosition = _indicatorPosition;
+    _lastDraggedTabIndex = _closestTabIndex();
   }
 
   void _onIndicatorDragUpdate(DragUpdateDetails details) {
-    final currentTabIndex = _getClosestTab(context);
+    final currentTabIndex = _closestTabIndex();
 
     if (_lastDraggedTabIndex != currentTabIndex) {
       LdHaptics.vibrate(HapticsType.heavy);
       _lastDraggedTabIndex = currentTabIndex;
     }
+
+    final metrics = _metrics;
     setState(() {
       _indicatorPosition = (_dragStartIndicatorPosition + (details.localPosition.dx - _dragStartPosition))
-          .clamp(0, max(0, _contentWidth - _tabWidth));
+          .clamp(0, max(0, metrics.contentWidth - metrics.tabWidth));
     });
   }
 
+  void _onIndicatorDragEnd(DragEndDetails details) {
+    _selectTab(_closestTabIndex());
+  }
+
   void _onTabTap(int tabIndex) {
-    final route = widget.tabs[tabIndex].route;
-    widget.onTabPressed(route);
-    widget.pageController?.animateToPage(
-      tabIndex,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
-    _updateIndicatorPosition();
+    _selectTab(tabIndex);
     LdHaptics.vibrate(HapticsType.light);
+  }
+
+  void _selectTab(int index) {
+    widget.onTabPressed(widget.tabs[index].route);
+    _animateToPage(index);
+    _updateIndicatorPosition();
   }
 
   // ── Scroll to keep active tab visible ─────────────────────────────────────
@@ -302,19 +326,15 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
       return;
     }
 
-    final targetOffset = (_indicatorPosition - (_navWidth - _tabWidth) / 2)
-        .clamp(
-          0,
-          maxScrollExtent,
-        )
-        .toDouble();
+    final targetOffset =
+        (_indicatorPosition - (_navWidth - _metrics.tabWidth) / 2).clamp(0, maxScrollExtent).toDouble();
 
     if (ldDisableAnimations) {
       _scrollController.jumpTo(targetOffset);
     } else {
       _scrollController.animateTo(
         targetOffset,
-        duration: const Duration(milliseconds: 220),
+        duration: _scrollAnimationDuration,
         curve: Curves.easeOut,
       );
     }
@@ -327,7 +347,6 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
     final theme = LdTheme.of(context, listen: true);
     final isAttached = _effectivelyAttached(context);
     final position = _effectivePosition;
-
     final decorationBuilder = LdAppBarDecorationBuilder(
       backgroundColor: widget.backgroundColor,
       shadowMode: widget.shadowMode,
@@ -336,205 +355,97 @@ class _LdTabNavigationState extends State<LdTabNavigation> {
       scrollBehavior: widget.scrollBehavior,
     );
 
-    // The tab bar surface widget — passed as [child] to AppBarFrame.
-    final tabBarSurface = LayoutBuilder(
-      builder: (context, constraints) {
-        final isScrolledUnder = LdAppBarScrolledUnderScope.of(context);
-        final isSurface = decorationBuilder
-            .resolveAppearance(context, isScrolledUnder: isScrolledUnder, position: position)
-            .childIsSurface;
-
-        if (constraints.maxWidth != _navWidth) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) {
-              setState(() {
-                _navWidth = constraints.maxWidth;
-
-                final activeIndex = _activeIndex().clamp(0, _tabCount - 1);
-                _indicatorPosition = activeIndex * _tabStride;
-              });
-              _scrollToIndicator();
-            }
-          });
-        }
-
-        return Provider.value(
-          value: LdSurfaceInfo(isSurface: isSurface),
-          child: Builder(builder: (context) {
-            return LdScrollEdgeFade(
-              axis: Axis.horizontal,
-              fadeColor: context.surfaceColor,
-              fadeExtent: _tabWidth / 2,
-              controller: _scrollController,
-              child: Builder(builder: (context) {
-                return SingleChildScrollView(
-                  padding: LdTheme.of(context).pad(size: LdSize.s),
-                  controller: _scrollController,
-                  scrollDirection: Axis.horizontal,
-                  child: Stack(
-                    children: [
-                      Row(
-                        spacing: _tabSpacing,
-                        children: [
-                          ...widget.tabs.mapIndexed(
-                            (index, tab) => SizedBox(
-                              width: _tabWidth,
-                              child: LdTouchableSurface(
-                                active: _isTabActive(tab),
-                                onPressed: () => _onTabTap(index),
-                                builder: (context, status, _) {
-                                  final colors = switch (_isTabActive(tab)) {
-                                    true => ghostColor(theme.primary, theme, status),
-                                    false => neutralGhostColor(theme, status),
-                                  };
-                                  return Container(
-                                    decoration: BoxDecoration(
-                                      color: colors.surface,
-                                      borderRadius: context.adaptiveRadius.childRadius.max.atLeast(
-                                        theme.radius(LdSize.m),
-                                      ),
-                                    ),
-                                    child: Builder(
-                                      builder: (context) {
-                                        final iconColor = colors.icon;
-                                        final textColor = colors.text;
-                                        final icon = IconTheme(
-                                          data: IconThemeData(
-                                            color: iconColor,
-                                            size: theme.labelSize(LdSize.l),
-                                          ),
-                                          child: tab.icon,
-                                        );
-
-                                        if (_compactMode) {
-                                          return Column(
-                                            crossAxisAlignment: CrossAxisAlignment.center,
-                                            children: [
-                                              icon,
-                                              ldSpacerXS,
-                                              LdText.ls(
-                                                tab.label,
-                                                color: textColor,
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ],
-                                          ).padXS();
-                                        }
-                                        return Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            icon,
-                                            ldSpacerS,
-                                            Flexible(
-                                              child: LdText.l(
-                                                tab.label,
-                                                color: textColor,
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                            ),
-                                          ],
-                                        ).padS();
-                                      },
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      LdSpring(
-                        springConstant: 20,
-                        dampingCoefficient: 20,
-                        mass: 5,
-                        overriden: _springOverridden,
-                        position: _indicatorPosition,
-                        child: GestureDetector(
-                          behavior: HitTestBehavior.translucent,
-                          onHorizontalDragStart: (details) {
-                            _dragStartPosition = details.localPosition.dx;
-                            _dragStartIndicatorPosition = _indicatorPosition;
-                            _lastDraggedTabIndex = _getClosestTab(context);
-                          },
-                          onHorizontalDragUpdate: _onIndicatorDragUpdate,
-                          onHorizontalDragCancel: () {
-                            _updateIndicatorPosition();
-                          },
-                          onHorizontalDragEnd: _onIndicatorDragEnd,
-                          // IgnorePointer lets taps reach the tab under the
-                          // indicator. translucent keeps this detector in the
-                          // hit-test path so horizontal drags still move it
-                          // (deferToChild would drop events because the child
-                          // ignores pointers).
-                          child: IgnorePointer(
-                            child: LdTouchableSurface(
-                              onPressed: () {},
-                              trackPan: true,
-                              builder: (context, status, _) => LdTouchableTouchFeedback(
-                                scaleFactor: 100,
-                                status: status,
-                                child: Container(
-                                  width: _tabWidth,
-                                  decoration: BoxDecoration(
-                                    color: theme.primaryColor.withAlpha(26),
-                                    borderRadius: context.adaptiveRadius.childRadius.max.atLeast(
-                                      theme.radius(LdSize.m),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        builder: (context, state, child) {
-                          return Positioned(
-                            bottom: 0,
-                            top: 0,
-                            left: state.position,
-                            child: child!,
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                );
-              }),
-            );
-          }),
-        );
-      },
-    );
-
-    final frame = AnnotatedRegion<SystemUiOverlayStyle>(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
       value: appBarSystemUiOverlayStyle(theme),
       child: AppBarFrame(
         debugName: widget.debugName,
-        position: position,
+        position: _effectivePosition,
         attached: isAttached,
-        isTabNavigation: true,
         addContainer: widget.addContainer,
-        insidePadding: EdgeInsets.zero,
         scrollBehavior: widget.scrollBehavior,
-        wrappedChild: widget.child,
         outsideAdditionalPadding: !isAttached ? LdTheme.of(context).pad(size: LdSize.s) : null,
-        insideDecorationBuilder: (isScrolledUnder) => decorationBuilder.buildInsideDecoration(
-          context: context,
-          isScrolledUnder: isScrolledUnder,
-          isAttached: isAttached,
+        insideBuilder: (context, metrics, child) {
+          return Row(
+            children: [
+              Expanded(
+                child: AppbarInsideContainer(
+                  metrics: metrics,
+                  borderMode: widget.borderMode,
+                  shadowMode: widget.shadowMode,
+                  backgroundMode: widget.backgroundMode,
+                  backgroundColor: widget.backgroundColor,
+                  child: child,
+                ),
+              ),
+              if (widget.trailing != null) widget.trailing!,
+            ],
+          );
+        },
+        outsideBuilder: (context, metrics, child) {
+          return AppbarOutsideContainer(
+            metrics: metrics,
+            borderMode: widget.borderMode,
+            shadowMode: widget.shadowMode,
+            backgroundMode: widget.backgroundMode,
+            backgroundColor: widget.backgroundColor,
+            child: child,
+          );
+        },
+        wrappedChild: widget.child,
+        child: _buildTabBar(
+          decorationBuilder: decorationBuilder,
           position: position,
         ),
-        outsideDecorationBuilder: (isScrolledUnder) => decorationBuilder.buildOutsideDecoration(
-          context: context,
-          isScrolledUnder: isScrolledUnder,
-          isAttached: isAttached,
-          position: position,
-        ),
-        child: tabBarSurface,
       ),
     );
+  }
 
-    return frame;
+  Widget _buildTabBar({
+    required LdAppBarDecorationBuilder decorationBuilder,
+    required LdAppBarPosition position,
+  }) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        _scheduleNavWidthSync(constraints.maxWidth);
+
+        final metrics = _metrics;
+
+        return _LdTabBarScrollArea(
+          controller: _scrollController,
+          fadeExtent: metrics.tabWidth / 2,
+          child: Stack(
+            children: [
+              _buildTabRow(metrics),
+              _LdTabNavigationIndicator(
+                tabWidth: metrics.tabWidth,
+                position: _indicatorPosition,
+                springOverridden: _springOverridden,
+                onDragStart: _onIndicatorDragStart,
+                onDragUpdate: _onIndicatorDragUpdate,
+                onDragEnd: _onIndicatorDragEnd,
+                onDragCancel: _updateIndicatorPosition,
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildTabRow(_TabBarMetrics metrics) {
+    return Row(
+      spacing: metrics.tabSpacing,
+      children: [
+        ...widget.tabs.mapIndexed(
+          (index, tab) => _LdTabNavigationItem(
+            tab: tab,
+            active: _isTabActive(tab),
+            compact: metrics.compactMode,
+            width: metrics.tabWidth,
+            onPressed: () => _onTabTap(index),
+          ),
+        ),
+      ],
+    );
   }
 }

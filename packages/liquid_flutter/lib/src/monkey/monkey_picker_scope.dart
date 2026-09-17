@@ -74,7 +74,7 @@ class _LdMonkeyPickerScopeState<T extends Identifiable<IdType>, IdType> extends 
           value: LdMonkeyInteractionMode.pick,
           child: Provider<LdMonkeyActions<T, IdType>>.value(
             value: widget.actions,
-            child: Provider<LdMonkeyActionScope<T, IdType>>(
+            child: ChangeNotifierProvider<LdMonkeyActionScope<T, IdType>>(
               create: (_) => LdMonkeyActionScope<T, IdType>(),
               child: LdMonkeyActionHost<T, IdType>(
                 actions: widget.actions,

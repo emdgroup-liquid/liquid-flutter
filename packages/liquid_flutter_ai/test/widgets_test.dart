@@ -184,6 +184,108 @@ void main() {
     expect(find.text('body:'), findsOneWidget);
   });
 
+  Future<void> pumpAllowPicker(
+    WidgetTester tester,
+    void Function(LdToolAllowRulePickerResult?) onResult,
+  ) async {
+    await tester.pumpWidget(
+      LdThemeProvider(
+        child: MaterialApp(
+          home: Builder(
+            builder: (context) => Scaffold(
+              body: Center(
+                child: TextButton(
+                  onPressed: () async {
+                    final result = await ldShowToolAllowRulePicker(
+                      context,
+                      toolName: 'bash',
+                      arguments: '{"command":"ls"}',
+                      inputSchema: {
+                        'type': 'object',
+                        'properties': {
+                          'command': {'type': 'string'},
+                          'cwd': {'type': 'string'},
+                        },
+                      },
+                    );
+                    onResult(result);
+                  },
+                  child: const Text('open'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('open'));
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('LdToolAllowRulePickerSheet "Allow used" pins request args',
+      (tester) async {
+    LdToolAllowRulePickerResult? result;
+    await pumpAllowPicker(tester, (r) => result = r);
+
+    await tester.tap(find.text('Allow used'));
+    await tester.pumpAndSettle();
+    expect(result, isNull);
+
+    await tester.tap(find.text('Approve & save rule'));
+    await tester.pumpAndSettle();
+
+    expect(result, isNotNull);
+    expect(result!.approved, isTrue);
+    final rule = result!.savedRule!;
+    expect(rule.wildcard, isFalse);
+    expect(rule.argumentPattern, {'command': 'ls'});
+    expect(rule.matches('bash', {'command': 'ls'}), isTrue);
+  });
+
+  testWidgets('LdToolAllowRulePickerSheet "Allow any arguments" saves wildcard',
+      (tester) async {
+    LdToolAllowRulePickerResult? result;
+    await pumpAllowPicker(tester, (r) => result = r);
+
+    await tester.tap(find.text('Allow any arguments'));
+    await tester.pumpAndSettle();
+    expect(result, isNull);
+    expect(
+      find.text('Any arguments allowed for this tool.'),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.text('Approve & save rule'));
+    await tester.pumpAndSettle();
+
+    expect(result, isNotNull);
+    expect(result!.approved, isTrue);
+    expect(result!.savedRule!.wildcard, isTrue);
+    expect(result!.savedRule!.matches('bash', {'anything': 1}), isTrue);
+  });
+
+  testWidgets(
+      'LdToolAllowRulePickerSheet "Allow * for used" wildcards request keys',
+      (tester) async {
+    LdToolAllowRulePickerResult? result;
+    await pumpAllowPicker(tester, (r) => result = r);
+
+    await tester.tap(find.text('Allow * for used'));
+    await tester.pumpAndSettle();
+    expect(result, isNull);
+
+    await tester.tap(find.text('Approve & save rule'));
+    await tester.pumpAndSettle();
+
+    expect(result, isNotNull);
+    final rule = result!.savedRule!;
+    expect(rule.wildcard, isFalse);
+    expect(rule.argumentPattern, {'command': '*'});
+    expect(rule.matches('bash', {'command': 'anything'}), isTrue);
+    expect(rule.matches('bash', {'command': 'ls', 'cwd': '/tmp'}), isFalse);
+  });
+
   test('ldStripGenuiBlocks removes fenced blocks', () {
     const raw = 'Hello\n\n```genui\n{"createSurface":{}}\n```\n\nWorld';
     expect(ldStripGenuiBlocks(raw), contains('Hello'));
@@ -238,6 +340,36 @@ void main() {
     await tester.pump();
 
     expect(sent, 'hello');
+  });
+
+  testWidgets('LdComposeBar keeps input focus after tapping send',
+      (tester) async {
+    final controller = TextEditingController();
+    String? sent;
+
+    await tester.pumpWidget(
+      _wrap(
+        LdScaffold(
+          body: LdComposeBar(
+            controller: controller,
+            onSend: (value) => sent = value,
+            child: const SizedBox.expand(),
+          ),
+        ),
+      ),
+    );
+
+    final textField = find.byType(TextField);
+    await tester.enterText(textField, 'hello');
+    await tester.pump();
+
+    final inputFocusNode = tester.widget<TextField>(textField).focusNode;
+    expect(inputFocusNode, isNotNull);
+    await tester.tap(find.byKey(const ValueKey('ld-compose-send')));
+    await tester.pump();
+
+    expect(sent, 'hello');
+    expect(inputFocusNode!.hasPrimaryFocus, isTrue);
   });
 
   testWidgets('LdSendFlyScope commits immediately when animations disabled',
@@ -445,6 +577,55 @@ void main() {
 
     expect(find.text('Streaming thought text'), findsOneWidget);
     expect(find.textContaining('Thought for'), findsNothing);
+  });
+
+  testWidgets('LdReasoningCard only scrolls when reasoning is a singleton',
+      (tester) async {
+    const content =
+        'line1\nline2\nline3\nline4\nline5\nline6\nline7\nline8';
+
+    Finder scrollViewIn(WidgetTester tester) => find.descendant(
+      of: find.byType(LdReasoningCard),
+      matching: find.byType(SingleChildScrollView),
+    );
+
+    // Singleton streaming reasoning bounds to the scrolling ticker.
+    await tester.pumpWidget(
+      _wrap(
+        const SizedBox(
+          width: 320,
+          child: LdReasoningCard(
+            item: LdReasoningItem(
+              id: 'r1',
+              content: content,
+              isStreaming: true,
+            ),
+            isSingleton: true,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(scrollViewIn(tester), findsOneWidget);
+
+    // Grouped (non-singleton) streaming reasoning shows full, unscrolled.
+    await tester.pumpWidget(
+      _wrap(
+        const SizedBox(
+          width: 320,
+          child: LdReasoningCard(
+            item: LdReasoningItem(
+              id: 'r2',
+              content: content,
+              isStreaming: true,
+            ),
+            isSingleton: false,
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(scrollViewIn(tester), findsNothing);
   });
 
   Widget activityItemBuilder(
@@ -829,6 +1010,158 @@ void main() {
     expect(find.text('Hidden user message'), findsOneWidget);
     expect(find.text('Hidden agent reply'), findsOneWidget);
     expect(find.text('Show 2 earlier messages'), findsNothing);
+  });
+
+  testWidgets('LdConversation opens at the newest message', (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        SizedBox(
+          width: 400,
+          height: 600,
+          child: LdConversation(
+            items: [
+              for (var i = 0; i < 40; i++)
+                LdUserMessageItem(id: 'u$i', text: 'Message $i'),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Message 39'), findsOneWidget);
+    expect(find.text('Message 0'), findsNothing);
+  });
+
+  testWidgets('LdConversation follows new items while at the bottom', (
+    tester,
+  ) async {
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+
+    Widget build(List<LdConversationItem> items) => _wrap(
+      SizedBox(
+        width: 400,
+        height: 600,
+        child: LdConversation(scrollController: controller, items: items),
+      ),
+    );
+
+    final items = <LdConversationItem>[
+      for (var i = 0; i < 40; i++)
+        LdUserMessageItem(id: 'u$i', text: 'Message $i'),
+    ];
+
+    await tester.pumpWidget(build(items));
+    await tester.pump();
+    await tester.pump();
+    expect(
+      controller.position.pixels,
+      closeTo(controller.position.maxScrollExtent, 0.5),
+    );
+
+    await tester.pumpWidget(
+      build([
+        ...items,
+        const LdUserMessageItem(id: 'u40', text: 'Message 40'),
+      ]),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    expect(find.text('Message 40'), findsOneWidget);
+    expect(
+      controller.position.pixels,
+      closeTo(controller.position.maxScrollExtent, 0.5),
+    );
+  });
+
+  testWidgets('LdConversation follows content growth while at the bottom', (
+    tester,
+  ) async {
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+    var lastHeight = 100.0;
+
+    Widget build(double height) => _wrap(
+      SizedBox(
+        width: 400,
+        height: 600,
+        child: LdConversation(
+          scrollController: controller,
+          group: false,
+          itemBuilder: (context, item, isSingleton) => SizedBox(
+            height: item.id == 'last' ? height : 50,
+            child: Text(item.id),
+          ),
+          items: [
+            for (var i = 0; i < 20; i++)
+              LdUserMessageItem(id: 'u$i', text: 'u$i'),
+            const LdUserMessageItem(id: 'last', text: 'last'),
+          ],
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(build(lastHeight));
+    await tester.pump();
+    await tester.pump();
+    expect(
+      controller.position.pixels,
+      closeTo(controller.position.maxScrollExtent, 0.5),
+    );
+
+    lastHeight = 300;
+    await tester.pumpWidget(build(lastHeight));
+    await tester.pump();
+    await tester.pump();
+
+    expect(
+      controller.position.pixels,
+      closeTo(controller.position.maxScrollExtent, 0.5),
+    );
+  });
+
+  testWidgets('LdConversation keeps position when scrolled up', (tester) async {
+    final controller = ScrollController();
+    addTearDown(controller.dispose);
+
+    Widget build(List<LdConversationItem> items) => _wrap(
+      SizedBox(
+        width: 400,
+        height: 600,
+        child: LdConversation(scrollController: controller, items: items),
+      ),
+    );
+
+    final items = <LdConversationItem>[
+      for (var i = 0; i < 40; i++)
+        LdUserMessageItem(id: 'u$i', text: 'Message $i'),
+    ];
+
+    await tester.pumpWidget(build(items));
+    await tester.pump();
+    await tester.pump();
+
+    await tester.drag(find.byType(ListView), const Offset(0, 600));
+    await tester.pump();
+
+    final pixelsAfterScrollUp = controller.position.pixels;
+    expect(
+      controller.position.maxScrollExtent - pixelsAfterScrollUp,
+      greaterThan(80),
+    );
+
+    await tester.pumpWidget(
+      build([
+        ...items,
+        const LdUserMessageItem(id: 'u40', text: 'Message 40'),
+      ]),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    expect(controller.position.pixels, closeTo(pixelsAfterScrollUp, 0.5));
+    expect(find.text('Message 40'), findsNothing);
   });
 
   testWidgets('LdToolCallCard opens detail modal on tap', (tester) async {

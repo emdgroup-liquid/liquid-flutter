@@ -304,6 +304,54 @@ void main() {
       expect(find.text('Done'), findsOneWidget);
     });
 
+    testWidgets('App bar keeps always-overflow actions in the overflow menu even with room', (WidgetTester tester) async {
+      ldDisableAnimations = true;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          localizationsDelegates: const [LiquidLocalizations.delegate],
+          home: ldFrame(
+            size: LdThemeSize.m,
+            child: SizedBox(
+              width: 500,
+              child: LdScaffold(
+                body: LdAppBar.top(
+                  title: const Text('Title'),
+                  actions: [
+                    LdAppBarAction(
+                      onPressed: () {},
+                      child: const Text('Save'),
+                    ),
+                    LdAppBarAction(
+                      overflowMode: LdAppBarActionOverflowMode.always,
+                      onPressed: () {},
+                      child: const Text('Settings'),
+                    ),
+                  ],
+                  child: const Center(child: Text('Body')),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // The ellipsis indicator is shown even though there is plenty of room,
+      // the always-overflow action is hidden, and it is the one served to the
+      // overflow menu.
+      expect(find.byIcon(LucideIcons.ellipsisVertical), findsOneWidget);
+      expect(find.text('Save'), findsOneWidget);
+      expect(find.text('Settings'), findsNothing);
+
+      final overflowMenu = tester.widget<LdAppbarActionOverflowMenu>(
+        find.byType(LdAppbarActionOverflowMenu),
+      );
+      expect(overflowMenu.actions, hasLength(1));
+      final settingsAction = overflowMenu.actions.single as LdAppBarAction;
+      expect((settingsAction.child as Text).data, 'Settings');
+    });
+
     testWidgets('App bar actions compact when row is tight', (WidgetTester tester) async {
       ldDisableAnimations = true;
 
@@ -1502,6 +1550,8 @@ void main() {
       required bool isSideBySide,
       Set<LdAppBarImpliedFeature> parentImpliedFeatures = const {},
       LdDrawerSlot drawerSlot = LdDrawerSlot.body,
+      LdDrawerButtonType type = LdDrawerButtonType.open,
+      bool isCollapsible = true,
     }) {
       return MaterialApp(
         localizationsDelegates: const [LiquidLocalizations.delegate],
@@ -1518,10 +1568,11 @@ void main() {
                 value: LdDrawerState(
                   isOpen: drawerOpen,
                   isSideBySide: isSideBySide,
+                  isCollapsible: isCollapsible,
                 ),
               ),
             ],
-            child: const LdDrawerButton(type: LdDrawerButtonType.open),
+            child: LdDrawerButton(type: type),
           ),
         ),
       );
@@ -1573,6 +1624,53 @@ void main() {
       await tester.pump();
 
       expect(find.byType(LdReveal), findsNothing);
+    });
+
+    testWidgets('close button is hidden for a non-collapsible side-by-side drawer', (WidgetTester tester) async {
+      ldDisableAnimations = true;
+      await tester.pumpWidget(
+        buildButton(
+          drawerOpen: true,
+          isSideBySide: true,
+          isCollapsible: false,
+          drawerSlot: LdDrawerSlot.drawer,
+          type: LdDrawerButtonType.close,
+        ),
+      );
+      await tester.pump();
+
+      expect(find.byType(LdReveal), findsNothing);
+    });
+
+    testWidgets('close button is shown for a collapsible side-by-side drawer', (WidgetTester tester) async {
+      ldDisableAnimations = true;
+      await tester.pumpWidget(
+        buildButton(
+          drawerOpen: true,
+          isSideBySide: true,
+          drawerSlot: LdDrawerSlot.drawer,
+          type: LdDrawerButtonType.close,
+        ),
+      );
+      await tester.pump();
+
+      expect(find.byType(LdReveal), findsOneWidget);
+    });
+
+    testWidgets('close button is shown for a non-collapsible stacked drawer', (WidgetTester tester) async {
+      ldDisableAnimations = true;
+      await tester.pumpWidget(
+        buildButton(
+          drawerOpen: true,
+          isSideBySide: false,
+          isCollapsible: false,
+          drawerSlot: LdDrawerSlot.drawer,
+          type: LdDrawerButtonType.close,
+        ),
+      );
+      await tester.pump();
+
+      expect(find.byType(LdReveal), findsOneWidget);
     });
   });
 }

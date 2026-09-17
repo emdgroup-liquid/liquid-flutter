@@ -9,6 +9,7 @@ import 'package:liquid/components/feedback/indicator.dart';
 import 'package:liquid/components/feedback/loader.dart';
 import 'package:liquid/components/feedback/reveal.dart';
 import 'package:liquid/components/form_elements/choose.dart';
+import 'package:liquid/components/form_elements/attachment_picker.dart';
 import 'package:liquid/components/form_elements/emoji_picker.dart';
 import 'package:liquid/components/form_elements/date_time_pickers.dart';
 import 'package:liquid/components/form_elements/recurrence_picker.dart';
@@ -70,6 +71,7 @@ import 'components/feedback/notification.dart';
 import 'components/form_elements/checkbox.dart';
 
 import 'components/form_elements/input.dart';
+import 'components/form_elements/input_group.dart';
 
 import 'components/interaction/breadcrumb.dart';
 import 'components/layout/accordion.dart';
@@ -245,6 +247,11 @@ class AppRouter {
             pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const EmojiPickerDemo()),
           ),
           GoRoute(
+            path: "/components/attachment-picker",
+            pageBuilder: (context, state) =>
+                NoTransitionPage<void>(key: state.pageKey, child: const AttachmentPickerDemo()),
+          ),
+          GoRoute(
             path: "/components/drawer",
             pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const DrawerDemo()),
           ),
@@ -368,6 +375,11 @@ class AppRouter {
           GoRoute(
             path: "/components/input",
             pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const InputDemo()),
+          ),
+          GoRoute(
+            path: "/components/input-group",
+            pageBuilder: (context, state) =>
+                NoTransitionPage<void>(key: state.pageKey, child: const InputGroupDemo()),
           ),
           GoRoute(
             path: "/components/spring",

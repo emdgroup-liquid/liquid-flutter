@@ -51,6 +51,12 @@ class LdDrawerButton extends StatelessWidget {
 
     if (drawerSlot != slot) return false;
 
+    // A non-collapsible drawer cannot be hidden, so no close toggle is offered
+    // while it is laid out side-by-side. In stacked mode it stays dismissible.
+    if (type == LdDrawerButtonType.close && drawerState.isSideBySide && !drawerState.isCollapsible) {
+      return false;
+    }
+
     return true;
   }
 

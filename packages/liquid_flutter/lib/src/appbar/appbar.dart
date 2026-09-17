@@ -297,8 +297,11 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObse
     final attached = switch (widget.attachedMode) {
       LdAppBarAttachedMode.attached => true,
 
-      /// Adaptive mode means the app bar is floating when in the bottom slot on mobile.
-      LdAppBarAttachedMode.adaptive => !(context.isInSheet && _effectivePosition == LdAppBarPosition.bottom),
+      /// Adaptive mode means the app bar is floating when in the bottom slot
+      LdAppBarAttachedMode.adaptive => switch (context.isInSheet) {
+          true => true,
+          false => _effectivePosition != LdAppBarPosition.bottom
+        },
       LdAppBarAttachedMode.floating => false,
     };
 
@@ -497,9 +500,8 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObse
       addContainer: widget.addContainer,
       debugName: widget.debugName,
       position: position,
-      useAdaptiveRadius: widget.useAdaptiveRadius ?? false,
       attached: isAttached,
-      outsideAdditionalPadding: isAttached ? EdgeInsets.zero : LdTheme.of(context).pad(size: LdSize.s),
+      outsideAdditionalPadding: isAttached ? EdgeInsets.zero : LdTheme.of(context).pad(size: LdSize.m),
       scrollBehavior: widget.scrollBehavior,
       wrappedChild: Builder(
         builder: (context) {
@@ -518,32 +520,30 @@ class _LdAppBarWidgetState extends State<LdAppBarWidget> with WidgetsBindingObse
           );
         },
       ),
-      insidePadding: widget.padding,
-      outsideDecorationBuilder: (isScrolledUnder) => decorationBuilder.buildOutsideDecoration(
-        context: context,
-        isScrolledUnder: isScrolledUnder,
-        isAttached: isAttached,
-        position: position,
-      ),
+      outsideBuilder: (context, metrics, child) {
+        return AppbarOutsideContainer(
+          metrics: metrics,
+          borderMode: widget.borderMode,
+          shadowMode: widget.shadowMode,
+          backgroundMode: widget.backgroundMode,
+          backgroundColor: widget.backgroundColor ?? LdTheme.of(context).surface,
+          child: child,
+        );
+      },
       scrimColor: (isScrolledUnder) => decorationBuilder.buildScrimColor(context, isScrolledUnder, position),
-      insideDecorationBuilder: (isScrolledUnder) => decorationBuilder.buildInsideDecoration(
-        context: context,
-        isScrolledUnder: isScrolledUnder,
-        isAttached: isAttached,
-        position: position,
-      ),
+      insideBuilder: (context, metrics, child) {
+        return AppbarInsideContainer(
+          metrics: metrics,
+          borderMode: widget.borderMode,
+          shadowMode: widget.shadowMode,
+          backgroundMode: widget.backgroundMode,
+          backgroundColor: widget.backgroundColor ?? LdTheme.of(context).surface,
+          child: child,
+        );
+      },
       child: Builder(
         builder: (context) {
-          return Provider.value(
-              value: LdSurfaceInfo(
-                  isSurface: decorationBuilder
-                      .resolveAppearance(
-                        context,
-                        isScrolledUnder: LdAppBarScrolledUnderScope.of(context),
-                        position: position,
-                      )
-                      .showsFill),
-              child: Padding(padding: MediaQuery.of(context).padding, child: barSurface));
+          return barSurface;
         },
       ),
     );

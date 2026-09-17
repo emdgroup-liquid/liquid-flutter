@@ -751,25 +751,10 @@ Call out if you want this expanded into a full changelog entry, a PR description
             ),
             onSend: (text) => _handleSend(text, fly),
             onStop: () => setState(() => _isBusy = false),
-            onPickFile: () {
+            onAttachmentsPicked: (picked) {
               setState(() {
-                _attachments.add(
-                  LdComposeAttachment(id: 'file-${_attachments.length}', name: 'notes.md', mimeType: 'text/markdown'),
-                );
-              });
-            },
-            onPickImage: () {
-              setState(() {
-                _attachments.add(
-                  LdComposeAttachment(
-                    id: 'img-${_attachments.length}',
-                    name: 'shot.png',
-                    mimeType: 'image/png',
-                    preview: ColoredBox(
-                      color: LdTheme.of(context).primaryColor.withValues(alpha: 0.3),
-                      child: const Icon(LucideIcons.image),
-                    ),
-                  ),
+                _attachments.addAll(
+                  picked.map(LdComposeAttachment.fromPicked),
                 );
               });
             },

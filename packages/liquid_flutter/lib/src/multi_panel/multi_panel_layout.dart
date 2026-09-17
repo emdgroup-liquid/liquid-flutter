@@ -231,11 +231,11 @@ class _LdMultiPanelLayoutState extends State<LdMultiPanelLayout> {
   bool get _panelIsLeft => widget.panelPosition == LdPanelPosition.left;
   bool get _insetBody => widget.insetBody;
 
-  BoxDecoration get _bodyDecoration => switch (_insetBody) {
+  BoxDecoration _bodyDecoration(double progress) => switch (_insetBody) {
         true => BoxDecoration(
             boxShadow: [ldShadowSticky],
             color: LdTheme.of(context).background,
-            borderRadius: context.adaptiveRadius.shrinkBy(_insetPadding),
+            borderRadius: context.adaptiveRadius.shrinkBy(_insetPadding * progress),
             border: Border.all(
               color: LdTheme.of(context).border,
               width: LdTheme.of(context).borderWidth,
@@ -389,13 +389,11 @@ class _LdMultiPanelLayoutState extends State<LdMultiPanelLayout> {
                   child: Container(
                     clipBehavior: Clip.hardEdge,
                     margin: effectiveInset,
-                    decoration: _bodyDecoration,
+                    decoration: _bodyDecoration(panelVisibility),
                     child: Provider.value(
-                        value: LdAdaptiveRadius(
-                          ownRadius: context.adaptiveRadius.shrinkBy(effectiveInset),
-                          insets: effectiveInset,
-                        ),
-                        child: FocusTraversalGroup(child: widget.body)),
+                      value: context.adaptiveRadius.shrinkByInsets(effectiveInset),
+                      child: FocusTraversalGroup(child: widget.body),
+                    ),
                   ),
                 );
               },

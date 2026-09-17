@@ -63,10 +63,11 @@ class _LdCheckboxState extends State<_LdCheckboxWidget> {
   @override
   Widget build(BuildContext context) {
     final theme = LdTheme.of(context, listen: true);
+    final scope = LdControlGroupScope.of(context);
 
     final color = widget.color ?? theme.palette.primary;
 
-    final size = widget.size.clamp(LdSize.s, LdSize.l);
+    final size = (scope?.size ?? widget.size).clamp(LdSize.s, LdSize.l);
 
     final checkboxSize = theme.labelSize(size) * 1.5;
 
@@ -86,6 +87,58 @@ class _LdCheckboxState extends State<_LdCheckboxWidget> {
           true => solidColor(color, theme, status),
           false => outlineColor(color, theme, status),
         };
+        final frame = Container(
+          key: const ValueKey("frame"),
+          height: checkboxSize,
+          width: checkboxSize,
+          decoration: BoxDecoration(
+            color: colors.surface,
+            border: Border.all(
+              color: colors.border,
+              width: 2,
+            ),
+            borderRadius: LdTheme.of(context).radius(size.adjust(-2)),
+          ),
+          child: Opacity(
+            opacity: widget.checked ? 1 : 0,
+            child: Icon(
+              key: const ValueKey("checkmark"),
+              LucideIcons.check,
+              color: colors.text,
+              size: theme.labelSize(size),
+            ),
+          ),
+        );
+
+        if (scope != null) {
+          // Joining an [LdInputGroup]: frame the (label-free) checkbox in a
+          // control-height slot that carries the group's seam border and
+          // position radius, matching the height of neighbouring inputs. The
+          // label surfaces as a tooltip.
+          return ldGroupLabelTooltip(
+            context: context,
+            label: widget.label,
+            child: Semantics(
+              checked: widget.checked,
+              enabled: !widget.disabled,
+              child: Container(
+                key: const ValueKey("groupedFrame"),
+                width: theme.controlHeight(size),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: theme.surface,
+                  borderRadius: scope.radiusFor(theme, Directionality.of(context)),
+                  border: scope.borderFor(theme, theme.border, Directionality.of(context)),
+                ),
+                child: Transform.translate(
+                  offset: const Offset(0, 1),
+                  child: frame,
+                ),
+              ),
+            ),
+          );
+        }
+
         return Semantics(
           checked: widget.checked,
           enabled: !widget.disabled,
@@ -97,28 +150,7 @@ class _LdCheckboxState extends State<_LdCheckboxWidget> {
             children: [
               Transform.translate(
                 offset: Offset(0, 1),
-                child: Container(
-                  key: const ValueKey("frame"),
-                  height: checkboxSize,
-                  width: checkboxSize,
-                  decoration: BoxDecoration(
-                    color: colors.surface,
-                    border: Border.all(
-                      color: colors.border,
-                      width: 2,
-                    ),
-                    borderRadius: LdTheme.of(context).radius(size.adjust(-2)),
-                  ),
-                  child: Opacity(
-                    opacity: widget.checked ? 1 : 0,
-                    child: Icon(
-                      key: const ValueKey("checkmark"),
-                      LucideIcons.check,
-                      color: colors.text,
-                      size: theme.labelSize(widget.size),
-                    ),
-                  ),
-                ),
+                child: frame,
               ),
               if (widget.label != null)
                 LdText.l(

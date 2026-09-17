@@ -38,6 +38,11 @@ class LdScaffold extends StatefulWidget {
   final double drawerWidth;
   final double drawerMinWidth;
 
+  /// Whether the user may hide the drawer. When false, a side-by-side drawer is
+  /// kept open and the app bar shows no drawer-close toggle. Useful when the
+  /// drawer hosts primary navigation (e.g. an [LdNavigationRail]).
+  final bool drawerCollapsible;
+
   final double? reflowBreakpoint;
   final SingleActivator? toggleDrawerShortcut;
 
@@ -51,6 +56,7 @@ class LdScaffold extends StatefulWidget {
 
     properties.add(ColorProperty('backgroundColor', backgroundColor));
     properties.add(DoubleProperty('drawerWidth', drawerWidth));
+    properties.add(FlagProperty('drawerCollapsible', value: drawerCollapsible, ifFalse: 'pinned'));
     properties.add(DoubleProperty('reflowBreakpoint', reflowBreakpoint));
     properties.add(DiagnosticsProperty<Widget?>('drawer', drawer));
     properties.add(DiagnosticsProperty<TextEditingController?>('searchController', searchController));
@@ -69,6 +75,7 @@ class LdScaffold extends StatefulWidget {
     this.drawer,
     this.drawerWidth = 304,
     this.drawerMinWidth = 200,
+    this.drawerCollapsible = true,
     this.reflowBreakpoint = 900,
     this.searchController,
     this.primaryScrollController,
@@ -185,6 +192,7 @@ class LdScaffoldState extends State<LdScaffold> {
                     drawerWidth: widget.drawerWidth,
                     drawerRight: false,
                     drawerMinWidth: widget.drawerMinWidth,
+                    collapsible: widget.drawerCollapsible,
                     onStateChange: _onDrawerStateChange,
                     drawer: RepaintBoundary(
                       child: FocusScope(

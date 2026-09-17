@@ -104,6 +104,7 @@ class LdFilterModal<T extends Identifiable<IdType>, IdType> extends StatelessWid
             ...sortAndFilterState.sortOptions.map(
               (e) => LdListItem(
                 borderRadius: LdTheme.of(context).radius(LdSize.s),
+                padding: LdTheme.of(context).pad(),
                 active: e.isOn,
                 title: Text(e.label(context)),
                 trailing: switch (e.isOn) {

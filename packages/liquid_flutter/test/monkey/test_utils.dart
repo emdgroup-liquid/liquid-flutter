@@ -418,7 +418,7 @@ Widget wrapMonkeyActionBuild<T extends Identifiable<IdType>, IdType>({
     viewing: shellState.currentViewing,
     showSelectionControls: shellState.currentShowSelectionControls,
   );
-  return Provider<LdMonkeyActionScope<T, IdType>>(
+  return ChangeNotifierProvider<LdMonkeyActionScope<T, IdType>>(
     create: (_) => LdMonkeyActionScope<T, IdType>(),
     child: ListenableProvider<LdListController<T, IdType>>.value(
       value: repository,
@@ -453,7 +453,7 @@ Widget wrapMonkeyActionShortcuts<T extends Identifiable<IdType>, IdType>({
 }) {
   return ListenableProvider<LdListController<T, IdType>>.value(
     value: repository,
-    child: Provider<LdMonkeyActionScope<T, IdType>>(
+    child: ChangeNotifierProvider<LdMonkeyActionScope<T, IdType>>(
       create: (_) => LdMonkeyActionScope<T, IdType>(),
       child: Provider<LdMonkeyRouterController<T, IdType>>.value(
         value: shellState.controllerDelegate,
@@ -489,7 +489,7 @@ Widget wrapMonkeyMasterPage<T extends Identifiable<IdType>, IdType>({
   return LdThemeProvider(
     child: MaterialApp(
       localizationsDelegates: LiquidLocalizations.localizationsDelegates,
-      home: Provider<LdMonkeyActionScope<T, IdType>>(
+      home: ChangeNotifierProvider<LdMonkeyActionScope<T, IdType>>(
         create: (_) => LdMonkeyActionScope<T, IdType>(),
         child: Provider<LdMonkeySearchFocusNode>(
           create: (_) => LdMonkeySearchFocusNode(focusNode: FocusNode()),

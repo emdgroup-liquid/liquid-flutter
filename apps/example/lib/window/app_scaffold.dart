@@ -43,6 +43,7 @@ class _AppScaffoldState extends State<AppScaffold> {
                 child: LdScaffold(
                   drawer: MainNavigationDrawer(),
                   body: LdAppBar(
+                    scrollBehavior: LdAppBarScrollBehavior.static,
                     debugName: "Master App Bar",
 
                     leading: Container(

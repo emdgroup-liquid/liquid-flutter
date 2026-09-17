@@ -560,7 +560,12 @@ class _AppBarDemoState extends State<AppBarDemo> {
       ),
     ),
     LdAppBarAction(leading: const Icon(LucideIcons.bell), onPressed: () {}, child: const Text('Notification')),
-    LdAppBarAction(leading: const Icon(LucideIcons.trash2), onPressed: () {}, child: const Text('Delete')),
+    LdAppBarAction(
+      leading: const Icon(LucideIcons.trash2),
+      onPressed: () {},
+      overflowMode: LdAppBarActionOverflowMode.always,
+      child: const Text('Delete'),
+    ),
   ];
 
   Widget _wrapWithAppBars(Widget body) {
@@ -575,6 +580,7 @@ class _AppBarDemoState extends State<AppBarDemo> {
   Widget build(BuildContext context) {
     final scaffoldContent = LdScaffoldBody(
       addContainer: true,
+
       children: [
         LdText.h('LdAppBar Demo'),
         LdButton.outline(
@@ -757,6 +763,7 @@ class _AppBarDemoState extends State<AppBarDemo> {
         backgroundMode: _tabBackgroundMode,
         position: _tabPosition,
         scrollBehavior: _tabScrollBehavior,
+        //trailing: LdButton.filled(size: LdSize.l, onPressed: () {}, child: const Icon(LucideIcons.arrowUp)),
         child: body,
       );
     }

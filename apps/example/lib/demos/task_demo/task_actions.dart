@@ -42,71 +42,75 @@ bool _hasDoneInSelection(LdMonkeyActionContext<Task, int> ctx) {
 List<LdMonkeyAction<Task, int>> taskActions = [
   refreshAction<Task, int>(),
   reactiveCreateAction<Task, int>(routeConfig: taskRouteConfig),
-  LdMonkeySubmitAction(
-    id: TaskActionId.markDone,
-    tooltip: (context) => "Mark as done",
-    visibility: {
-      LdMonkeyActionVisibility(
-        location: LdMonkeyActionLocation.detailAppBar,
-        minSelectionCount: 1,
-        maxSelectionCount: null,
-        isVisible: _hasTodoInSelection,
+  LdMonkeyActionGroup(
+    actions: [
+      LdMonkeySubmitAction(
+        id: TaskActionId.markDone,
+        tooltip: (context) => "Mark as done",
+        visibility: {
+          LdMonkeyActionVisibility(
+            location: LdMonkeyActionLocation.detailAppBar,
+            minSelectionCount: 1,
+            maxSelectionCount: null,
+            isVisible: _hasTodoInSelection,
+          ),
+          LdMonkeyActionVisibility(
+            location: LdMonkeyActionLocation.context,
+            minSelectionCount: 1,
+            maxSelectionCount: null,
+            isVisible: _hasTodoInSelection,
+          ),
+        },
+        shortcutActivators: {SingleActivator(LogicalKeyboardKey.keyD)},
+        submitConfig: (_) => const LdMonkeySubmitConfig(loadingText: "Marking as done", allowResubmit: true),
+        onSubmit: (ctx) async {
+          final updatedItems = <int, Task>{};
+          for (final id in ctx.selectedIds) {
+            final item = await ctx.listController.getById(ctx.appContext, id);
+            updatedItems[id] = item.copyWith(done: true);
+          }
+          if (!ctx.appContext.mounted) {
+            return;
+          }
+          await ctx.appContext.read<LdModel<Task, int, Object?, Object?>>().updateBatch(ctx.appContext, updatedItems);
+        },
+        child: Text("Done"),
+        icon: Icon(LucideIcons.check),
       ),
-      LdMonkeyActionVisibility(
-        location: LdMonkeyActionLocation.context,
-        minSelectionCount: 1,
-        maxSelectionCount: null,
-        isVisible: _hasTodoInSelection,
+      LdMonkeySubmitAction(
+        id: TaskActionId.markUndone,
+        tooltip: (context) => "Mark as undone",
+        visibility: {
+          LdMonkeyActionVisibility(
+            location: LdMonkeyActionLocation.detailAppBar,
+            minSelectionCount: 1,
+            maxSelectionCount: null,
+            isVisible: (ctx) => _hasDoneInSelection(ctx),
+          ),
+          LdMonkeyActionVisibility(
+            location: LdMonkeyActionLocation.context,
+            minSelectionCount: 1,
+            maxSelectionCount: null,
+            isVisible: (ctx) => _hasDoneInSelection(ctx),
+          ),
+        },
+        shortcutActivators: {SingleActivator(LogicalKeyboardKey.keyU)},
+        submitConfig: (_) => const LdMonkeySubmitConfig(loadingText: "Marking as undone", allowResubmit: true),
+        onSubmit: (ctx) async {
+          final updatedItems = <int, Task>{};
+          for (final id in ctx.selectedIds) {
+            final item = await ctx.listController.getById(ctx.appContext, id);
+            updatedItems[id] = item.copyWith(done: false);
+          }
+          if (!ctx.appContext.mounted) {
+            return;
+          }
+          await ctx.appContext.read<LdModel<Task, int, Object?, Object?>>().updateBatch(ctx.appContext, updatedItems);
+        },
+        child: Text("To do"),
+        icon: Icon(LucideIcons.hourglass),
       ),
-    },
-    shortcutActivators: {SingleActivator(LogicalKeyboardKey.keyD)},
-    submitConfig: (_) => const LdMonkeySubmitConfig(loadingText: "Marking as done", allowResubmit: true),
-    onSubmit: (ctx) async {
-      final updatedItems = <int, Task>{};
-      for (final id in ctx.selectedIds) {
-        final item = await ctx.listController.getById(ctx.appContext, id);
-        updatedItems[id] = item.copyWith(done: true);
-      }
-      if (!ctx.appContext.mounted) {
-        return;
-      }
-      await ctx.appContext.read<LdModel<Task, int, Object?, Object?>>().updateBatch(ctx.appContext, updatedItems);
-    },
-    child: Text("Done"),
-    icon: Icon(LucideIcons.check),
-  ),
-  LdMonkeySubmitAction(
-    id: TaskActionId.markUndone,
-    tooltip: (context) => "Mark as undone",
-    visibility: {
-      LdMonkeyActionVisibility(
-        location: LdMonkeyActionLocation.detailAppBar,
-        minSelectionCount: 1,
-        maxSelectionCount: null,
-        isVisible: (ctx) => _hasDoneInSelection(ctx),
-      ),
-      LdMonkeyActionVisibility(
-        location: LdMonkeyActionLocation.context,
-        minSelectionCount: 1,
-        maxSelectionCount: null,
-        isVisible: (ctx) => _hasDoneInSelection(ctx),
-      ),
-    },
-    shortcutActivators: {SingleActivator(LogicalKeyboardKey.keyU)},
-    submitConfig: (_) => const LdMonkeySubmitConfig(loadingText: "Marking as undone", allowResubmit: true),
-    onSubmit: (ctx) async {
-      final updatedItems = <int, Task>{};
-      for (final id in ctx.selectedIds) {
-        final item = await ctx.listController.getById(ctx.appContext, id);
-        updatedItems[id] = item.copyWith(done: false);
-      }
-      if (!ctx.appContext.mounted) {
-        return;
-      }
-      await ctx.appContext.read<LdModel<Task, int, Object?, Object?>>().updateBatch(ctx.appContext, updatedItems);
-    },
-    child: Text("To do"),
-    icon: Icon(LucideIcons.hourglass),
+    ],
   ),
   LdMonkeySubmitAction(
     id: TaskActionId.setDueToday,

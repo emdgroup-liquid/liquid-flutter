@@ -214,7 +214,12 @@ class LdModalRoute<T> extends PageRoute<T> {
                 margin: sheetInsets,
                 child: Provider.value(
                   value: LdAppBarMetrics.reset(context),
-                  child: sheet,
+                  child: LdAppBarConfigProvider(
+                    config: LdAppBarConfig(
+                      scrollBehavior: LdAppBarScrollBehavior.static,
+                    ),
+                    child: sheet,
+                  ),
                 ),
               ),
             ),
@@ -319,7 +324,10 @@ class LdModalRoute<T> extends PageRoute<T> {
       return Provider.value(
           value: modalRouteInfo,
           child: LdAppBarConfigProvider(
-            config: LdAppBarConfig(scrollBehavior: LdAppBarScrollBehavior.static),
+            config: LdAppBarConfig(
+              scrollBehavior: LdAppBarScrollBehavior.static,
+              attachedMode: LdAppBarAttachedMode.attached,
+            ),
             child: switch (isSheet) {
               true => _buildSheetContent(context, pageBuilder),
               false => _buildDialogContent(context, pageBuilder),
