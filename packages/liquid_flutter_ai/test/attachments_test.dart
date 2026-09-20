@@ -16,6 +16,8 @@ class _FakeMedia implements LdMediaFacade {
   _FakeMedia({
     this.permission = LdPermissionState.authorized,
     this.assets = const [],
+    this.isSupported = true,
+    this.supportsLimitedAccess = true,
   });
 
   LdPermissionState permission;
@@ -23,7 +25,10 @@ class _FakeMedia implements LdMediaFacade {
   int requestCount = 0;
 
   @override
-  bool get supportsLimitedAccess => true;
+  final bool isSupported;
+
+  @override
+  final bool supportsLimitedAccess;
 
   @override
   Future<LdPermissionState> requestPermission({LdMediaType? forType}) async {
@@ -161,13 +166,13 @@ class _FakeRecentFiles implements LdRecentFilesSource {
 }
 
 class _FakeContacts implements LdContactsFacade {
-  _FakeContacts({this.contacts = const []});
+  _FakeContacts({this.contacts = const [], this.isSupported = true});
 
   List<LdContactEntry> contacts;
   LdPermissionState permission = LdPermissionState.authorized;
 
   @override
-  bool get isSupported => true;
+  final bool isSupported;
 
   @override
   Future<LdPermissionState> permissionState() async => permission;
@@ -192,6 +197,11 @@ class _FakePermissions implements LdPermissionFacade {
 }
 
 class _FakeMap implements LdMapFacade {
+  _FakeMap({this.isSupported = true});
+
+  @override
+  final bool isSupported;
+
   @override
   Widget buildMap(BuildContext context, LdMapRequest request) =>
       const SizedBox(key: ValueKey('ld-fake-map'));
@@ -205,6 +215,7 @@ LdAttachmentServices _services({
   _FakeContacts? contacts,
   _FakePlaces? places,
   _FakeRecentFiles? recentFiles,
+  _FakeMap? map,
 }) {
   return LdAttachmentServices(
     camera: camera ?? _FakeCamera(),
@@ -213,7 +224,7 @@ LdAttachmentServices _services({
     location: location ?? _FakeLocation(),
     contacts: contacts ?? _FakeContacts(),
     permissions: _FakePermissions(),
-    map: _FakeMap(),
+    map: map ?? _FakeMap(),
     places: places ?? _FakePlaces(),
     recentFiles: recentFiles ?? _FakeRecentFiles(),
   );
@@ -666,5 +677,145 @@ void main() {
 
     expect(result, isNotNull);
     expect(result!.single.kind, LdAttachmentKind.image);
+  });
+
+  testWidgets('omits gallery tab when media is unsupported', (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        LdAttachmentPicker(
+          services: _services(media: _FakeMedia(isSupported: false)),
+          config: const LdAttachmentPickerConfig(
+            allowedTypes: {LdAttachmentKind.image, LdAttachmentKind.file},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Gallery'), findsNothing);
+    expect(find.text('File'), findsWidgets);
+    expect(find.text('Select from Files'), findsOneWidget);
+  });
+
+  testWidgets('omits contacts tab when contacts are unsupported', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        LdAttachmentPicker(
+          services: _services(contacts: _FakeContacts(isSupported: false)),
+          config: const LdAttachmentPickerConfig(
+            allowedTypes: {LdAttachmentKind.file, LdAttachmentKind.contact},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('Contacts'), findsNothing);
+    expect(find.text('File'), findsWidgets);
+  });
+
+  testWidgets('shows empty state when no sources are available', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      _wrap(
+        LdAttachmentPicker(
+          services: _services(
+            media: _FakeMedia(isSupported: false),
+            contacts: _FakeContacts(isSupported: false),
+          ),
+          config: const LdAttachmentPickerConfig(
+            allowedTypes: {LdAttachmentKind.image, LdAttachmentKind.contact},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('No attachment sources are available on this device.'),
+      findsOneWidget,
+    );
+    expect(find.byType(LdTabNavigation), findsNothing);
+  });
+
+  testWidgets('hides limited-access banner when unsupported', (tester) async {
+    final media = _FakeMedia(
+      permission: LdPermissionState.limited,
+      assets: [_asset('a1')],
+      supportsLimitedAccess: false,
+    );
+    await tester.pumpWidget(
+      _wrap(
+        LdAttachmentPicker(
+          services: _services(media: media),
+          config: const LdAttachmentPickerConfig(
+            allowedTypes: {LdAttachmentKind.image, LdAttachmentKind.file},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('You have limited access to your photos.'), findsNothing);
+    expect(find.byType(LdAttachmentMediaTile), findsOneWidget);
+  });
+
+  testWidgets('shows limited-access banner when supported', (tester) async {
+    final media = _FakeMedia(
+      permission: LdPermissionState.limited,
+      assets: [_asset('a1')],
+    );
+    await tester.pumpWidget(
+      _wrap(
+        LdAttachmentPicker(
+          services: _services(media: media),
+          config: const LdAttachmentPickerConfig(
+            allowedTypes: {LdAttachmentKind.image, LdAttachmentKind.file},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      find.text('You have limited access to your photos.'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('location tab hides the map when unsupported', (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        LdAttachmentPicker(
+          services: _services(map: _FakeMap(isSupported: false)),
+          config: const LdAttachmentPickerConfig(
+            allowedTypes: {LdAttachmentKind.location},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('ld-fake-map')), findsNothing);
+    expect(find.text('Send My Current Location'), findsOneWidget);
+  });
+
+  testWidgets('location tab shows the map when supported', (tester) async {
+    await tester.pumpWidget(
+      _wrap(
+        LdAttachmentPicker(
+          services: _services(),
+          config: const LdAttachmentPickerConfig(
+            allowedTypes: {LdAttachmentKind.location},
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey('ld-fake-map')), findsOneWidget);
   });
 }

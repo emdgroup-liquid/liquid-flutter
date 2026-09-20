@@ -111,12 +111,63 @@ class _LdTabNavigationItem extends StatelessWidget {
   }
 
   Widget _buildIcon(LdTheme theme, LdColorBundle colors) {
-    return IconTheme(
-      data: IconThemeData(
-        color: colors.icon,
-        size: theme.labelSize(LdSize.l),
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        IconTheme(
+          data: IconThemeData(
+            color: colors.icon,
+            size: theme.labelSize(LdSize.l),
+          ),
+          child: tab.icon,
+        ),
+        if (tab.badge != null && compact)
+          Positioned(
+            top: switch (tab.badge!.value) {
+              null => -3,
+              _ => -10,
+            },
+            right: switch (tab.badge!.value) {
+              null => -3,
+              int value => switch (value) {
+                  < 100 => -10,
+                  _ => -15,
+                },
+            },
+            child: _buildBadge(theme, colors),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildBadge(LdTheme theme, LdColorBundle colors) {
+    final shape = switch (tab.badge!.value) {
+      null => BoxShape.circle,
+      < 10 => BoxShape.circle,
+      _ => BoxShape.rectangle,
+    };
+    final borderRadius = switch (shape) {
+      BoxShape.circle => null,
+      BoxShape.rectangle => theme.radius(LdSize.s),
+    };
+    return Container(
+      decoration: BoxDecoration(
+        color: tab.badge!.color.center(theme.isDark),
+        borderRadius: borderRadius,
+        shape: shape,
       ),
-      child: tab.icon,
+      padding: EdgeInsets.all(switch (shape) {
+        BoxShape.circle => 3,
+        BoxShape.rectangle => 2,
+      }),
+      child: (tab.badge!.value != null)
+          ? LdText.lxs(
+              tab.badge!.value.toString(),
+              color: tab.badge!.color.contrastingText(
+                tab.badge!.color.center(theme.isDark),
+              ),
+            )
+          : null,
     );
   }
 
@@ -141,7 +192,6 @@ class _LdTabNavigationItem extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         _buildIcon(theme, colors),
-        ldSpacerS,
         Flexible(
           child: LdText.l(
             tab.label,
@@ -150,8 +200,9 @@ class _LdTabNavigationItem extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
         ),
+        if (tab.badge != null && !compact) _buildBadge(theme, colors),
       ],
-    );
+    ).spaceXS();
   }
 }
 

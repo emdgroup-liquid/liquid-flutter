@@ -203,7 +203,7 @@ class _LdLocationTabState extends State<LdLocationTab>
           child: LdScaffoldBody(
             shrinkWrap: true,
             children: [
-              if (position != null)
+              if (position != null && _controller.services.map.isSupported)
                 ClipRRect(
                   borderRadius: theme.radius(LdSize.m),
                   child: SizedBox(

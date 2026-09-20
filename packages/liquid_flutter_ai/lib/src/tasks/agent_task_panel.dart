@@ -188,14 +188,15 @@ class _LdAgentTaskPanelState extends State<LdAgentTaskPanel> {
     return LdRawAppBar(
       addContainer: true,
 
+      positionMode: LdAppBarPositionMode.bottom,
+
       attached: true,
       scrollBehavior: LdAppBarScrollBehavior.static,
       outsideDecoration: BoxDecoration(
         color: theme.surface,
         border: Border(top: BorderSide(color: theme.border)),
       ),
-      content: widget.child,
-      child: Builder(
+      content: Builder(
         builder: (context) {
           return Container(
             padding: MediaQuery.of(context).padding,
@@ -203,6 +204,7 @@ class _LdAgentTaskPanelState extends State<LdAgentTaskPanel> {
           );
         },
       ),
+      child: widget.child,
     );
   }
 

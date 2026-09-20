@@ -45,6 +45,19 @@ class LdInput extends StatefulWidget {
   /// when paste was handled (e.g. image attachment). Otherwise plain text is pasted.
   final Future<bool> Function()? onCustomPaste;
 
+  /// Overrides the platform's clipboard detection for whether the paste button
+  /// appears in the context menu.
+  ///
+  /// The caller inspects the clipboard itself (e.g. with `super_clipboard` or a
+  /// platform channel) to tell whether it holds text, an image, or nothing, and
+  /// passes the result here: `true` always shows the paste button, `false`
+  /// hides it. `null` (default) lets the platform decide.
+  ///
+  /// On iOS the platform only detects pasteable *text*, so it hides the paste
+  /// button when the clipboard holds an image. Pass `true` when the clipboard
+  /// has image (or text) data so [onCustomPaste] can consume it.
+  final bool? clipboardHasData;
+
   final TextStyle? style;
   final BorderRadius? borderRadius;
 
@@ -78,6 +91,7 @@ class LdInput extends StatefulWidget {
     this.trailingHint,
     this.onCleared,
     this.onCustomPaste,
+    this.clipboardHasData,
     super.key,
   });
 
@@ -226,11 +240,44 @@ class _LdInputState extends State<LdInput> {
       }
       return ContextMenuButtonItem(
         label: item.label,
+        // Preserve the paste type so the platform's default (localized) label
+        // is used instead of the empty label of a `custom` item.
+        type: item.type,
         onPressed: () {
           _runCustomPaste();
         },
       );
     }).toList();
+
+    // When a custom paste handler is set, always surface a paste button even
+    // if the platform clipboard reports no pasteable text (e.g. an image on
+    // iOS), so the handler gets a chance to consume it.
+    if (widget.clipboardHasData == false) {
+      // The caller reports there is nothing pasteable, so drop the paste button.
+      buttonItems.removeWhere((item) => item.type == ContextMenuButtonType.paste);
+    } else if (widget.onCustomPaste != null) {
+      // When a custom paste handler is set, always surface a paste button even
+      // if the platform clipboard reports no pasteable text (e.g. an image on
+      // iOS), so the handler gets a chance to consume it.
+      final hasPaste =
+          buttonItems.any((item) => item.type == ContextMenuButtonType.paste);
+      if (!hasPaste) {
+        final pasteItem = ContextMenuButtonItem(
+          type: ContextMenuButtonType.paste,
+          onPressed: () {
+            _runCustomPaste();
+          },
+        );
+        final selectAllIndex =
+            buttonItems.indexWhere((item) => item.type == ContextMenuButtonType.selectAll);
+        if (selectAllIndex >= 0) {
+          buttonItems.insert(selectAllIndex, pasteItem);
+        } else {
+          buttonItems.add(pasteItem);
+        }
+      }
+    }
+
     return AdaptiveTextSelectionToolbar.buttonItems(
       buttonItems: buttonItems,
       anchors: editableTextState.contextMenuAnchors,

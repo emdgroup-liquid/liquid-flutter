@@ -24,6 +24,7 @@ import 'package:liquid/components/interaction/action_runner.dart';
 import 'package:liquid/components/interaction/appbar_demo.dart';
 import 'package:liquid/components/interaction/context_menu.dart';
 import 'package:liquid/components/interaction/conversation.dart';
+import 'package:liquid/components/interaction/outgoing_pipeline.dart';
 import 'package:liquid/components/interaction/genui_catalog_demo.dart';
 import 'package:liquid/components/interaction/modal.dart';
 import 'package:liquid/components/interaction/orb.dart';
@@ -303,6 +304,11 @@ class AppRouter {
                 NoTransitionPage<void>(key: state.pageKey, child: const ConversationDemo()),
           ),
           GoRoute(
+            path: "/components/outgoing-pipeline",
+            pageBuilder: (context, state) =>
+                NoTransitionPage<void>(key: state.pageKey, child: const OutgoingPipelineDemo()),
+          ),
+          GoRoute(
             path: "/components/genui-catalog",
             pageBuilder: (context, state) =>
                 NoTransitionPage<void>(key: state.pageKey, child: const GenuiCatalogDemo()),
@@ -378,8 +384,7 @@ class AppRouter {
           ),
           GoRoute(
             path: "/components/input-group",
-            pageBuilder: (context, state) =>
-                NoTransitionPage<void>(key: state.pageKey, child: const InputGroupDemo()),
+            pageBuilder: (context, state) => NoTransitionPage<void>(key: state.pageKey, child: const InputGroupDemo()),
           ),
           GoRoute(
             path: "/components/spring",

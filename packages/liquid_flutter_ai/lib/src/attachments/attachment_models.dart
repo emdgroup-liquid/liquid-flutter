@@ -178,5 +178,20 @@ String ldInitialsFromName(String name) {
       .toUpperCase();
 }
 
+/// Formats a byte count as a compact human-readable string.
+String ldFormatBytes(int bytes) {
+  const units = ['B', 'KB', 'MB', 'GB'];
+  var value = bytes.toDouble();
+  var unit = 0;
+  while (value >= 1024 && unit < units.length - 1) {
+    value /= 1024;
+    unit += 1;
+  }
+  final rounded = value >= 10 || unit == 0
+      ? value.toStringAsFixed(0)
+      : value.toStringAsFixed(1);
+  return '$rounded ${units[unit]}';
+}
+
 /// A raw thumbnail or avatar payload.
 typedef LdBytes = Uint8List;

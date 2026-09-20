@@ -17,13 +17,33 @@ class LdGenuiSurfaceManager {
   late final SurfaceController controller;
   final String catalogId;
 
+  /// Anchor (e.g. the piece id of the message) that last created or updated
+  /// each active surface, keyed by surface id. Cleared on deleteSurface.
+  final Map<String, Object?> _anchorBySurfaceId = {};
+
+  /// The anchor recorded for [surfaceId], or null when unknown / deleted.
+  Object? anchorFor(String surfaceId) => _anchorBySurfaceId[surfaceId];
+
+  /// Snapshot of active anchors (surface id -> anchor). Surfaces created or
+  /// updated by the same message share that message's anchor.
+  Map<String, Object?> get surfaceAnchors =>
+      Map<String, Object?>.of(_anchorBySurfaceId);
+
   /// Processes message text by extracting genui blocks from it.
   /// Returns the cleaned text (with genui blocks removed) for display.
   ///
   /// When [reportErrors] is true (default), JSON / parse failures are reported
   /// via [SurfaceController.reportError] so listeners on [onSubmit] can react.
   /// Pass `false` when replaying history so old failures do not auto-submit.
-  String processMessageText(String text, {bool reportErrors = true}) {
+  ///
+  /// [anchor] is recorded as the position where every surface created or
+  /// updated by this text lives (e.g. the owning message piece id). Surfaces
+  /// without an anchor fall back to the end of the transcript.
+  String processMessageText(
+    String text, {
+    bool reportErrors = true,
+    Object? anchor,
+  }) {
     final blockRegex = RegExp(r'```genui\s*\n([\s\S]*?)```');
     var lastEnd = 0;
     final result = StringBuffer();
@@ -35,7 +55,11 @@ class LdGenuiSurfaceManager {
 
       final blockContent = match.group(1)?.trim();
       if (blockContent != null && blockContent.isNotEmpty) {
-        _processGenuiLines(blockContent, reportErrors: reportErrors);
+        _processGenuiLines(
+          blockContent,
+          reportErrors: reportErrors,
+          anchor: anchor,
+        );
       }
 
       lastEnd = match.end;
@@ -48,7 +72,11 @@ class LdGenuiSurfaceManager {
     return result.toString().trim();
   }
 
-  void _processGenuiLines(String content, {required bool reportErrors}) {
+  void _processGenuiLines(
+    String content, {
+    required bool reportErrors,
+    Object? anchor,
+  }) {
     final lines = content.split('\n');
     for (final line in lines) {
       final trimmed = line.trim();
@@ -64,6 +92,7 @@ class LdGenuiSurfaceManager {
           json['createSurface'] = surface;
         }
         final message = A2uiMessage.fromJson(json);
+        _trackAnchor(message, anchor);
         controller.handleMessage(message);
       } catch (e, stack) {
         debugPrint('LdGenuiSurfaceManager: failed to handle genui line: $e');
@@ -75,6 +104,29 @@ class LdGenuiSurfaceManager {
         }
       }
     }
+  }
+
+  void _trackAnchor(A2uiMessage message, Object? anchor) {
+    switch (message) {
+      case CreateSurface(:final surfaceId):
+        _anchorBySurfaceId[surfaceId] = anchor;
+      case UpdateComponents(:final surfaceId):
+        _anchorBySurfaceId[surfaceId] = anchor;
+      case UpdateDataModel(:final surfaceId):
+        _anchorBySurfaceId[surfaceId] = anchor;
+      case DeleteSurface(:final surfaceId):
+        _anchorBySurfaceId.remove(surfaceId);
+    }
+  }
+
+  /// Deletes [surfaceId] and drops its anchor, so the surface no longer
+  /// renders inline in the transcript.
+  ///
+  /// Routes through the manager (rather than calling the controller directly)
+  /// so [_anchorBySurfaceId] stays in sync with the registry.
+  void deleteSurface(String surfaceId) {
+    _anchorBySurfaceId.remove(surfaceId);
+    controller.handleMessage(DeleteSurface(surfaceId: surfaceId));
   }
 
   /// Decodes a genui action line, tolerating a common LLM mistake of one or

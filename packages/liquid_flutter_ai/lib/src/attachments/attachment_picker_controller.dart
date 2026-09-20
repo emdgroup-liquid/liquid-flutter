@@ -16,7 +16,7 @@ class LdAttachmentPickerController extends ChangeNotifier {
     required this.services,
     required this.config,
     required this.labels,
-  }) : _activeTabId = config.initialTabId;
+  }) : _activeTabId = _initialTabId(services, config);
 
   final LdAttachmentServices services;
   final LdAttachmentPickerConfig config;
@@ -28,16 +28,25 @@ class LdAttachmentPickerController extends ChangeNotifier {
   String _activeTabId;
   String get activeTabId => _activeTabId;
 
-  List<LdAttachmentTabSpec> get tabs => config.tabs;
+  /// Built-in and custom tabs from [config], minus those the current platform
+  /// cannot back (e.g. gallery on Windows, contacts on web).
+  List<LdAttachmentTabSpec> get tabs => [
+    for (final tab in config.tabs)
+      if (_isTabSupported(services, tab)) tab,
+  ];
 
   /// The currently active tab, or the first tab when the id is unknown.
-  LdAttachmentTabSpec get activeTab {
-    for (final tab in tabs) {
+  LdAttachmentTabSpec? get activeTab {
+    final visible = tabs;
+    if (visible.isEmpty) {
+      return null;
+    }
+    for (final tab in visible) {
       if (tab.id == _activeTabId) {
         return tab;
       }
     }
-    return tabs.first;
+    return visible.first;
   }
 
   /// Whether the bottom tab bar should be shown.
@@ -185,7 +194,8 @@ class LdAttachmentPickerController extends ChangeNotifier {
       services.media.supportsLimitedAccess;
 
   bool get hasMediaAccess =>
-      _mediaPermission == LdPermissionState.authorized || isLimited;
+      _mediaPermission == LdPermissionState.authorized ||
+      _mediaPermission == LdPermissionState.limited;
 
   /// Reads (and optionally requests) the gallery permission.
   Future<void> loadMediaPermission({bool request = false}) async {
@@ -233,5 +243,32 @@ class LdAttachmentPickerController extends ChangeNotifier {
         '$error\n$stackTrace',
       );
     }
+  }
+
+  static String _initialTabId(
+    LdAttachmentServices services,
+    LdAttachmentPickerConfig config,
+  ) {
+    for (final tab in config.tabs) {
+      if (_isTabSupported(services, tab)) {
+        return tab.id;
+      }
+    }
+    return '';
+  }
+
+  static bool _isTabSupported(
+    LdAttachmentServices services,
+    LdAttachmentTabSpec tab,
+  ) {
+    if (tab.isCustom) {
+      return true;
+    }
+    return switch (tab.builtIn!) {
+      LdAttachmentTab.gallery => services.media.isSupported,
+      LdAttachmentTab.file => true,
+      LdAttachmentTab.location => true,
+      LdAttachmentTab.contacts => services.contacts.isSupported,
+    };
   }
 }

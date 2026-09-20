@@ -752,12 +752,22 @@ class _AppBarDemoState extends State<AppBarDemo> {
       body = LdTabNavigation(
         activeRoute: _activeTabRoute,
         onTabPressed: (route) => setState(() => _activeTabRoute = route),
-        tabs: const [
-          LdNavigationTab(label: 'Home', icon: Icon(LucideIcons.house), route: '/home'),
+        tabs: [
+          LdNavigationTab(
+            label: 'Home',
+            icon: Icon(LucideIcons.house),
+            route: '/home',
+            badge: LdNavigationTabBadge(value: 100, color: LdTheme.of(context).warning),
+          ),
           LdNavigationTab(label: 'Search', icon: Icon(LucideIcons.search), route: '/search'),
           LdNavigationTab(label: 'Settings', icon: Icon(LucideIcons.settings), route: '/settings'),
           LdNavigationTab(label: 'Profile', icon: Icon(LucideIcons.user), route: '/profile'),
-          LdNavigationTab(label: 'Notifications', icon: Icon(LucideIcons.bell), route: '/notifications'),
+          LdNavigationTab(
+            label: 'Notifications',
+            icon: Icon(LucideIcons.bell),
+            route: '/notifications',
+            badge: LdNavigationTabBadge(color: LdTheme.of(context).warning),
+          ),
         ],
         attachedMode: _tabAttachedMode,
         backgroundMode: _tabBackgroundMode,

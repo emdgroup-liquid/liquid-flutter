@@ -4,6 +4,7 @@ import 'package:cross_file/cross_file.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 import '../../attachment_models.dart';
+import '../attachment_platform.dart';
 import '../media_facade.dart';
 
 /// Bundled [LdMediaFacade] backed by `package:photo_manager`.
@@ -24,7 +25,10 @@ class LdNativeMediaFacade implements LdMediaFacade {
       AndroidPermission(type: _requestType(types), mediaLocation: false);
 
   @override
-  bool get supportsLimitedAccess => true;
+  bool get isSupported => ldPhotoLibraryPlatformSupported;
+
+  @override
+  bool get supportsLimitedAccess => ldLimitedLibrarySupported;
 
   @override
   Future<LdPermissionState> requestPermission({LdMediaType? forType}) async {

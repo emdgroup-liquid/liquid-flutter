@@ -7,8 +7,11 @@ import 'package:liquid_flutter_ai/src/attachments/attachment_config.dart';
 import 'package:liquid_flutter_ai/src/attachments/attachment_picker.dart';
 import 'package:liquid_flutter_ai/src/attachments/attachment_result.dart';
 import 'package:liquid_flutter_ai/src/attachments/platform/attachment_services.dart';
+import 'package:liquid_flutter_ai/src/attachments/widgets/attachment_chip.dart';
 import 'package:liquid_flutter_ai/src/compose/waveform_recorder.dart';
 import 'package:liquid_flutter_ai/src/models/compose_attachment.dart';
+import 'package:liquid_flutter_ai/src/models/outgoing.dart';
+import 'package:liquid_flutter_ai/src/send/outgoing_scope.dart';
 import 'package:liquid_flutter_ai/src/send/send_fly_scope.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:waveform_recorder/waveform_recorder.dart';
@@ -64,6 +67,11 @@ class LdComposeBar extends StatefulWidget {
   /// pasted as usual.
   final Future<bool> Function()? onCustomPaste;
 
+  /// Whether the clipboard currently holds pasteable content (text, image, or
+  /// nothing). Forwarded to [LdInput.clipboardHasData]; see there for the
+  /// semantics. `null` (default) lets the platform decide.
+  final bool? clipboardHasData;
+
   const LdComposeBar({
     super.key,
     required this.child,
@@ -86,6 +94,7 @@ class LdComposeBar extends StatefulWidget {
     this.overlay,
     this.attachmentsExtra,
     this.onCustomPaste,
+    this.clipboardHasData,
   });
 
   @override
@@ -170,8 +179,36 @@ class _LdComposeBarState extends State<LdComposeBar> {
   bool get _hasContent =>
       _controller.text.trim().isNotEmpty || widget.attachments.isNotEmpty;
 
+  bool get _canSend {
+    if (!_hasContent) {
+      return false;
+    }
+    final scope = LdOutgoingScope.maybeOf(context, listen: false);
+    if (scope == null) {
+      return widget.onSend != null;
+    }
+    return scope.canSend(widget.attachments);
+  }
+
   void _handleSend() {
-    if (widget.onSend == null || !_hasContent) {
+    if (!_hasContent) {
+      return;
+    }
+    final scope = LdOutgoingScope.maybeOf(context, listen: false);
+    if (scope != null) {
+      if (!scope.canSend(widget.attachments)) {
+        return;
+      }
+      unawaited(
+        scope.submit(
+          text: _controller.text,
+          attachments: List.of(widget.attachments),
+        ),
+      );
+      _controller.clear();
+      return;
+    }
+    if (widget.onSend == null) {
       return;
     }
     widget.onSend!(_controller.text);
@@ -273,40 +310,19 @@ class _LdComposeBarState extends State<LdComposeBar> {
     BuildContext context,
     LdComposeAttachment attachment,
   ) {
-    final theme = LdTheme.of(context);
-    final onRemove = widget.onRemoveAttachment;
-
-    return LdTag(
+    final scope = LdOutgoingScope.maybeOf(context, listen: false);
+    return LdComposeAttachmentTile(
       key: ValueKey(attachment.id),
-      onDismiss: onRemove != null ? () => onRemove(attachment) : null,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (attachment.preview != null)
-            ClipRRect(
-              borderRadius: theme.radius(LdSize.xs),
-              child: SizedBox(width: 18, height: 18, child: attachment.preview),
-            )
-          else ...[
-            Icon(
-              attachment.isImage
-                  ? LucideIcons.image
-                  : attachment.isAudio
-                  ? LucideIcons.mic
-                  : LucideIcons.paperclip,
-            ),
-            ldHSpacerXS,
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 120),
-              child: Text(
-                attachment.name,
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
-              ),
-            ),
-          ],
-        ],
-      ),
+      attachment: attachment,
+      onDismiss: widget.onRemoveAttachment == null
+          ? null
+          : () {
+              scope?.cancelDraft(attachment.id);
+              widget.onRemoveAttachment!(attachment);
+            },
+      onRetry: !attachment.hasPersistError
+          ? null
+          : () => unawaited(scope?.retryDraft(attachment.id) ?? Future.value()),
     );
   }
 
@@ -412,6 +428,7 @@ class _LdComposeBarState extends State<LdComposeBar> {
                   key: const ValueKey('ld-compose-send'),
                   size: _controlSize,
                   noFocusOnTap: true,
+                  disabled: !_canSend,
                   onPressed: _handleSend,
                   child: const Icon(LucideIcons.arrowUp),
                 ),
@@ -437,6 +454,13 @@ class _LdComposeBarState extends State<LdComposeBar> {
       return;
     }
     widget.onAttachmentsPicked!(result);
+    final scope = LdOutgoingScope.maybeOf(context, listen: false);
+    if (scope == null || scope.persistWhen != LdAttachmentPersistWhen.pick) {
+      return;
+    }
+    for (final picked in result) {
+      unawaited(scope.persistDraft(LdComposeAttachment.fromPicked(picked)));
+    }
   }
 
   Widget _buildAttachButtons(BuildContext context) {
@@ -550,6 +574,7 @@ class _LdComposeBarState extends State<LdComposeBar> {
       allowTapOutside: true,
       onSubmitted: (_) => _handleSend(),
       onCustomPaste: widget.onCustomPaste,
+      clipboardHasData: widget.clipboardHasData,
     );
   }
 

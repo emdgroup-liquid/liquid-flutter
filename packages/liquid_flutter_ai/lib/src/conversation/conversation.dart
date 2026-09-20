@@ -12,6 +12,7 @@ import 'package:liquid_flutter_ai/src/bubbles/user_bubble.dart';
 import 'package:liquid_flutter_ai/src/conversation/approval_actions.dart';
 import 'package:liquid_flutter_ai/src/conversation/group_items.dart';
 import 'package:liquid_flutter_ai/src/models/conversation_item.dart';
+import 'package:liquid_flutter_ai/src/send/outgoing_scope.dart';
 
 typedef LdConversationItemBuilder =
     Widget Function(
@@ -112,8 +113,18 @@ class LdConversation extends StatefulWidget {
   }) {
     return switch (item) {
       LdSystemPromptItem() => LdSystemPromptCard(item: item),
-      LdUserMessageItem(text: final text, attachments: final attachments) =>
-        LdUserBubble(text: text, attachments: attachments),
+      LdUserMessageItem() => LdUserBubble(
+        text: item.text,
+        attachments: item.attachments,
+        delivery: item.delivery,
+        deliveryError: item.deliveryError,
+        onRetry: () =>
+            LdOutgoingScope.maybeOf(context, listen: false)?.retry(item.id),
+        onRetryAttachment: (attachmentId) => LdOutgoingScope.maybeOf(
+          context,
+          listen: false,
+        )?.retryMessageAttachment(item.id, attachmentId),
+      ),
       LdAgentMarkdownItem(
         markdown: final markdown,
         isStreaming: final isStreaming,
@@ -143,6 +154,9 @@ class LdConversation extends StatefulWidget {
         isSingleton: isSingleton,
       ),
       LdTurnErrorItem() => LdTurnErrorCard(item: item),
+      // Apps render inline GenUI surfaces via their own itemBuilder (they own
+      // the surface manager); the default is a no-op placeholder.
+      LdGenuiSurfaceItem() => const SizedBox.shrink(),
     };
   }
 

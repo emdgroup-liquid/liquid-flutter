@@ -542,19 +542,25 @@ class LdSendFlyTarget extends StatelessWidget {
 
     // Hold height at 0 until the flight layer mounts so slot open and shuttle
     // springs start together (same params on [LdSendFlyScope]).
-    if (!fly.isAnimating) {
-      return ClipRect(
-        child: Align(
-          alignment: Alignment.bottomCenter,
-          heightFactor: 0,
-          child: measured,
-        ),
-      );
-    }
+    final heightFactor = fly.isAnimating ? 1.0 : 0.0;
 
-    // Reverse lists grow from the compose edge (bottom). heightFactor 0 still
-    // lays out [child] at full size so the measure key can read the final rect.
-    return measured;
+    return LdSpring(
+      mass: fly.mass,
+      springConstant: fly.springConstant,
+      dampingCoefficient: fly.dampingCoefficient,
+      initialPosition: 0,
+      position: heightFactor,
+      builder: (context, progress, child) {
+        return ClipRect(
+          child: Align(
+            alignment: Alignment.bottomCenter,
+            heightFactor: progress.position.clamp(0.0, 1.0),
+            child: child,
+          ),
+        );
+      },
+      child: measured,
+    );
   }
 }
 

@@ -1,27 +1,18 @@
 import 'package:flutter/foundation.dart';
+import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter_ai/src/models/compose_attachment.dart';
+import 'package:liquid_flutter_ai/src/models/outgoing.dart';
 
-enum LdToolCallStatus {
-  pending,
-  running,
-  done,
-  error,
-}
+enum LdToolCallStatus { pending, running, done, error }
 
-enum LdApprovalStatus {
-  pending,
-  approved,
-  denied,
-}
+enum LdApprovalStatus { pending, approved, denied }
 
 /// Flat transcript item. Apps own ordering (oldest → newest).
 @immutable
 sealed class LdConversationItem {
   final String id;
 
-  const LdConversationItem({
-    required this.id,
-  });
+  const LdConversationItem({required this.id});
 }
 
 final class LdSystemPromptItem extends LdConversationItem {
@@ -39,14 +30,37 @@ final class LdSystemPromptItem extends LdConversationItem {
 }
 
 final class LdUserMessageItem extends LdConversationItem {
+  static const _unset = Object();
+
   final String text;
   final List<LdComposeAttachment> attachments;
+  final LdMessageDelivery delivery;
+  final LdException? deliveryError;
 
   const LdUserMessageItem({
     required super.id,
     required this.text,
     this.attachments = const [],
+    this.delivery = LdMessageDelivery.sent,
+    this.deliveryError,
   });
+
+  LdUserMessageItem copyWith({
+    String? text,
+    List<LdComposeAttachment>? attachments,
+    LdMessageDelivery? delivery,
+    Object? deliveryError = _unset,
+  }) {
+    return LdUserMessageItem(
+      id: id,
+      text: text ?? this.text,
+      attachments: attachments ?? this.attachments,
+      delivery: delivery ?? this.delivery,
+      deliveryError: identical(deliveryError, _unset)
+          ? this.deliveryError
+          : deliveryError as LdException?,
+    );
+  }
 }
 
 final class LdAgentMarkdownItem extends LdConversationItem {
@@ -126,11 +140,16 @@ final class LdTurnErrorItem extends LdConversationItem {
   final String message;
   final String? code;
 
-  const LdTurnErrorItem({
-    required super.id,
-    required this.message,
-    this.code,
-  });
+  const LdTurnErrorItem({required super.id, required this.message, this.code});
+}
+
+/// Inline GenUI surface placed at the transcript position where the surface
+/// was last created or updated. Apps render it via their [LdConversation]
+/// `itemBuilder` (the surface widget needs the surface manager).
+final class LdGenuiSurfaceItem extends LdConversationItem {
+  final String surfaceId;
+
+  const LdGenuiSurfaceItem({required super.id, required this.surfaceId});
 }
 
 /// Whether [item] is tool/reasoning noise that can collapse into an activity group.

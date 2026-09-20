@@ -1,4 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:liquid_flutter/liquid_flutter.dart';
+
+class LdNavigationTabBadge {
+  final int? value;
+  final LdColor color;
+  LdNavigationTabBadge({
+    this.value,
+    required this.color,
+  });
+}
 
 /// A primary navigation destination shared by [LdTabNavigation] and
 /// [LdNavigationRail].
@@ -6,6 +16,8 @@ class LdNavigationTab {
   final String label;
   final Widget icon;
   final String route;
+  final LdNavigationTabBadge? badge;
+
   final bool Function(BuildContext context)? isActive;
 
   const LdNavigationTab({
@@ -13,6 +25,7 @@ class LdNavigationTab {
     required this.icon,
     required this.route,
     this.isActive,
+    this.badge,
   });
 
   /// Whether this destination should be highlighted for [activeRoute].

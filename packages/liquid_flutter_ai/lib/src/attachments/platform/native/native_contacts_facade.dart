@@ -2,12 +2,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_contacts/flutter_contacts.dart' as fc;
 
 import '../../attachment_models.dart';
+import '../attachment_platform.dart';
 import '../contacts_facade.dart';
 
 /// Bundled [LdContactsFacade] backed by `package:flutter_contacts`.
 class LdNativeContactsFacade implements LdContactsFacade {
   @override
-  bool get isSupported => !kIsWeb;
+  bool get isSupported => ldPhotoLibraryPlatformSupported;
 
   @override
   Future<LdPermissionState> permissionState() async {

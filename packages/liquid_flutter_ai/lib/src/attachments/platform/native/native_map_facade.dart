@@ -4,6 +4,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:maplibre/maplibre.dart';
 
 import '../../attachment_models.dart';
+import '../attachment_platform.dart';
 import '../map_facade.dart';
 
 /// Bundled [LdMapFacade] backed by `package:maplibre`.
@@ -12,6 +13,9 @@ import '../map_facade.dart';
 /// limited. Swap via [LdAttachmentServices.copyWith] for another SDK.
 class LdNativeMapFacade implements LdMapFacade {
   const LdNativeMapFacade();
+
+  @override
+  bool get isSupported => ldMapPluginSupported;
 
   @override
   Widget buildMap(BuildContext context, LdMapRequest request) {

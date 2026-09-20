@@ -1,12 +1,32 @@
+import 'package:flutter/foundation.dart';
 import 'package:permission_handler/permission_handler.dart' as ph;
+import 'package:photo_manager/photo_manager.dart';
 
 import '../../attachment_models.dart';
+import '../attachment_platform.dart';
 import '../permission_facade.dart';
 
 /// Bundled [LdPermissionFacade] backed by `package:permission_handler`.
 class LdNativePermissionFacade implements LdPermissionFacade {
   @override
-  Future<bool> openAppSettings() => ph.openAppSettings();
+  Future<bool> openAppSettings() async {
+    if (kIsWeb) {
+      return ph.openAppSettings();
+    }
+    if (ldIsMacOS) {
+      try {
+        await PhotoManager.openSetting();
+        return true;
+      } catch (_) {
+        return false;
+      }
+    }
+    try {
+      return await ph.openAppSettings();
+    } catch (_) {
+      return false;
+    }
+  }
 
   @override
   Future<LdPermissionState> status(LdPermissionKind kind) async {

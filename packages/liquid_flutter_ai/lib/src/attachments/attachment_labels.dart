@@ -38,6 +38,7 @@ class LdAttachmentPickerLabels {
   final String locationUnavailable;
   final String contactsDenied;
   final String accuracy;
+  final String noSources;
 
   const LdAttachmentPickerLabels({
     this.title = 'Attach',
@@ -72,6 +73,7 @@ class LdAttachmentPickerLabels {
     this.locationUnavailable = 'Location is not available.',
     this.contactsDenied = 'Allow access to your contacts to attach them.',
     this.accuracy = 'Accuracy',
+    this.noSources = 'No attachment sources are available on this device.',
   });
 
   /// A human readable label for a tab.
@@ -115,6 +117,7 @@ class LdAttachmentPickerLabels {
     String? locationUnavailable,
     String? contactsDenied,
     String? accuracy,
+    String? noSources,
   }) {
     return LdAttachmentPickerLabels(
       title: title ?? this.title,
@@ -149,6 +152,7 @@ class LdAttachmentPickerLabels {
       locationUnavailable: locationUnavailable ?? this.locationUnavailable,
       contactsDenied: contactsDenied ?? this.contactsDenied,
       accuracy: accuracy ?? this.accuracy,
+      noSources: noSources ?? this.noSources,
     );
   }
 }

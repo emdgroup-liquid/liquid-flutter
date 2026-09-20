@@ -9,6 +9,9 @@ import '../attachment_models.dart';
 /// Host apps can replace the bundled native implementation; tests supply a
 /// fake. No photo-library-plugin type appears here.
 abstract interface class LdMediaFacade {
+  /// Whether a photo library can be queried on this platform.
+  bool get isSupported;
+
   /// Whether this platform supports limited photo-library access and a
   /// "manage selection" flow.
   bool get supportsLimitedAccess;

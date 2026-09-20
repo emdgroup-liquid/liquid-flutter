@@ -4,16 +4,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_doc_scanner/flutter_doc_scanner.dart';
 
 import '../../attachment_models.dart';
+import '../attachment_platform.dart';
 import '../file_facade.dart';
 
 /// Bundled [LdFileFacade] backed by `package:file_picker` and
 /// `package:flutter_doc_scanner`.
 class LdNativeFileFacade implements LdFileFacade {
   @override
-  bool get documentScanSupported =>
-      !kIsWeb &&
-      (defaultTargetPlatform == TargetPlatform.android ||
-          defaultTargetPlatform == TargetPlatform.iOS);
+  bool get documentScanSupported => ldDocumentScanSupported;
 
   @override
   Future<List<LdFileEntry>> pickFiles({bool allowMultiple = true}) async {

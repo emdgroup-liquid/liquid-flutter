@@ -90,4 +90,23 @@ void main() {
     expect(find.text('Start'), findsOneWidget);
     expect(find.text('Item'), findsOneWidget);
   });
+
+  test('deleteSurface drops the anchor so the surface stops rendering inline', () {
+    final manager = LdGenuiSurfaceManager();
+    addTearDown(manager.dispose);
+
+    manager.processMessageText(
+      '```genui\n'
+      '{"version":"v0.9","createSurface":{"surfaceId":"p1"}}\n'
+      '```',
+      anchor: 'piece-1',
+    );
+    expect(manager.surfaceAnchors.containsKey('p1'), isTrue);
+    expect(manager.activeSurfaceIds.any((id) => id == 'p1'), isTrue);
+
+    manager.deleteSurface('p1');
+
+    expect(manager.surfaceAnchors.containsKey('p1'), isFalse);
+    expect(manager.activeSurfaceIds.any((id) => id == 'p1'), isFalse);
+  });
 }

@@ -4,6 +4,7 @@ library;
 export 'src/models/agent_task.dart';
 export 'src/models/compose_attachment.dart';
 export 'src/models/conversation_item.dart';
+export 'src/models/outgoing.dart';
 export 'src/conversation/group_items.dart';
 export 'src/conversation/conversation.dart';
 export 'src/conversation/approval_actions.dart';
@@ -29,6 +30,7 @@ export 'src/attachments/platform/media_facade.dart';
 export 'src/attachments/platform/permission_facade.dart';
 export 'src/attachments/camera/camera_capture_view.dart';
 export 'src/attachments/widgets/action_tile.dart';
+export 'src/attachments/widgets/attachment_chip.dart';
 export 'src/attachments/widgets/empty_state.dart';
 export 'src/attachments/widgets/media_tile.dart';
 export 'src/attachments/widgets/permission_prompt.dart';
@@ -46,6 +48,7 @@ export 'src/bubbles/system_prompt.dart';
 export 'src/bubbles/turn_error.dart';
 export 'src/bubbles/agent_activity_group.dart';
 export 'src/tasks/agent_task_panel.dart';
+export 'src/send/outgoing_scope.dart';
 export 'src/send/send_fly_scope.dart'
     show
         LdSendFlyScope,

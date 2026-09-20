@@ -106,6 +106,7 @@ class _LdFileTabState extends State<LdFileTab> {
       name: entry.name,
       file: entry.file,
       mimeType: entry.mimeType,
+      size: entry.size,
     );
   }
 
@@ -180,19 +181,4 @@ class _LdFileTabState extends State<LdFileTab> {
       ],
     );
   }
-}
-
-/// Formats a byte count as a compact human-readable string.
-String ldFormatBytes(int bytes) {
-  const units = ['B', 'KB', 'MB', 'GB'];
-  var value = bytes.toDouble();
-  var unit = 0;
-  while (value >= 1024 && unit < units.length - 1) {
-    value /= 1024;
-    unit += 1;
-  }
-  final rounded = value >= 10 || unit == 0
-      ? value.toStringAsFixed(0)
-      : value.toStringAsFixed(1);
-  return '$rounded ${units[unit]}';
 }

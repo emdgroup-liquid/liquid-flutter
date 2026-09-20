@@ -14,6 +14,7 @@ import 'tabs/contacts_tab.dart';
 import 'tabs/file_tab.dart';
 import 'tabs/gallery_tab.dart';
 import 'tabs/location_tab.dart';
+import 'widgets/empty_state.dart';
 
 /// A rich, Telegram-style attachment picker.
 ///
@@ -87,6 +88,15 @@ class _LdAttachmentPickerState extends State<LdAttachmentPicker> {
     return ListenableBuilder(
       listenable: controller,
       builder: (context, _) {
+        if (controller.tabs.isEmpty) {
+          return LdScaffold(
+            body: LdAttachmentEmptyState(
+              icon: LucideIcons.paperclip,
+              message: controller.labels.noSources,
+            ),
+          );
+        }
+
         final content = _buildTab(context, controller);
 
         return LdScaffold(
@@ -158,6 +168,12 @@ class _LdAttachmentPickerState extends State<LdAttachmentPicker> {
     LdAttachmentPickerController controller,
   ) {
     final tab = controller.activeTab;
+    if (tab == null) {
+      return LdAttachmentEmptyState(
+        icon: LucideIcons.paperclip,
+        message: controller.labels.noSources,
+      );
+    }
     if (tab.isCustom) {
       return tab.custom!.pageBuilder(
         context,

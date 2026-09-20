@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -22,6 +23,9 @@ class _ConversationDemoState extends State<ConversationDemo> {
   var _isBusy = false;
 
   var _messageSeq = 0;
+  var _persistWhen = LdAttachmentPersistWhen.submit;
+  final _replied = <String>{};
+  final _pendingFly = <String>{};
 
   late List<LdConversationItem> _items = _seedItems();
   var _tasks = <LdAgentTask>[];
@@ -221,65 +225,76 @@ class _ConversationDemoState extends State<ConversationDemo> {
     });
   }
 
-  void _handleSend(String text, LdSendFlyScopeState flyScope) {
-    final trimmed = text.trim();
-    if (trimmed.isEmpty && _attachments.isEmpty) {
-      return;
-    }
-
-    final id = 'local-${++_messageSeq}';
-    final message = LdUserMessageItem(
-      id: id,
-      text: trimmed.isEmpty ? '(attachment)' : trimmed,
-      attachments: List.of(_attachments),
-    );
-    final bubble = LdUserBubble(text: message.text, attachments: message.attachments, fill: true);
-
-    _controller.clear();
-    setState(() => _attachments.clear());
-
-    void commitMessage() {
-      if (!mounted) {
-        return;
+  void _upsertItem(LdUserMessageItem item) {
+    setState(() {
+      final index = _items.indexWhere((existing) => existing.id == item.id);
+      if (index < 0) {
+        _items = [..._items, item];
+      } else {
+        final next = [..._items];
+        next[index] = item;
+        _items = next;
       }
-      setState(() {
-        _items = [..._items, message];
-        _isBusy = true;
-      });
-      _simulateAgentReply(id, trimmed);
-    }
-
-    flyScope.dispatch(message, bubble: bubble, onCommitted: commitMessage);
+    });
   }
 
-  void _handleVoiceRecorded(LdVoiceRecording recording, LdSendFlyScopeState flyScope) {
+  void _onMessage(LdUserMessageItem item, LdSendFlyScopeState fly) {
+    final exists = _items.any((existing) => existing.id == item.id);
+    if (!exists && !_pendingFly.contains(item.id)) {
+      _pendingFly.add(item.id);
+      fly.dispatch(
+        item,
+        bubble: LdUserBubble(text: item.text, attachments: item.attachments, fill: true),
+        onCommitted: () {
+          _pendingFly.remove(item.id);
+          if (!_items.any((existing) => existing.id == item.id)) {
+            _upsertItem(item);
+          }
+        },
+      );
+    } else {
+      _upsertItem(item);
+    }
+
+    if (item.delivery == LdMessageDelivery.sent && _replied.add(item.id)) {
+      setState(() => _isBusy = true);
+      _simulateAgentReply(item.id, item.text.trim());
+    }
+  }
+
+  void _upsertDraft(LdComposeAttachment attachment) {
+    setState(() {
+      final index = _attachments.indexWhere((existing) => existing.id == attachment.id);
+      if (index < 0) {
+        _attachments.add(attachment);
+      } else {
+        _attachments[index] = attachment;
+      }
+    });
+  }
+
+  Stream<LdPersistEvent> _persistAttachment(LdComposeAttachment attachment) async* {
+    yield const LdPersistEvent.progress(0.25);
+    await Future<void>.delayed(const Duration(milliseconds: 280));
+    yield const LdPersistEvent.progress(0.7);
+    await Future<void>.delayed(const Duration(milliseconds: 280));
+    yield LdPersistEvent.done('remote-${attachment.id}');
+  }
+
+  Future<void> _sendMessage(LdOutgoingMessage message) async {
+    await Future<void>.delayed(const Duration(milliseconds: 350));
+  }
+
+  void _handleVoiceRecorded(LdVoiceRecording recording, LdOutgoingScopeState outgoing) {
     final seconds = (recording.length.inMilliseconds / 1000).toStringAsFixed(1);
     final attachment = LdComposeAttachment(
       id: 'voice-${++_messageSeq}',
       name: recording.file.name,
       mimeType: recording.file.mimeType ?? 'audio/mp4',
+      file: recording.file,
       preview: const Icon(LucideIcons.mic),
     );
-
-    final id = 'local-${++_messageSeq}';
-    final text = 'Voice message (${seconds}s)';
-    final message = LdUserMessageItem(id: id, text: text, attachments: [attachment]);
-    final bubble = LdUserBubble(text: text, attachments: [attachment], fill: true);
-
-    flyScope.dispatch(
-      message,
-      bubble: bubble,
-      onCommitted: () {
-        if (!mounted) {
-          return;
-        }
-        setState(() {
-          _items = [..._items, message];
-          _isBusy = true;
-        });
-        _simulateAgentReply(id, text);
-      },
-    );
+    unawaited(outgoing.submit(text: 'Voice message (${seconds}s)', attachments: [attachment]));
   }
 
   Future<void> _simulateAgentReply(String userMessageId, String trimmed) async {
@@ -592,9 +607,17 @@ Call out if you want this expanded into a full changelog entry, a PR description
 
   Widget _buildItem(BuildContext context, LdConversationItem item, bool isSingleton) {
     return switch (item) {
-      LdUserMessageItem(:final id, :final text, :final attachments) => LdSendFlyTarget(
-        id: id,
-        child: LdUserBubble(text: text, attachments: attachments),
+      LdUserMessageItem() => LdSendFlyTarget(
+        id: item.id,
+        child: LdUserBubble(
+          text: item.text,
+          attachments: item.attachments,
+          delivery: item.delivery,
+          deliveryError: item.deliveryError,
+          onRetry: () => LdOutgoingScope.maybeOf(context, listen: false)?.retry(item.id),
+          onRetryAttachment: (attachmentId) =>
+              LdOutgoingScope.maybeOf(context, listen: false)?.retryMessageAttachment(item.id, attachmentId),
+        ),
       ),
       _ => LdConversation.defaultItemBuilder(context, item, isSingleton, approval: _approvalActions),
     };
@@ -641,148 +664,166 @@ Call out if you want this expanded into a full changelog entry, a PR description
       child: Builder(
         builder: (context) {
           final fly = LdSendFlyScope.of(context);
-          final conversation = LdAgentTaskPanel(
-            tasks: _tasks,
-            child: LdConversation(
-              items: _items,
-              approval: _approvalActions,
-              itemBuilder: _buildItem,
-              toolCallOverride: _toolCallOverride,
-              hideBeforeIndex: _hideBeforeIndex,
-            ),
-          );
-          final composeBar = LdComposeBar(
-            controller: _controller,
-            focusNode: _focusNode,
-            attachments: _attachments,
-            isBusy: _isBusy,
-            attachmentsExtra: LdAutoSpace(
-              children: [
-                LdSelect(
-                  label: 'Model',
-                  value: "smart",
-                  items: [
-                    LdSelectItem(value: 'smart', child: Text('Model Super Smart plus')),
-                    LdSelectItem(value: 'fast', child: Text('Model Fast and Furious')),
-                  ],
-                  onChanged: (value) {},
-                ),
-                LdSelect(
-                  label: 'Effort',
-                  value: 'high',
-                  items: [
-                    LdSelectItem(child: Text('Extra high'), value: 'high'),
-                    LdSelectItem(child: Text('Normal'), value: 'normal'),
-                    LdSelectItem(child: Text('Low'), value: 'low'),
-                  ],
-                  onChanged: (value) {},
-                ),
-              ],
-            ),
-            leading: LdContextUsageIndicator(
-              contextUsage: const LdContextUsage(estimatedTokens: 12400, contextLimit: 128000, lastPromptTokens: 9800),
-              onTap: () {
-                final pricing = ldModelPricingLookup(const [
-                  LdModelPricing(
-                    modelId: 'openai/gpt-4o-mini',
-                    displayName: 'GPT-4o Mini',
-                    promptPricePerToken: 0.00000015,
-                    completionPricePerToken: 0.0000006,
-                  ),
-                ]);
-                final totals = ldComputeUsage(
-                  pricingByModelId: pricing,
-                  records: const [
-                    LdTokenUsageRecord(
-                      modelId: 'openai/gpt-4o-mini',
-                      promptTokens: 2200,
-                      totalTokens: 2200,
-                      kind: LdUsageKind.user,
-                    ),
-                    LdTokenUsageRecord(
-                      modelId: 'openai/gpt-4o-mini',
-                      promptTokens: 1200,
-                      totalTokens: 1200,
-                      kind: LdUsageKind.tools,
-                      toolName: 'bash',
-                    ),
-                    LdTokenUsageRecord(
-                      modelId: 'openai/gpt-4o-mini',
-                      promptTokens: 450,
-                      totalTokens: 450,
-                      kind: LdUsageKind.tools,
-                      toolName: 'read_file',
-                    ),
-                    LdTokenUsageRecord(
-                      modelId: 'openai/gpt-4o-mini',
-                      promptTokens: 150,
-                      totalTokens: 150,
-                      kind: LdUsageKind.tools,
-                      toolName: 'grep',
-                    ),
-                    LdTokenUsageRecord(
-                      modelId: 'openai/gpt-4o-mini',
-                      promptTokens: 4800,
-                      completionTokens: 900,
-                      totalTokens: 5700,
-                      kind: LdUsageKind.agent,
-                    ),
-                    LdTokenUsageRecord(
-                      modelId: 'openai/gpt-4o-mini',
-                      promptTokens: 1000,
-                      completionTokens: 300,
-                      totalTokens: 1300,
-                      kind: LdUsageKind.reasoning,
-                    ),
-                  ],
-                );
-                LdModalRoute(
-                  context: context,
-                  pageBuilder: (modalContext) => LdUsageCostModal(
-                    totals: totals,
-                    contextUsage: const LdContextUsage(
-                      estimatedTokens: 12400,
-                      contextLimit: 128000,
-                      lastPromptTokens: 9800,
-                    ),
-                  ),
-                ).show(context, useRootNavigator: true);
-              },
-            ),
-            onSend: (text) => _handleSend(text, fly),
-            onStop: () => setState(() => _isBusy = false),
-            onAttachmentsPicked: (picked) {
-              setState(() {
-                _attachments.addAll(
-                  picked.map(LdComposeAttachment.fromPicked),
-                );
-              });
+          final outgoing = LdOutgoingScope(
+            persistWhen: _persistWhen,
+            persistAttachment: _persistAttachment,
+            send: _sendMessage,
+            onMessage: (item) => _onMessage(item, fly),
+            onDraftAttachment: _upsertDraft,
+            onSubmitted: () {
+              _controller.clear();
+              setState(() => _attachments.clear());
             },
-            onCustomPaste: () async {
-              // Intercept paste to handle image data from clipboard.
-              // Use a platform-specific clipboard reader (e.g. super_clipboard)
-              // to read image bytes, then create an LdComposeAttachment with
-              // a thumbnail preview and return true.
-              // Returning false falls back to default text paste.
-              return false;
-            },
-            onRemoveAttachment: (attachment) {
-              setState(() {
-                _attachments.removeWhere((a) => a.id == attachment.id);
-              });
-            },
-            onVoiceRecorded: (recording) => _handleVoiceRecorded(recording, fly),
-            child: conversation,
+            child: Builder(builder: (context) => _buildScaffold(context)),
           );
-
-          return LdScaffold(
-            body: LdAppBar.top(
-              title: LdText.h('Conversation'),
-              actions: [LdButton.ghost(size: LdSize.s, onPressed: _compactHistory, child: const Text('Compact'))],
-              child: composeBar,
-            ),
-          );
+          return outgoing;
         },
+      ),
+    );
+  }
+
+  Widget _buildScaffold(BuildContext context) {
+    final conversation = LdAgentTaskPanel(
+      tasks: _tasks,
+      child: LdConversation(
+        items: _items,
+        approval: _approvalActions,
+        itemBuilder: _buildItem,
+        toolCallOverride: _toolCallOverride,
+        hideBeforeIndex: _hideBeforeIndex,
+      ),
+    );
+    final composeBar = LdComposeBar(
+      controller: _controller,
+      focusNode: _focusNode,
+      attachments: _attachments,
+      isBusy: _isBusy,
+      attachmentsExtra: LdAutoSpace(
+        children: [
+          LdSelect<LdAttachmentPersistWhen>(
+            label: 'Persist',
+            value: _persistWhen,
+            items: const [
+              LdSelectItem(value: LdAttachmentPersistWhen.submit, child: Text('On send')),
+              LdSelectItem(value: LdAttachmentPersistWhen.pick, child: Text('On pick')),
+            ],
+            onChanged: (value) => setState(() => _persistWhen = value),
+          ),
+          LdSelect(
+            label: 'Model',
+            value: "smart",
+            items: [
+              LdSelectItem(value: 'smart', child: Text('Model Super Smart plus')),
+              LdSelectItem(value: 'fast', child: Text('Model Fast and Furious')),
+            ],
+            onChanged: (value) {},
+          ),
+          LdSelect(
+            label: 'Effort',
+            value: 'high',
+            items: [
+              LdSelectItem(child: Text('Extra high'), value: 'high'),
+              LdSelectItem(child: Text('Normal'), value: 'normal'),
+              LdSelectItem(child: Text('Low'), value: 'low'),
+            ],
+            onChanged: (value) {},
+          ),
+        ],
+      ),
+      leading: LdContextUsageIndicator(
+        contextUsage: const LdContextUsage(estimatedTokens: 12400, contextLimit: 128000, lastPromptTokens: 9800),
+        onTap: () {
+          final pricing = ldModelPricingLookup(const [
+            LdModelPricing(
+              modelId: 'openai/gpt-4o-mini',
+              displayName: 'GPT-4o Mini',
+              promptPricePerToken: 0.00000015,
+              completionPricePerToken: 0.0000006,
+            ),
+          ]);
+          final totals = ldComputeUsage(
+            pricingByModelId: pricing,
+            records: const [
+              LdTokenUsageRecord(
+                modelId: 'openai/gpt-4o-mini',
+                promptTokens: 2200,
+                totalTokens: 2200,
+                kind: LdUsageKind.user,
+              ),
+              LdTokenUsageRecord(
+                modelId: 'openai/gpt-4o-mini',
+                promptTokens: 1200,
+                totalTokens: 1200,
+                kind: LdUsageKind.tools,
+                toolName: 'bash',
+              ),
+              LdTokenUsageRecord(
+                modelId: 'openai/gpt-4o-mini',
+                promptTokens: 450,
+                totalTokens: 450,
+                kind: LdUsageKind.tools,
+                toolName: 'read_file',
+              ),
+              LdTokenUsageRecord(
+                modelId: 'openai/gpt-4o-mini',
+                promptTokens: 150,
+                totalTokens: 150,
+                kind: LdUsageKind.tools,
+                toolName: 'grep',
+              ),
+              LdTokenUsageRecord(
+                modelId: 'openai/gpt-4o-mini',
+                promptTokens: 4800,
+                completionTokens: 900,
+                totalTokens: 5700,
+                kind: LdUsageKind.agent,
+              ),
+              LdTokenUsageRecord(
+                modelId: 'openai/gpt-4o-mini',
+                promptTokens: 1000,
+                completionTokens: 300,
+                totalTokens: 1300,
+                kind: LdUsageKind.reasoning,
+              ),
+            ],
+          );
+          LdModalRoute(
+            context: context,
+            pageBuilder: (modalContext) => LdUsageCostModal(
+              totals: totals,
+              contextUsage: const LdContextUsage(estimatedTokens: 12400, contextLimit: 128000, lastPromptTokens: 9800),
+            ),
+          ).show(context, useRootNavigator: true);
+        },
+      ),
+      onStop: () => setState(() => _isBusy = false),
+      onAttachmentsPicked: (picked) {
+        setState(() {
+          _attachments.addAll(picked.map(LdComposeAttachment.fromPicked));
+        });
+      },
+      onCustomPaste: () async {
+        // Intercept paste to handle image data from clipboard.
+        // Use a platform-specific clipboard reader (e.g. super_clipboard)
+        // to read image bytes, then create an LdComposeAttachment with
+        // a thumbnail preview and return true.
+        // Returning false falls back to default text paste.
+        return false;
+      },
+      onRemoveAttachment: (attachment) {
+        setState(() {
+          _attachments.removeWhere((a) => a.id == attachment.id);
+        });
+      },
+      onVoiceRecorded: (recording) => _handleVoiceRecorded(recording, LdOutgoingScope.of(context)),
+      child: conversation,
+    );
+
+    return LdScaffold(
+      body: LdAppBar.top(
+        title: LdText.h('Conversation'),
+        actions: [LdButton.ghost(size: LdSize.s, onPressed: _compactHistory, child: const Text('Compact'))],
+        child: composeBar,
       ),
     );
   }

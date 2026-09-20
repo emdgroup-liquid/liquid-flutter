@@ -21,6 +21,7 @@ class LdPickedAttachment {
     this.place,
     this.contact,
     this.duration,
+    this.size,
   });
 
   /// Stable identifier, unique within a selection.
@@ -48,6 +49,9 @@ class LdPickedAttachment {
   /// Duration for video/audio attachments, when known.
   final Duration? duration;
 
+  /// Byte length when known (typically files).
+  final int? size;
+
   bool get isImage => kind == LdAttachmentKind.image;
   bool get isVideo => kind == LdAttachmentKind.video;
 
@@ -62,6 +66,7 @@ class LdPickedAttachment {
     LdPlace? place,
     LdContactEntry? contact,
     Duration? duration,
+    int? size,
   }) {
     return LdPickedAttachment(
       id: id ?? this.id,
@@ -74,6 +79,7 @@ class LdPickedAttachment {
       place: place ?? this.place,
       contact: contact ?? this.contact,
       duration: duration ?? this.duration,
+      size: size ?? this.size,
     );
   }
 

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart' show DeviceOrientation;
 import 'package:flutter/widgets.dart';
 
 import '../../attachment_models.dart';
+import '../attachment_platform.dart';
 import '../camera_facade.dart';
 
 /// Bundled [LdCameraFacade] backed by `package:camera`.
@@ -11,6 +12,9 @@ import '../camera_facade.dart';
 class LdNativeCameraFacade implements LdCameraFacade {
   @override
   Future<bool> isAvailable() async {
+    if (!ldCameraPluginSupported) {
+      return false;
+    }
     try {
       final cameras = await availableCameras();
       return cameras.isNotEmpty;

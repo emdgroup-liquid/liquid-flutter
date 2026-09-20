@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter_ai/src/attachments/widgets/attachment_chip.dart';
 import 'package:liquid_flutter_ai/src/models/compose_attachment.dart';
+import 'package:liquid_flutter_ai/src/models/outgoing.dart';
 import 'package:liquid_flutter_ai/src/send/send_fly_scope.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
@@ -8,6 +10,10 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 class LdUserBubble extends StatelessWidget {
   final String text;
   final List<LdComposeAttachment> attachments;
+  final LdMessageDelivery delivery;
+  final LdException? deliveryError;
+  final VoidCallback? onRetry;
+  final ValueChanged<String>? onRetryAttachment;
   final Widget? trailing;
 
   /// When true, expands to fill parent constraints (used by send-fly).
@@ -17,6 +23,10 @@ class LdUserBubble extends StatelessWidget {
     super.key,
     required this.text,
     this.attachments = const [],
+    this.delivery = LdMessageDelivery.sent,
+    this.deliveryError,
+    this.onRetry,
+    this.onRetryAttachment,
     this.trailing,
     this.fill = false,
   });
@@ -34,7 +44,7 @@ class LdUserBubble extends StatelessWidget {
           ? CrossAxisAlignment.start
           : CrossAxisAlignment.end,
       children: [
-        if (hasAttachments) _buildAttachments(theme),
+        if (hasAttachments) _buildAttachments(),
         if (hasText)
           SelectableText(
             text,
@@ -74,58 +84,82 @@ class LdUserBubble extends StatelessWidget {
       return bubble;
     }
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
+    final deliveryChrome = _buildDelivery(context);
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Flexible(child: bubble),
-        if (trailing != null) ...[ldHSpacerS, trailing!],
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Flexible(child: bubble),
+            if (trailing != null) ...[ldHSpacerS, trailing!],
+          ],
+        ),
+        if (deliveryChrome != null) ...[ldSpacerS, deliveryChrome],
       ],
     );
   }
 
-  Widget _buildAttachments(LdTheme theme) {
+  Widget? _buildDelivery(BuildContext context) {
+    final persistFailed = attachments.any(
+      (attachment) => attachment.hasPersistError,
+    );
+    if (delivery != LdMessageDelivery.error ||
+        persistFailed ||
+        deliveryError == null) {
+      return null;
+    }
+    return _buildSendError(context);
+  }
+
+  Widget _buildSendError(BuildContext context) {
+    final theme = LdTheme.of(context);
+    final message = deliveryError!.localize(context).message;
+    final retry = onRetry;
+    return Row(
+      key: const ValueKey('ld-send-error'),
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Flexible(child: LdText.ls(message, color: theme.errorColor)),
+        if (retry != null) ...[
+          ldHSpacerS,
+          LdButton.ghost(
+            key: const ValueKey('ld-send-retry'),
+            size: LdSize.s,
+            onPressed: retry,
+            child: const Icon(LucideIcons.rotateCcw),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildAttachments() {
     return Wrap(
       alignment: WrapAlignment.end,
       children: [
         for (final attachment in attachments)
-          _buildAttachmentChip(theme, attachment),
+          LdComposeAttachmentTile(
+            attachment: attachment,
+            maxHeight: 160,
+            maxWidth: 240,
+            onRetry: _retryFor(attachment),
+          ),
       ],
     ).spaceS();
   }
 
-  Widget _buildAttachmentChip(LdTheme theme, LdComposeAttachment attachment) {
-    if (attachment.isImage && attachment.preview != null) {
-      return ClipRRect(
-        borderRadius: theme.radius(LdSize.s),
-        child: SizedBox(width: 56, height: 56, child: attachment.preview),
-      );
+  VoidCallback? _retryFor(LdComposeAttachment attachment) {
+    if (!attachment.hasPersistError) {
+      return null;
     }
-
-    return LdTag(
-      size: LdSize.s,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            attachment.isImage
-                ? LucideIcons.image
-                : attachment.isAudio
-                ? LucideIcons.mic
-                : LucideIcons.paperclip,
-            size: theme.labelSize(LdSize.s),
-          ),
-          ldHSpacerXS,
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 120),
-            child: Text(
-              attachment.name,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
-        ],
-      ),
-    );
+    final onRetryAttachment = this.onRetryAttachment;
+    if (onRetryAttachment != null) {
+      return () => onRetryAttachment(attachment.id);
+    }
+    return onRetry;
   }
 }

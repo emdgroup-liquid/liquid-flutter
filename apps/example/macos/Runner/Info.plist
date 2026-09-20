@@ -30,5 +30,11 @@
 	<string>NSApplication</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Record voice messages for the conversation demo.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Select photos and videos to attach to your conversation.</string>
+	<key>NSLocationUsageDescription</key>
+	<string>Share your current location as an attachment.</string>
+	<key>NSContactsUsageDescription</key>
+	<string>Share a contact as an attachment.</string>
 </dict>
 </plist>
