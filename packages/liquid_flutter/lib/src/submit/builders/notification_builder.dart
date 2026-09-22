@@ -56,18 +56,18 @@ class _LdSubmitNotificationState<T, Arg> extends State<_LdSubmitNotification<T, 
   void initState() {
     super.initState();
     _submitController = context.read<LdSubmitController<T, Arg>>();
-    _subscription = _submitController.stateStream.listen((state) => _onStateChanged(state, _submitController));
+    _subscription = _submitController.stateStream.listen((state) => _onStateChanged(_submitController));
     _notificationsController = LdNotificationsController.of(context);
   }
 
   @override
   void dispose() {
     _subscription?.cancel();
-    _dismissNotification();
+    _maybeDismissNotification();
     super.dispose();
   }
 
-  void _dismissNotification() {
+  void _maybeDismissNotification() {
     if (_notification != null) {
       _notificationsController?.onDismissNotification(_notification!);
       _notification = null;
@@ -76,8 +76,18 @@ class _LdSubmitNotificationState<T, Arg> extends State<_LdSubmitNotification<T, 
 
   LdNotification? _notification;
 
-  void _onStateChanged(LdSubmitState<T> state, LdSubmitController<T, Arg> controller) {
-    _dismissNotification();
+  void _onStateChanged(LdSubmitController<T, Arg> controller) async {
+    // We wait a slight delay so thaht instant actions dont show a notification
+    // for only a split second.
+    await Future.delayed(const Duration(milliseconds: 100));
+    final state = controller.state;
+
+    _maybeDismissNotification();
+
+    if (!(mounted)) {
+      return;
+    }
+
     if (state.type == LdSubmitStateType.loading) {
       _notification = _notificationsController?.addNotification(
         LdNotification(

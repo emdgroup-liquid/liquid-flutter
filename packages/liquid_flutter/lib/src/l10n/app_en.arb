@@ -31,6 +31,7 @@
   "createNew": "Create new",
   "delete": "Delete",
   "deleteSelected": "Delete selected",
+  "deleting": "Deleting...",
   "deleteNItems": "Delete {items} {items,plural, =1{item}other{items}}",
   "deleteConfirmBody": "Are you sure you want to delete {items} {items,plural, =1{item}other{items}}?",
   "@deleteNItems": {

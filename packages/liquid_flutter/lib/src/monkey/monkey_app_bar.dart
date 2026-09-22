@@ -85,7 +85,12 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
 
     final selectionControlsVisible = selection.showSelectionControls;
 
-    final showClearSelectionButton = selectionControlsVisible && location == LdMonkeyActionLocation.masterSecondary;
+    final isPicker = context.watch<LdMonkeyInteractionMode?>() == LdMonkeyInteractionMode.pick;
+
+    final showClearSelectionButton =
+        !isPicker && selectionControlsVisible && location == LdMonkeyActionLocation.masterSecondary;
+
+    final showSelectionCounter = selectionControlsVisible && location == LdMonkeyActionLocation.masterSecondary;
 
     final monkeyBarConfig = config ??
         switch (location) {
@@ -125,7 +130,7 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
             (monkeyBarConfig?.additionalActions.isEmpty ?? true) &&
             monkeyBarConfig?.appbarConfig?.title == null &&
             monkeyBarConfig?.appbarConfig?.bottom == null &&
-            !showClearSelectionButton;
+            !showSelectionCounter;
 
         final showBar = switch (location) {
           LdMonkeyActionLocation.masterAppBar => true,
@@ -143,7 +148,7 @@ class LdMonkeyAppBar<T extends Identifiable<IdType>, IdType> extends StatelessWi
                 ).animate().scaleXY(),
               false => null,
             },
-            title: showClearSelectionButton
+            title: showSelectionCounter
                 ? LdCounterText.template(
                     LiquidLocalizations.of(context).nItemsSelected(selection.selection.length),
                     value: selection.selection.length.toDouble(),

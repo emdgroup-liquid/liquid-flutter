@@ -4,6 +4,7 @@ import 'package:liquid_flutter/src/monkey/data/fetch_page_parameters.dart';
 import 'package:liquid_flutter/src/monkey/data/identifiable.dart';
 import 'package:liquid_flutter/src/monkey/data/ld_list_cache.dart';
 import 'package:liquid_flutter/src/monkey/data/ld_list_cache_key.dart';
+import 'package:liquid_flutter/src/monkey/data/ld_greedy_fuzzy_search.dart';
 import 'package:liquid_flutter/src/monkey/data/ld_model.dart';
 import 'package:liquid_flutter/src/monkey/filter/ld_filter_option.dart';
 import 'package:liquid_flutter/src/monkey/sort/sort_option.dart';
@@ -259,6 +260,7 @@ class LdCallbackModel<T extends Identifiable<IdType>, IdType, TCreate, TUpdate>
     required List<L> list,
     bool Function(L item, Set<LdFilterOption<L, IdType>>? activeFilters)? filterFunction,
     int Function(L a, L b, List<LdSortOption<L, IdType>>? activeSortOptions)? sortFunction,
+    LdSearchTextExtractor<L>? searchText,
     int pageSize = 50,
   }) {
     return greedy<L, IdType, L, L>(
@@ -271,6 +273,14 @@ class LdCallbackModel<T extends Identifiable<IdType>, IdType, TCreate, TUpdate>
 
         if (filterFunction != null && filters.isNotEmpty) {
           filtered = filtered.where((item) => filterFunction(item, filters)).toList();
+        }
+
+        if (searchText != null) {
+          filtered = ldFuzzySearchFromFilters<L, IdType>(
+            items: filtered,
+            filters: filters,
+            searchText: searchText,
+          );
         }
 
         if (sortFunction != null && sortOptions.isNotEmpty) {

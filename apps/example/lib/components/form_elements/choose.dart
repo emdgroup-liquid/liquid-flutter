@@ -325,12 +325,11 @@ class _TagSelectorSectionState extends State<_TagSelectorSection> {
                 label: 'Tags',
                 value: _selected,
                 onChanged: (ids) => setState(() => _selected = ids),
-                filtersBuilder: (_) async => [],
                 actions: [
                   LdMonkeyBareChildAction<LdSelectItem<String>, String>(
                     appBarOverflowMode: LdAppBarActionOverflowMode.pinned,
                     visibility: {LdMonkeyActionVisibility(location: LdMonkeyActionLocation.masterAppBar)},
-                    builder: (ctx, trigger) => LdButton(
+                    builder: (ctx, trigger) => LdAppBarAction(
                       leading: const Icon(LucideIcons.plus),
                       onPressed: trigger,
                       child: const Text('New tag'),

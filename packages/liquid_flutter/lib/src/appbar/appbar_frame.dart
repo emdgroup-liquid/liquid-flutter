@@ -635,7 +635,7 @@ class _AppBarFrameState extends State<AppBarFrame> {
 
       if (widget.scrollBehavior == LdAppBarScrollBehavior.hidden) {
         _visualTarget = _barHeight + 1;
-        _snapOverriding = false;
+        _snapOverriding = true;
         _hideOffset = _barHeight + 1;
       }
 

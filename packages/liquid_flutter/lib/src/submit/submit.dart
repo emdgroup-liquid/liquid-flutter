@@ -61,6 +61,10 @@ class LdSubmit<T, Arg> extends StatefulWidget {
   final Arg? arg;
   final bool Function(Arg? oldArg, Arg? newArg)? argEquals;
 
+  /// By default will wait for the controller to be initialized before mounting the child.
+  /// This prevents a loader being visible for a split frame.
+  final bool mountChildImmediately;
+
   /// An optional exception mapper scoped to this [LdSubmit] instance.
   ///
   /// This lets you localize exceptions that only occur in this specific
@@ -80,6 +84,7 @@ class LdSubmit<T, Arg> extends StatefulWidget {
     this.config,
     this.controller,
     this.disabled,
+    this.mountChildImmediately = false,
 
     /// Will default to [LdSubmitInlineBuilder] if not provided
     this.child,
@@ -193,7 +198,7 @@ class _LdSubmitState<T, Arg> extends State<LdSubmit<T, Arg>> {
       "You must provide either a config or a controller",
     );
 
-    if (_isInitialRender) {
+    if (_isInitialRender && !widget.mountChildImmediately) {
       return SizedBox.shrink();
     }
 

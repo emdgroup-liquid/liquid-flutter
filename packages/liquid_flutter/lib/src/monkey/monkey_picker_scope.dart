@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 /// Ephemeral monkey picker: search, filter chips, and selection without
@@ -128,8 +129,10 @@ class _LdMonkeyPickerPage<T extends Identifiable<IdType>, IdType> extends Statel
   @override
   Widget build(BuildContext context) {
     final selection = context.watch<LdMonkeySelection<T, IdType>>();
+
+    print('selection: ${selection.selection}');
+
     final canDismiss = ldChooseCanDismissPicker<IdType>(
-      current: selection.selection,
       initial: initialSelection,
       allowEmpty: allowEmpty,
     );
@@ -144,10 +147,19 @@ class _LdMonkeyPickerPage<T extends Identifiable<IdType>, IdType> extends Statel
           debugName: 'LdMonkeyPickerPage',
           body: Provider.value(
             value: LdMonkeyMasterAppbarConfig(
+              appbarConfig: LdAppBarConfig(
+                debugName: 'LdMonkeyPickerAppBar',
+                title: Text(label),
+                bottom: bottom,
+              ),
+            ),
+            child: Provider.value(
+              value: LdMonkeyMasterSecondaryAppbarConfig(
                 appbarConfig: LdAppBarConfig(
-                    debugName: 'LdMonkeyPickerAppBar', title: Text(label), implyFeatures: const {}, bottom: bottom),
+                  attachedMode: LdAppBarAttachedMode.floating,
+                ),
                 additionalActions: [
-                  if (allowEmpty)
+                  if (multiple)
                     LdButton.ghost(
                       disabled: selection.selection.isEmpty,
                       onPressed: () {
@@ -155,23 +167,25 @@ class _LdMonkeyPickerPage<T extends Identifiable<IdType>, IdType> extends Statel
                       },
                       child: const Text('Clear'),
                     ),
-                  LdButton(
+                  LdAppBarAction(
+                    buttonMode: LdButtonMode.filled,
+                    overflowMode: LdAppBarActionOverflowMode.pinned,
                     key: const Key('ldChoose_done'),
-                    disabled: !ldChooseCanConfirmSelection<IdType>(
-                      current: selection.selection,
-                      initial: initialSelection,
-                    ),
+                    disabled: (selection.selection.isEmpty && !allowEmpty),
                     onPressed: () {
                       maybePopContextMenu(context);
                       Navigator.of(context).pop(selection.selection);
                     },
+                    leading: Icon(LucideIcons.check),
                     child: const Text('Done'),
                   ),
-                ]),
-            child: LdMonkeyMasterPage<T, IdType>(
-              allowMultipleSelection: multiple,
-              buildList: buildList,
-              buildItem: (context, item) => itemBuilder(context, item, 0),
+                ],
+              ),
+              child: LdMonkeyMasterPage<T, IdType>(
+                allowMultipleSelection: multiple,
+                buildList: buildList,
+                buildItem: (context, item) => itemBuilder(context, item, 0),
+              ),
             ),
           ),
         ),

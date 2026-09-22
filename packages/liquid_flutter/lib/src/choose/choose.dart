@@ -2,35 +2,33 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../../liquid_flutter.dart';
-import 'choose_lightweight_scope.dart';
 
 /// Whether the picker Done button should be enabled.
 bool ldChooseCanConfirmSelection<IdType>({
-  required Set<IdType> current,
-  required Set<IdType> initial,
+  required Set<IdType> selection,
+  required bool allowEmpty,
 }) {
-  if (!setEquals(current, initial)) {
+  if (allowEmpty) {
     return true;
   }
-  return current.isNotEmpty;
+  return selection.isNotEmpty;
 }
 
 /// Whether the picker can be dismissed via back gesture or modal backdrop.
 bool ldChooseCanDismissPicker<IdType>({
-  required Set<IdType> current,
   required Set<IdType> initial,
   required bool allowEmpty,
 }) {
   if (allowEmpty) {
     return true;
   }
-  return ldChooseCanConfirmSelection<IdType>(
-    current: current,
-    initial: initial,
-  );
+  if (initial.isEmpty) {
+    return true;
+  }
+  return false;
 }
 
 Future<void> ldChoosePrefetchPickerData<T extends Identifiable<IdType>, IdType>({
@@ -76,6 +74,27 @@ Future<void> ldChooseScrollToInitialSelection<T extends Identifiable<IdType>, Id
   }
 
   repository.requestScrollToItem(id);
+}
+
+LdFilterSearch<T, IdType, String> _ldChooseDefaultSearchFilter<T extends Identifiable<IdType>, IdType>({
+  Future<List<String>> Function(String query)? getSuggestions,
+}) {
+  return LdFilterSearch<T, IdType, String>(
+    name: 'search',
+    label: (context) => LiquidLocalizations.of(context).search,
+    icon: (context) => const Icon(LucideIcons.search),
+    getSuggestions: getSuggestions,
+    buildSuggestion: getSuggestions == null
+        ? null
+        : (context, suggestion) {
+            return LdListItem(
+              title: Text(suggestion),
+              onPressed: () {
+                LdSearchAcceptSuggestion(suggestion: suggestion).dispatch(context);
+              },
+            );
+          },
+  );
 }
 
 enum LdChooseMode {
@@ -148,20 +167,22 @@ class LdChoose<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
   final dynamic Function(T)? groupingCriterion;
   final Widget Function(BuildContext context, dynamic criterion, List<LdPaginatorItem<T>>)? groupHeaderBuilder;
 
-  /// Filter definitions for repository-backed pickers ([LdMonkeyPickerScope]).
+  /// Filter definitions for the picker ([LdMonkeyPickerScope]).
+  ///
+  /// When [searchText] is set and this list does not already include a search
+  /// filter, a default search filter is prepended.
   final LdMonkeyFiltersBuilder<T, IdType>? filtersBuilder;
 
-  /// Sort options for repository-backed pickers.
+  /// Sort options for the picker.
   final LdMonkeySortOptionsBuilder<T, IdType>? sortOptionsBuilder;
 
-  /// Chip bar configs for repository-backed pickers.
+  /// Chip bar configs for the picker.
   final List<LdFilterChipConfig<T, IdType>>? filterChipConfigs;
 
   /// Extracts searchable text for [fromList] / fuzzy local filtering.
   final LdSearchTextExtractor<T>? searchText;
 
-  /// Actions shown in the picker's app bar (repository-backed / monkey picker
-  /// path only — requires [filtersBuilder] to be set alongside [repository]).
+  /// Actions shown in the picker's app bar.
   final List<LdMonkeyAction<T, IdType>> actions;
 
   const LdChoose({
@@ -192,10 +213,9 @@ class LdChoose<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
   })  : assert(items != null || repository != null, 'Either items or repository must be provided'),
         assert(items == null || repository == null, 'Cannot provide both items and repository');
 
-  /// Convenience constructor that creates an LdChoose from a list of LdSelectItem.
+  /// Convenience constructor that creates an LdChoose from a static list.
   ///
-  /// This constructor automatically creates a repository from the items and
-  /// uses the child widget from each LdSelectItem for rendering.
+  /// Builds an in-memory repository via [LdCallbackModel.fromList].
   static LdChoose<T, IdType> fromList<T extends Identifiable<IdType>, IdType>({
     required List<T> items,
     required Function(Set<IdType>) onChanged,
@@ -217,9 +237,7 @@ class LdChoose<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
   }) {
     return LdChoose<T, IdType>(
       items: items,
-      itemBuilder: (context, item, index) {
-        return itemBuilder(context, item, index);
-      },
+      itemBuilder: itemBuilder,
       selectedItemBuilder: selectedItemBuilder,
       value: value,
       allowEmpty: allowEmpty,
@@ -236,6 +254,18 @@ class LdChoose<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
       searchText: searchText,
       key: key,
     );
+  }
+
+  static LdSearchTextExtractor<LdSelectItem<T>>? _selectItemSearchText<T>(
+    List<LdSelectItem<T>> items,
+  ) {
+    final hasSearchStrings = items.any(
+      (item) => item.searchString?.isNotEmpty ?? false,
+    );
+    if (!hasSearchStrings) {
+      return null;
+    }
+    return (item) => item.searchString ?? '';
   }
 
   static LdChoose<LdSelectItem<T>, T> fromSelectItems<T>({
@@ -278,12 +308,10 @@ class LdChoose<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
       size: size,
       truncateDisplay: truncateDisplay,
       triggerBuilder: triggerBuilder,
-      searchText: searchText,
+      searchText: searchText ?? _selectItemSearchText(items),
       key: key,
     );
   }
-
-  bool get _usesMonkeyPicker => repository != null && filtersBuilder != null;
 
   @override
   State<LdChoose<T, IdType>> createState() => _LdChooseState<T, IdType>();
@@ -292,34 +320,15 @@ class LdChoose<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
 class _LdChooseState<T extends Identifiable<IdType>, IdType> extends State<LdChoose<T, IdType>> {
   late LdListController<T, IdType> _repository;
   bool _ownsRepository = false;
-  LdSearchTextExtractor<T>? _effectiveSearchText;
 
   @override
   void initState() {
     super.initState();
-    _effectiveSearchText = _resolveSearchText();
     if (widget.items != null && widget.repository == null) {
-      final items = widget.items!;
-      final searchText = _effectiveSearchText;
       _repository = LdListController(
-        LdCallbackModel.greedy<T, IdType, T, T>(
-          getById: (context, id) async => items.firstWhere((item) => item.id == id),
-          fetchListWithParameters: (parameters) async {
-            var filtered = items.toList();
-            final filters = parameters.filters;
-            if (searchText != null && filters.isNotEmpty) {
-              filtered = ldFuzzySearchFromFilters<T, IdType>(
-                items: filtered,
-                filters: filters,
-                searchText: searchText,
-              );
-            }
-            return LdListPage<T>(
-              newItems: filtered.skip(parameters.offset).take(parameters.pageSize).toList(),
-              hasMore: parameters.offset + parameters.pageSize < filtered.length,
-              total: filtered.length,
-            );
-          },
+        LdCallbackModel.fromList<T, IdType>(
+          list: widget.items!,
+          searchText: widget.searchText,
         ),
       );
       _repository.initialOffset = 0;
@@ -328,30 +337,6 @@ class _LdChooseState<T extends Identifiable<IdType>, IdType> extends State<LdCho
       _repository = widget.repository!;
       _ownsRepository = false;
     }
-  }
-
-  LdSearchTextExtractor<T>? _resolveSearchText() {
-    if (widget.searchText != null) {
-      return widget.searchText;
-    }
-    if (widget.items == null) {
-      return null;
-    }
-    final hasSearchStrings = widget.items!.any((item) {
-      if (item is LdSelectItem<dynamic>) {
-        return (item as LdSelectItem<dynamic>).searchString?.isNotEmpty ?? false;
-      }
-      return false;
-    });
-    if (!hasSearchStrings) {
-      return null;
-    }
-    return (item) {
-      if (item is LdSelectItem<dynamic>) {
-        return (item as LdSelectItem<dynamic>).searchString ?? '';
-      }
-      return item.toString();
-    };
   }
 
   Future<List<T>> _fetchSelectedItems(List<IdType> ids) async {
@@ -366,62 +351,96 @@ class _LdChooseState<T extends Identifiable<IdType>, IdType> extends State<LdCho
     super.dispose();
   }
 
+  Future<List<String>> _getSearchSuggestions(String query) async {
+    final searchText = widget.searchText;
+    final sourceItems = widget.items;
+    if (searchText == null || sourceItems == null || query.trim().isEmpty) {
+      return [];
+    }
+
+    final lowerQuery = query.toLowerCase();
+    final seen = <String>{};
+    final suggestions = <String>[];
+
+    for (final item in sourceItems) {
+      final text = searchText(item);
+      if (text.isEmpty) {
+        continue;
+      }
+      if (text.toLowerCase().startsWith(lowerQuery) && seen.add(text)) {
+        suggestions.add(text);
+      }
+    }
+
+    return suggestions;
+  }
+
+  Future<List<LdFilterOption<T, IdType>>> _effectiveFiltersBuilder(BuildContext context) async {
+    final userFilters =
+        widget.filtersBuilder == null ? <LdFilterOption<T, IdType>>[] : await widget.filtersBuilder!(context);
+    if (widget.searchText == null) {
+      return userFilters;
+    }
+    final hasSearch = userFilters.any(
+      (filter) => filter is LdFilterSearch<T, IdType, dynamic>,
+    );
+    if (hasSearch) {
+      return userFilters;
+    }
+    return [
+      _ldChooseDefaultSearchFilter<T, IdType>(
+        getSuggestions: widget.items == null ? null : _getSearchSuggestions,
+      ),
+      ...userFilters,
+    ];
+  }
+
   Widget _buildPickerPage(BuildContext context) {
     final label = widget.label ?? LiquidLocalizations.of(context).choose;
 
-    if (widget._usesMonkeyPicker) {
-      return LdMonkeyPickerScope<T, IdType>(
-        repository: _repository,
-        itemBuilder: widget.itemBuilder,
-        initialSelection: widget.value ?? <IdType>{},
-        multiple: widget.multiple,
-        allowEmpty: widget.allowEmpty,
-        label: label,
-        filtersBuilder: widget.filtersBuilder,
-        sortOptionsBuilder: widget.sortOptionsBuilder,
-        filterChipConfigs: widget.filterChipConfigs,
-        actions: widget.actions,
-        buildList: widget.groupingCriterion == null
-            ? null
-            : (context, repository) {
-                return LdListConfigProvider<T, IdType>(
-                  config: LdListConfig<T, IdType>(
-                    paginator: repository,
-                    itemBuilder: (ctx, item, index) => widget.itemBuilder(
-                      ctx,
-                      LdPaginatorItem(value: item.value, state: item.state),
-                      index,
-                    ),
-                    groupingCriterion: widget.groupingCriterion,
-                    groupHeaderBuilder: widget.groupHeaderBuilder,
-                    padding: MediaQuery.paddingOf(context),
-                  ),
-                  child: LdSelectableList<T, IdType>(
-                    listController: repository,
-                    initialSelectedItems: widget.value ?? <IdType>{},
-                    multiSelect: widget.multiple,
-                    showSelectionControls: true,
-                    onSelectionChange: (selected) {
-                      LdMonkeySelection.updateSelection<T, IdType>(context, selected);
-                    },
-                    child: LdList<T, IdType>(),
-                  ),
-                );
-              },
-      );
-    }
-
-    return LdChooseLightweightScope<T, IdType>(
+    return LdMonkeyPickerScope<T, IdType>(
       repository: _repository,
       itemBuilder: widget.itemBuilder,
       initialSelection: widget.value ?? <IdType>{},
       multiple: widget.multiple,
       allowEmpty: widget.allowEmpty,
       label: label,
-      searchText: _effectiveSearchText,
-      searchSourceItems: widget.items,
-      groupingCriterion: widget.groupingCriterion,
-      groupHeaderBuilder: widget.groupHeaderBuilder,
+      filtersBuilder: _effectiveFiltersBuilder,
+      sortOptionsBuilder: widget.sortOptionsBuilder,
+      filterChipConfigs: widget.filterChipConfigs,
+      actions: widget.actions,
+      buildList: widget.groupingCriterion == null
+          ? null
+          : (context, repository) {
+              return LdListConfigProvider<T, IdType>(
+                config: LdListConfig<T, IdType>(
+                  paginator: repository,
+                  separatorBuilder: (_) {
+                    return LdDivider(
+                      insetForLeading: true,
+                    );
+                  },
+                  itemBuilder: (ctx, item, index) => widget.itemBuilder(
+                    ctx,
+                    LdPaginatorItem(value: item.value, state: item.state),
+                    index,
+                  ),
+                  groupingCriterion: widget.groupingCriterion,
+                  groupHeaderBuilder: widget.groupHeaderBuilder,
+                  padding: MediaQuery.paddingOf(context),
+                ),
+                child: LdSelectableList<T, IdType>(
+                  listController: repository,
+                  initialSelectedItems: widget.value ?? <IdType>{},
+                  multiSelect: widget.multiple,
+                  showSelectionControls: true,
+                  onSelectionChange: (selected) {
+                    LdMonkeySelection.updateSelection<T, IdType>(context, selected);
+                  },
+                  child: LdList<T, IdType>(),
+                ),
+              );
+            },
     );
   }
 
@@ -564,144 +583,5 @@ class _LdChooseState<T extends Identifiable<IdType>, IdType> extends State<LdCho
         },
       ),
     );
-  }
-}
-
-class LdChoosePage<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
-  final LdListController<T, IdType> repository;
-  final Widget Function(BuildContext context, LdPaginatorItem<T> item, int index) itemBuilder;
-  final Set<IdType> initialSelectedItems;
-  final bool multiple;
-  final bool allowEmpty;
-  final dynamic Function(T)? groupingCriterion;
-  final Widget Function(BuildContext context, dynamic criterion, List<LdPaginatorItem<T>>)? groupHeaderBuilder;
-  final String label;
-  final bool useMonkeySearch;
-
-  const LdChoosePage({
-    required this.repository,
-    required this.itemBuilder,
-    required this.initialSelectedItems,
-    required this.multiple,
-    required this.allowEmpty,
-    required this.label,
-    required this.groupingCriterion,
-    required this.groupHeaderBuilder,
-    this.useMonkeySearch = false,
-    super.key,
-  });
-
-  @override
-  State<LdChoosePage<T, IdType>> createState() => LdChoosePageState<T, IdType>();
-}
-
-class LdChoosePageState<T extends Identifiable<IdType>, IdType> extends State<LdChoosePage<T, IdType>> {
-  final GlobalKey<LdSelectableListState<T, IdType>> _listKey = GlobalKey();
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ldChooseScrollToInitialSelection<T, IdType>(
-        context: context,
-        repository: widget.repository,
-        initialSelection: widget.initialSelectedItems,
-      );
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final searchFilter = widget.useMonkeySearch ? ldChooseSearchFilter<T, IdType>(context) : null;
-    final selectedItems = context.select<LdMonkeySelection<T, IdType>?, Set<IdType>>(
-      (selection) => selection?.selection ?? widget.initialSelectedItems,
-    );
-    final canDismiss = ldChooseCanDismissPicker<IdType>(
-      current: selectedItems,
-      initial: widget.initialSelectedItems,
-      allowEmpty: widget.allowEmpty,
-    );
-
-    final body = LdListConfigProvider<T, IdType>(
-      config: LdListConfig<T, IdType>(
-        paginator: widget.repository,
-        itemBuilder: (ctx, item, index) => widget.itemBuilder(
-          ctx,
-          LdPaginatorItem(value: item.value, state: item.state),
-          index,
-        ),
-        groupingCriterion: widget.groupingCriterion,
-        groupHeaderBuilder: widget.groupHeaderBuilder,
-        padding: widget.groupingCriterion == null ? null : MediaQuery.paddingOf(context),
-      ),
-      child: LdSelectableList<T, IdType>(
-        key: _listKey,
-        listController: widget.repository,
-        initialSelectedItems: widget.initialSelectedItems,
-        multiSelect: widget.multiple,
-        showSelectionControls: true,
-        onSelectionChange: (items) {
-          LdMonkeySelection.updateSelection<T, IdType>(context, items);
-        },
-        child: LdList<T, IdType>(),
-      ),
-    );
-
-    return PopScope(
-      canPop: canDismiss,
-      child: LdScaffold(
-        debugName: 'LdChoosePage',
-        body: LdAppBar(
-          debugName: 'LdChoosePageAppBar',
-          title: Text(widget.label),
-          scrollBehavior: LdAppBarScrollBehavior.static,
-          attachedMode: LdAppBarAttachedMode.attached,
-          backgroundMode: LdAppBarBackgroundMode.visible,
-          borderMode: LdAppBarBorderMode.visible,
-          shadowMode: LdAppBarShadowMode.visible,
-          implyFeatures: const {},
-          searchConfig: searchFilter?.searchConfig((query) {
-            searchFilter.update(
-              context,
-              searchFilter.copyWith(
-                isOn: query.isNotEmpty,
-                searchText: query,
-              ),
-            );
-          }),
-          actions: [
-            if (widget.allowEmpty)
-              LdAppBarAction(
-                overflowMode: LdAppBarActionOverflowMode.pinned,
-                buttonMode: LdButtonMode.ghost,
-                disabled: selectedItems.isEmpty,
-                onPressed: () {
-                  LdMonkeySelection.updateSelection<T, IdType>(context, {});
-                  _listKey.currentState?.syncSelection({});
-                },
-                child: const Text('Clear'),
-              ),
-            LdAppBarAction(
-              overflowMode: LdAppBarActionOverflowMode.pinned,
-              disabled: !ldChooseCanConfirmSelection<IdType>(
-                current: selectedItems,
-                initial: widget.initialSelectedItems,
-              ),
-              key: const Key('ldChoose_done'),
-              onPressed: () {
-                maybePopContextMenu(context);
-                Navigator.of(context).pop(selectedItems);
-              },
-              child: const Text('Done'),
-            ),
-          ],
-          child: body,
-        ),
-      ),
-    );
-  }
-
-  static LdChoosePageState<T, IdType>? of<T extends Identifiable<IdType>, IdType>(BuildContext context) {
-    return context.findAncestorStateOfType<LdChoosePageState<T, IdType>>();
   }
 }

@@ -36,7 +36,7 @@ class LdTaskDetailForm extends StatelessWidget {
   }
 
   void _onCreated(BuildContext context, Task? task) {
-    taskRouteConfig.pushDetailRoute(context, {task!.id});
+    taskRouteConfig.replaceDetailRoute(context, {task!.id});
   }
 
   @override

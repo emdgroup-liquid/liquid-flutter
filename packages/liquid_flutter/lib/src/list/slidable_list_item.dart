@@ -690,26 +690,20 @@ class _LdSlidableListItemState extends State<LdSlidableListItem> {
       builder: (context, state, springChild) {
         return Transform.translate(
           offset: Offset(state.position, 0),
-          child: Container(
-            margin: EdgeInsets.symmetric(
-              vertical: state.position.abs().clamp(0, 10),
-              horizontal: state.position.abs().clamp(0, 10),
-            ),
-            child: LdListItemConfigProvider(
-              config: LdListItemConfig(
-                active: state.position.abs() > 5,
-                shadow: ldShadowDefault.copyWith(
-                  blurRadius: state.position.abs().clamp(0, 10),
-                ),
-                borderRadius: BorderRadius.circular(
-                  state.position.abs().clamp(
-                        0,
-                        theme.radiusSize(LdSize.m),
-                      ),
-                ),
+          child: LdListItemConfigProvider(
+            config: LdListItemConfig(
+              active: state.position.abs() > 5,
+              shadow: ldShadowDefault.copyWith(
+                blurRadius: state.position.abs().clamp(0, 10),
               ),
-              child: springChild!,
+              borderRadius: BorderRadius.circular(
+                state.position.abs().clamp(
+                      0,
+                      theme.radiusSize(LdSize.m),
+                    ),
+              ),
             ),
+            child: springChild!,
           ),
         );
       },
@@ -836,10 +830,10 @@ class _LdSlideActionCell extends StatelessWidget {
         curve: Curves.easeOut,
         color: background.withAlpha(isCommitTarget ? 255 : 0),
         child: Center(
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -850,14 +844,13 @@ class _LdSlideActionCell extends StatelessWidget {
                       color: isCommitTarget ? foreground : previewForeground,
                       size: theme.labelSize(LdSize.l),
                     ),
-                  if (action.icon != null && action.label != null) ldSpacerXS,
                   if (action.label != null)
                     LdText.l(
                       action.label!,
                       color: isCommitTarget ? foreground : previewForeground,
                     ),
                 ],
-              ),
+              ).spaceXS(),
             ),
           ),
         ),

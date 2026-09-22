@@ -5,14 +5,12 @@ import 'package:provider/provider.dart';
 class LdSubmitButton<T, Arg> extends StatelessWidget {
   final Widget? leading;
   final Widget? trailing;
-  final LdSize size;
   final LdColor? color;
 
   const LdSubmitButton({
     super.key,
     this.leading,
     this.trailing,
-    this.size = LdSize.m,
     this.color,
   });
 
@@ -22,7 +20,6 @@ class LdSubmitButton<T, Arg> extends StatelessWidget {
     final state = controller.state;
 
     return LdButton(
-      size: size,
       color: color,
       leading: leading,
       trailing: trailing,

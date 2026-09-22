@@ -218,6 +218,7 @@ class LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Stat
 
   void _tryScrollToInitialSelection(Set<IdType> initialSelectedItems) async {
     if (initialSelectedItems.isEmpty) {
+      print('initialSelectedItems is empty');
       return;
     }
     final listController = widget.listController is LdListController<T, IdType>
@@ -281,9 +282,28 @@ class LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Stat
 
       final laidOutIndex = listController?.getItemIndexById(id);
       if (laidOutIndex != null && averageHeight > 0) {
+        // We scroll to the target position plus half a page, to ensure
+        // the item is somewhat centered.
         final halfPage = _scrollController.position.viewportDimension / 2;
-        _scrollController.animateTo(max(0, laidOutIndex.toDouble() * averageHeight - halfPage),
-            duration: const Duration(milliseconds: 300), curve: Curves.easeInOut);
+
+        final targetPosition = laidOutIndex.toDouble() * averageHeight - halfPage;
+
+        final currentPosition = _scrollController.position.pixels;
+
+        // Skip the scroll, if we are already close
+        if ((targetPosition - currentPosition).abs() < halfPage) {
+          return;
+        }
+
+        _scrollController.animateTo(
+          max(
+            0,
+            targetPosition,
+          ),
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+
         _selectionController.getFocusNodeForItem(id).requestFocus();
       }
     }

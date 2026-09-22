@@ -574,11 +574,15 @@ class _LdFormState<
                 },
                 actions: [
                   LdFlexibleChild(
-                    child: LdFormResetButton(),
-                  ),
-                  LdFlexibleChild(
                     flex: 2,
-                    child: LdFormSubmitButton(),
+                    child: LdButtonConfigProvider(
+                      config: LdButtonConfig(
+                        mode: LdButtonMode.filled,
+                        size: LdSize.l,
+                        width: double.infinity,
+                      ),
+                      child: LdFormSubmitButton(),
+                    ),
                   ),
                 ],
                 child: child,

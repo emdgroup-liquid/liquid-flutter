@@ -287,6 +287,12 @@ abstract class LiquidLocalizations {
   /// **'Delete selected'**
   String get deleteSelected;
 
+  /// No description provided for @deleting.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleting...'**
+  String get deleting;
+
   /// No description provided for @deleteNItems.
   ///
   /// In en, this message translates to:

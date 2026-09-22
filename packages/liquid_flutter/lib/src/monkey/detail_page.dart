@@ -13,13 +13,14 @@ class LdMonkeyScrollableDetailPage<T extends Identifiable<IdType>, IdType> exten
   @override
   Widget build(BuildContext context) {
     return LdScaffold(
-        body: LdMonkeyDetailAppBars<T, IdType>(
-      child: LdMonkeyViewingBuilder<T, IdType>(
-        builder: (context, items) => LdScaffoldBody(
-          children: builder(context, items),
+      body: LdMonkeyDetailAppBars<T, IdType>(
+        child: LdMonkeyViewingBuilder<T, IdType>(
+          builder: (context, items) => LdScaffoldBody(
+            children: builder(context, items),
+          ),
         ),
       ),
-    ));
+    );
   }
 }
 
@@ -38,25 +39,26 @@ class LdMonkeySingleDetailPage<T extends Identifiable<IdType>, IdType> extends S
   Widget build(BuildContext context) {
     return LdScaffold(
       body: LdMonkeyViewingBuilder<T, IdType>(
-        builder: (context, items) => items.isEmpty
-            ? const SizedBox.shrink()
-            : LdWrapConditional(
-                condition: titleBuilder != null,
-                builder: (context, child) {
-                  final existingConfig = context.watch<LdMonkeyDetailAppbarConfig?>() ??
-                      LdMonkeyDetailAppbarConfig(appbarConfig: LdAppBarConfig());
+        builder: (context, items) => LdWrapConditional(
+          condition: titleBuilder != null,
+          builder: (context, child) {
+            final existingConfig = context.watch<LdMonkeyDetailAppbarConfig?>() ??
+                LdMonkeyDetailAppbarConfig(appbarConfig: LdAppBarConfig());
 
-                  return Provider.value(
-                    value: LdMonkeyDetailAppbarConfig(
-                        appbarConfig:
-                            existingConfig.appbarConfig?.copyWith(title: titleBuilder!(context, items.first))),
-                    child: child,
-                  );
-                },
-                child: LdMonkeyDetailAppBars<T, IdType>(
-                  child: builder(context, items.first),
-                ),
-              ),
+            return Provider.value(
+              value: LdMonkeyDetailAppbarConfig(
+                  appbarConfig: existingConfig.appbarConfig?.copyWith(title: titleBuilder!(context, items.first))),
+              child: child,
+            );
+          },
+          child: LdMonkeyDetailAppBars<T, IdType>(
+            child: items.isNotEmpty
+                ? builder(context, items.first)
+                : LdScaffoldBodyCentered(
+                    child: LdLoader(),
+                  ),
+          ),
+        ),
       ),
     );
   }
@@ -83,7 +85,7 @@ class LdMonkeyDetailAppBars<T extends Identifiable<IdType>, IdType> extends Stat
   }
 }
 
-class LdMonkeyViewingBuilder<T extends Identifiable<IdType>, IdType> extends StatelessWidget {
+class LdMonkeyViewingBuilder<T extends Identifiable<IdType>, IdType> extends StatefulWidget {
   final Widget Function(BuildContext context, List<LdPaginatorItem<T>> items) builder;
 
   final bool loadItems;
@@ -97,27 +99,61 @@ class LdMonkeyViewingBuilder<T extends Identifiable<IdType>, IdType> extends Sta
   });
 
   @override
-  Widget build(BuildContext context) {
-    final viewing = LdMonkeySelection.of<T, IdType>(context, listen: true).viewing;
+  State<LdMonkeyViewingBuilder<T, IdType>> createState() => _LdMonkeyViewingBuilderState<T, IdType>();
+}
 
+class _LdMonkeyViewingBuilderState<T extends Identifiable<IdType>, IdType>
+    extends State<LdMonkeyViewingBuilder<T, IdType>> {
+  Set<IdType> _viewing = {};
+
+  Future<void> _onViewingChanged(Set<IdType> viewing) async {
+    // When viewing is cleared, we wait for a short delay to prevent a
+    // flash of the lodaer when the user is navigating back to the list.
+
+    if (_viewing.isNotEmpty && viewing.isEmpty) {
+      await Future.delayed(const Duration(milliseconds: 500));
+    }
+    if (mounted) {
+      setState(() {
+        _viewing = viewing;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  didChangeDependencies() {
+    super.didChangeDependencies();
+
+    if (!setEquals(_viewing, LdMonkeySelection.of<T, IdType>(context).viewing)) {
+      _onViewingChanged(LdMonkeySelection.of<T, IdType>(context, listen: true).viewing);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    LdMonkeySelection.of<T, IdType>(context, listen: true);
     return LdWrapConditional(
-      condition: loadItems,
+      condition: widget.loadItems,
       builder: (context, child) {
         return _LdMonkeyViewingItemLoader<T, IdType>(
-          ids: viewing,
+          ids: _viewing,
           builder: (context, items) => child,
         );
       },
       child: _RepositoryWatchItems<T, IdType>(
-        viewing: viewing,
+        viewing: _viewing,
         builder: (context) {
           final listController = LdListController.of<T, IdType>(context);
 
-          if (viewing.isEmpty) {
-            return const SizedBox.shrink();
-          }
-
-          return builder(context, viewing.map((id) => listController.getItemById(id)).nonNulls.toList());
+          return widget.builder(
+            context,
+            _viewing.map((id) => listController.getItemById(id)).nonNulls.toList(),
+          );
         },
       ),
     );
@@ -140,6 +176,7 @@ class _LdMonkeyViewingItemLoader<T extends Identifiable<IdType>, IdType> extends
     return LdSubmit<List<LdPaginatorItem<T>>, Set<IdType>>(
       arg: ids,
       argEquals: (a, b) => setEquals(a, b),
+      mountChildImmediately: true,
       config: LdSubmitConfig(
         autoTrigger: true,
         allowResubmit: true,

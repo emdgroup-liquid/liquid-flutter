@@ -32,7 +32,7 @@ LdMonkeyAction<T, IdType> deleteAction<T extends Identifiable<IdType>, IdType>({
         SingleActivator(LogicalKeyboardKey.backspace),
       },
       submitConfig: (appContext) => LdMonkeySubmitConfig(
-        loadingText: LiquidLocalizations.of(appContext).loading,
+        loadingText: LiquidLocalizations.of(appContext).deleting,
       ),
       onSubmit: (ctx) async {
         final deletedIds = {...ctx.selectedIds};
@@ -68,6 +68,8 @@ LdMonkeyAction<T, IdType> deleteAction<T extends Identifiable<IdType>, IdType>({
               context: ctx.appContext,
               ids: deletedIds,
             );
+
+        ctx.updateShowSelectionControls(false);
       },
       childBuilder: (context) {
         return Text(

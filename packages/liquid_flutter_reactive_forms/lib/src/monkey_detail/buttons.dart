@@ -14,7 +14,8 @@ class LdFormSubmitButton extends StatelessWidget {
     final form = ReactiveForm.of(context)!;
 
     return LdSubmit<void, void>(
-      disabled: !form.dirty || formState.isMergeInProgress || formState.isSaving,
+      disabled:
+          !form.dirty || formState.isMergeInProgress || formState.isSaving,
       config: LdSubmitConfig(
         submitText: switch (formState.mode) {
           LdFormMode.edit => LiquidLocalizations.of(context).save,
@@ -34,14 +35,16 @@ class LdFormSubmitButton extends StatelessWidget {
 }
 
 class LdFormResetButton extends StatelessWidget {
-  const LdFormResetButton({super.key});
+  final LdButtonMode mode;
+  const LdFormResetButton({super.key, this.mode = LdButtonMode.outline});
 
   @override
   Widget build(BuildContext context) {
     final form = ReactiveForm.of(context)!;
     final formState = context.watch<LdFormState>();
 
-    return LdButton.outline(
+    return LdButton(
+      mode: mode,
       color: LdTheme.of(context).error,
       onPressed: () async {
         final confirm = await ldConfirmModal(
@@ -58,7 +61,8 @@ class LdFormResetButton extends StatelessWidget {
           formState.onReset();
         }
       },
-      disabled: !form.dirty || formState.isMergeInProgress || formState.isSaving,
+      disabled:
+          !form.dirty || formState.isMergeInProgress || formState.isSaving,
       leading: Icon(LucideIcons.x),
       child: Text(LiquidLocalizations.of(context).discardChanges),
     );

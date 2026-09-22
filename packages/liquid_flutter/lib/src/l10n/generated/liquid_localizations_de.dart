@@ -107,6 +107,9 @@ class LiquidLocalizationsDe extends LiquidLocalizations {
   String get deleteSelected => 'Delete selected';
 
   @override
+  String get deleting => 'Deleting...';
+
+  @override
   String deleteNItems(num items) {
     String _temp0 = intl.Intl.pluralLogic(
       items,

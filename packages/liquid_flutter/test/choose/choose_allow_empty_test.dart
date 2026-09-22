@@ -76,7 +76,7 @@ void main() {
     await tester.tap(find.byKey(const Key('ldChoose_trigger')));
     await tester.pumpAndSettle();
 
-    final doneButton = tester.widget<LdAppBarAction>(find.byKey(const Key('ldChoose_done')));
+    final doneButton = tester.widget<LdButton>(find.byKey(const Key('ldChoose_done')));
     expect(doneButton.disabled, isTrue);
 
     await tester.tap(find.byKey(const Key('ldChoose_done')));
@@ -110,13 +110,13 @@ void main() {
     await tester.tap(find.byKey(const Key('ldChoose_trigger')));
     await tester.pumpAndSettle();
 
-    final doneButton = tester.widget<LdAppBarAction>(find.byKey(const Key('ldChoose_done')));
+    final doneButton = tester.widget<LdButton>(find.byKey(const Key('ldChoose_done')));
     expect(doneButton.disabled, isTrue);
 
     await tester.tap(find.text('Apple pie'));
     await tester.pumpAndSettle();
 
-    final enabledDoneButton = tester.widget<LdAppBarAction>(find.byKey(const Key('ldChoose_done')));
+    final enabledDoneButton = tester.widget<LdButton>(find.byKey(const Key('ldChoose_done')));
     expect(enabledDoneButton.disabled, isFalse);
   });
 
@@ -153,7 +153,7 @@ void main() {
     await tester.tap(find.text('Clear'));
     await tester.pumpAndSettle();
 
-    final doneButton = tester.widget<LdAppBarAction>(find.byKey(const Key('ldChoose_done')));
+    final doneButton = tester.widget<LdButton>(find.byKey(const Key('ldChoose_done')));
     expect(doneButton.disabled, isFalse);
 
     await tester.tap(find.byKey(const Key('ldChoose_done')));
@@ -193,7 +193,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      tester.widget<LdAppBarAction>(find.byKey(const Key('ldChoose_done'))).disabled,
+      tester.widget<LdButton>(find.byKey(const Key('ldChoose_done'))).disabled,
       isFalse,
     );
 
@@ -201,7 +201,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      tester.widget<LdAppBarAction>(find.byKey(const Key('ldChoose_done'))).disabled,
+      tester.widget<LdButton>(find.byKey(const Key('ldChoose_done'))).disabled,
       isTrue,
     );
   });

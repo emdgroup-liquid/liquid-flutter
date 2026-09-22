@@ -43,6 +43,12 @@ class LdMonkeyRouteConfig<T extends Identifiable<IdType>, IdType> {
     return context.pushNamed<T>(detailRouteName, pathParameters: {viewingParamName: pathParameters});
   }
 
+  /// Replace the detail route with the given ids
+  void replaceDetailRoute(BuildContext context, Set<IdType> ids) async {
+    final pathParameters = serialiseIdType(ids);
+    return context.replaceNamed(detailRouteName, pathParameters: {viewingParamName: pathParameters});
+  }
+
   /// Push the create route
   Future<T?> pushCreateRoute(BuildContext context) async {
     return context.pushNamed<T>(createRouteName);

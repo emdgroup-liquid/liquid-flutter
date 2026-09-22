@@ -3,6 +3,19 @@ import 'package:liquid/demos/task_demo/demo_data.dart';
 import 'package:liquid/demos/task_demo/task.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
+/// Flip this to simulate network latency in the task demo repository.
+const kTaskDemoSimulateNetworkDelay = true;
+
+const _listDelay = Duration(milliseconds: 400);
+const _readDelay = Duration(milliseconds: 400);
+const _writeDelay = Duration(milliseconds: 1000);
+
+Future<void> _maybeDelay(Duration duration) async {
+  if (kTaskDemoSimulateNetworkDelay) {
+    await Future.delayed(duration);
+  }
+}
+
 List<Task> applyFiltersAndSorting(
   List<Task> data,
   Set<LdFilterOption<Task, int>>? filters,
@@ -50,6 +63,7 @@ List<Task> applyFiltersAndSorting(
 LdCallbackModel<Task, int, Task, Task> taskModel(BuildContext context) => LdCallbackModel<Task, int, Task, Task>(
   pageSize: 5,
   getOffsetByIdFn: (params) async {
+    await _maybeDelay(_readDelay);
     return applyFiltersAndSorting(
       testData,
       params.filters,
@@ -57,10 +71,11 @@ LdCallbackModel<Task, int, Task, Task> taskModel(BuildContext context) => LdCall
     ).indexWhere((element) => element.id == params.id);
   },
   getById: (context, id) async {
+    await _maybeDelay(_readDelay);
     return testData.firstWhere((element) => element.id == id);
   },
   fetchListWithParameters: (parameters) async {
-    await Future.delayed(const Duration(milliseconds: 200));
+    await _maybeDelay(_listDelay);
 
     if (!context.mounted) {
       return LdListPage<Task>(newItems: [], hasMore: false, total: 0);
@@ -75,10 +90,12 @@ LdCallbackModel<Task, int, Task, Task> taskModel(BuildContext context) => LdCall
     );
   },
   deleteItem: (context, id) async {
+    await _maybeDelay(_writeDelay);
     testData.removeWhere((element) => element.id == id);
-    await Future.delayed(const Duration(milliseconds: 500));
   },
   updateItem: (context, id, newItem) async {
+    print('updating item: $newItem');
+    await _maybeDelay(_writeDelay);
     final index = testData.indexWhere((element) => element.id == id);
     final previous = testData[index];
     newItem = newItem.copyWith(lastUpdate: DateTime.now());
@@ -100,15 +117,18 @@ LdCallbackModel<Task, int, Task, Task> taskModel(BuildContext context) => LdCall
     }
 
     testData[index] = newItem;
-    await Future.delayed(const Duration(milliseconds: 500));
+
+    print('updated item: $newItem');
     return newItem;
   },
   createItem: (context, item) async {
+    await _maybeDelay(_writeDelay);
     testData.add(item);
 
     return item;
   },
   reorderItem: (context, item, fromIndex, toIndex, activeSortOption) async {
+    await _maybeDelay(_writeDelay);
     return item.copyWith(order: toIndex, lastUpdate: DateTime.now());
   },
 );
