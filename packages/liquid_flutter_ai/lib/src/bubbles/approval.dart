@@ -74,12 +74,15 @@ class LdApprovalCard extends StatelessWidget {
                   child: switch (item.status) {
                     LdApprovalStatus.pending => LdIndicator.info(
                       key: const Key('request_pending'),
+                      size: LdSize.l,
                     ),
                     LdApprovalStatus.approved => LdIndicator.success(
                       key: const Key('request_approved'),
+                      size: LdSize.l,
                     ),
                     LdApprovalStatus.denied => LdIndicator.error(
                       key: const Key('request_denied'),
+                      size: LdSize.l,
                     ),
                   },
                 ),
@@ -89,7 +92,7 @@ class LdApprovalCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     defaultSpacing: LdSize.xs,
                     children: [
-                      LdText.l(item.title),
+                      LdText.h(item.title),
                       if (hasDescription)
                         LdText.p(
                           item.description!,

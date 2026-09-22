@@ -6,6 +6,79 @@ import 'package:liquid_flutter_ai_shared/liquid_flutter_ai_shared.dart';
 import 'package:liquid_flutter_md/liquid_flutter_md.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+final ldCalendarEvent = ldCatalogItem(
+  name: 'LdCalendarEvent',
+  schema: ldCalendarEventSchema,
+  parse: LdCalendarEventData.fromJson,
+  builder: (ctx, data) => LdCalendarEvent(catalogContext: ctx, data: data),
+);
+
+class LdCalendarEvent extends StatelessWidget {
+  const LdCalendarEvent({
+    super.key,
+    required this.catalogContext,
+    required this.data,
+  });
+
+  final CatalogItemContext catalogContext;
+  final LdCalendarEventData data;
+
+  @override
+  Widget build(BuildContext context) {
+    final when = _formatEventWhen(
+      start: data.startDate,
+      end: data.endDate,
+      allDay: data.allDay,
+    );
+    final location = data.location;
+    final description = data.description;
+    final action = data.action;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        LdBadge(
+          symmetric: true,
+          size: LdSize.l,
+          child: Icon(LucideIcons.calendar),
+        ),
+        Expanded(
+          child: LdAutoSpace(
+            children: [
+              LdText.h(data.title),
+              LdMute(
+                child: LdHorizontalScroll(
+                  children: [
+                    if (when.isNotEmpty) LdText.l(when),
+                    if (location != null && location.isNotEmpty)
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(LucideIcons.mapPin, size: 13),
+                          LdText.l(location),
+                        ],
+                      ).spaceXS(),
+                  ],
+                ),
+              ),
+
+              if (description != null && description.isNotEmpty)
+                LdMarkdown(data: description, shrinkWrap: true),
+              if (action != null)
+                LdButton(
+                  mode: LdButtonMode.outline,
+                  size: LdSize.l,
+                  onPressed: () => dispatchLdAction(catalogContext, action),
+                  child: const Text('Open'),
+                ),
+            ],
+          ),
+        ),
+      ],
+    ).spaceS();
+  }
+}
+
 String _formatEventWhen({
   required DateTime? start,
   DateTime? end,
@@ -41,62 +114,3 @@ String _formatEventWhen({
       '${end.day.toString().padLeft(2, '0')}';
   return '$date ${hm(start)} → $endDate ${hm(end)}';
 }
-
-final ldCalendarEvent = CatalogItem(
-  name: 'LdCalendarEvent',
-  dataSchema: ldCalendarEventSchema,
-  widgetBuilder: (ctx) {
-    final d = ctx.data as JsonMap;
-    final title = d['title'] as String? ?? '';
-    final startRaw = d['start'] as String?;
-    final endRaw = d['end'] as String?;
-    final location = d['location'] as String?;
-    final description = d['description'] as String?;
-    final allDay = d['allDay'] as bool? ?? false;
-    final action = d['action'] as JsonMap?;
-
-    if (title.isEmpty || startRaw == null || startRaw.isEmpty) {
-      final error = FormatException(
-        'LdCalendarEvent "${ctx.id}" requires title and start',
-      );
-      ctx.reportError(error, StackTrace.current);
-      return FallbackWidget(error: error);
-    }
-
-    final start = DateTime.tryParse(startRaw);
-    final end = endRaw == null ? null : DateTime.tryParse(endRaw);
-    final when = _formatEventWhen(start: start, end: end, allDay: allDay);
-
-    return LdAutoSpace(
-      children: [
-        Row(
-          children: [
-            Icon(LucideIcons.calendar, size: 14),
-            ldHSpacerS,
-            Expanded(child: LdText.h(title)),
-          ],
-        ),
-        if (when.isNotEmpty) LdMute(child: LdText.p(when)),
-        if (location != null && location.isNotEmpty)
-          Row(
-            children: [
-              Icon(LucideIcons.mapPin, size: 13),
-              ldHSpacerXS,
-              Expanded(child: LdText.p(location)),
-            ],
-          ),
-        if (description != null && description.isNotEmpty)
-          LdMarkdown(data: description, shrinkWrap: true),
-        if (action != null)
-          Align(
-            alignment: Alignment.centerRight,
-            child: LdButton(
-              mode: LdButtonMode.outline,
-              onPressed: () => dispatchAction(ctx, action),
-              child: const Text('Open'),
-            ),
-          ),
-      ],
-    );
-  },
-);

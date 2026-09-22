@@ -4,84 +4,71 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter_ai/src/genui/composites/helpers.dart';
 import 'package:liquid_flutter_ai_shared/liquid_flutter_ai_shared.dart';
 
-final ldMultipleChoice = CatalogItem(
+final ldMultipleChoice = ldCatalogItem(
   name: 'LdMultipleChoice',
-  dataSchema: ldMultipleChoiceSchema,
-  widgetBuilder: (ctx) {
-    final d = ctx.data as JsonMap;
-    final options = objectList(d['options']);
-    final selectedRef = d['selected'];
-    final path =
-        bindingPath(selectedRef, '${ctx.id}.selected') ?? '${ctx.id}.selected';
-
-    if (selectedRef is String) {
-      ctx.dataContext.update(DataPath(path), selectedRef);
-    }
-
-    return BoundString(
-      dataContext: ctx.dataContext,
-      value: {'path': path},
-      builder: (context, selected) {
-        return _MultipleChoice(
-          catalogContext: ctx,
-          label: d['label'] as String?,
-          description: d['description'] as String?,
-          options: options,
-          selected: selected,
-          path: path,
-          layout: d['layout'] as String? ?? 'radio',
-          allowCustom: d['allowCustom'] as bool? ?? false,
-          customLabel: d['customLabel'] as String?,
-          customHint: d['customHint'] as String? ?? 'Enter your own…',
-          submitLabel: d['submitLabel'] as String? ?? 'Submit',
-        );
-      },
-    );
-  },
+  schema: ldMultipleChoiceSchema,
+  parse: LdMultipleChoiceData.fromJson,
+  builder: (ctx, data) => LdMultipleChoice(catalogContext: ctx, data: data),
 );
 
-class _MultipleChoice extends StatefulWidget {
-  final CatalogItemContext catalogContext;
-  final String? label;
-  final String? description;
-  final List<JsonMap> options;
-  final String? selected;
-  final String path;
-  final String layout;
-  final bool allowCustom;
-  final String? customLabel;
-  final String customHint;
-  final String submitLabel;
-
-  const _MultipleChoice({
+class LdMultipleChoice extends StatelessWidget {
+  const LdMultipleChoice({
+    super.key,
     required this.catalogContext,
-    required this.label,
-    required this.description,
-    required this.options,
-    required this.selected,
-    required this.path,
-    required this.layout,
-    required this.allowCustom,
-    required this.customLabel,
-    required this.customHint,
-    required this.submitLabel,
+    required this.data,
   });
 
+  final CatalogItemContext catalogContext;
+  final LdMultipleChoiceData data;
+
   @override
-  State<_MultipleChoice> createState() => _MultipleChoiceState();
+  Widget build(BuildContext context) {
+    final path = writableStringPath(
+      data.selected,
+      '${catalogContext.id}.selected',
+    );
+
+    return bindWritableString(
+      catalogContext,
+      ref: data.selected,
+      fallbackPath: path,
+      builder: (context, selected) => _LdMultipleChoiceForm(
+        catalogContext: catalogContext,
+        data: data,
+        selected: selected,
+        path: path,
+      ),
+    );
+  }
 }
 
-class _MultipleChoiceState extends State<_MultipleChoice> {
+class _LdMultipleChoiceForm extends StatefulWidget {
+  const _LdMultipleChoiceForm({
+    required this.catalogContext,
+    required this.data,
+    required this.selected,
+    required this.path,
+  });
+
+  final CatalogItemContext catalogContext;
+  final LdMultipleChoiceData data;
+  final String? selected;
+  final String path;
+
+  @override
+  State<_LdMultipleChoiceForm> createState() => _LdMultipleChoiceFormState();
+}
+
+class _LdMultipleChoiceFormState extends State<_LdMultipleChoiceForm> {
   late final TextEditingController _customCtrl;
 
-  Set<String> get _optionValues => widget.options
-      .map((o) => o['value'] as String?)
-      .whereType<String>()
-      .toSet();
+  LdMultipleChoiceData get _data => widget.data;
+
+  Set<String> get _optionValues => _data.options.map((o) => o.value).toSet();
 
   /// Custom text wins whenever the input is non-empty.
   bool get _isCustomSelected =>
-      widget.allowCustom && _customCtrl.text.trim().isNotEmpty;
+      _data.allowCustom && _customCtrl.text.trim().isNotEmpty;
 
   String? get _effectiveSelection {
     if (_isCustomSelected) return _customCtrl.text.trim();
@@ -98,7 +85,7 @@ class _MultipleChoiceState extends State<_MultipleChoice> {
   }
 
   @override
-  void didUpdateWidget(covariant _MultipleChoice oldWidget) {
+  void didUpdateWidget(covariant _LdMultipleChoiceForm oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.selected != widget.selected) {
       _syncFromSelected(widget.selected);
@@ -106,7 +93,7 @@ class _MultipleChoiceState extends State<_MultipleChoice> {
   }
 
   void _syncFromSelected(String? selected) {
-    if (!widget.allowCustom) return;
+    if (!_data.allowCustom) return;
     final isCustom =
         selected != null &&
         selected.isNotEmpty &&
@@ -140,15 +127,14 @@ class _MultipleChoiceState extends State<_MultipleChoice> {
   Widget build(BuildContext context) {
     return LdAutoSpace(
       children: [
-        if (widget.label != null) LdText.h(widget.label!),
-        if (widget.description != null) LdText.p(widget.description!),
+        if (_data.label != null) LdText.h(_data.label!),
+        if (_data.description != null) LdText.p(_data.description!),
         ldSpacerL,
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [..._buildOptions()],
         ).spaceS(),
-
-        if (widget.allowCustom) ...[ldSpacerL, ldSpacerL, _buildCustom()],
+        if (_data.allowCustom) ...[ldSpacerL, ldSpacerL, _buildCustom()],
         LdDivider(),
         Align(
           alignment: Alignment.centerRight,
@@ -156,92 +142,86 @@ class _MultipleChoiceState extends State<_MultipleChoice> {
             mode: LdButtonMode.filled,
             size: LdSize.l,
             disabled: _effectiveSelection == null,
-            onPressed: () {
-              final selected = _effectiveSelection;
-              if (selected == null) return;
-              widget.catalogContext.dispatchEvent(
-                UserActionEvent(
-                  name: 'multipleChoiceSubmit',
-                  sourceComponentId: widget.catalogContext.id,
-                  timestamp: DateTime.now(),
-                  context: {'selected': selected},
-                ),
-              );
-            },
-            child: Text(widget.submitLabel),
+            onPressed: _submit,
+            child: Text(_data.submitLabel),
           ),
         ),
       ],
+    );
+  }
+
+  void _submit() {
+    final selected = _effectiveSelection;
+    if (selected == null) return;
+    widget.catalogContext.dispatchEvent(
+      UserActionEvent(
+        name: 'multipleChoiceSubmit',
+        sourceComponentId: widget.catalogContext.id,
+        timestamp: DateTime.now(),
+        context: {'selected': selected},
+      ),
     );
   }
 
   List<Widget> _buildOptions() {
-    return switch (widget.layout) {
-      'chips' => [
+    return switch (_data.layout) {
+      LdMultipleChoiceLayout.chips => [
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: [for (final opt in widget.options) _chip(opt)],
+          children: [for (final opt in _data.options) _chip(opt)],
         ),
       ],
-      'list' => [
+      LdMultipleChoiceLayout.list => [
         LdCard(
           padding: EdgeInsets.zero,
           child: Column(
-            children: [for (final opt in widget.options) _listOption(opt)],
+            children: [for (final opt in _data.options) _listOption(opt)],
           ),
         ),
       ],
-      _ => [for (final opt in widget.options) _radio(opt)],
+      LdMultipleChoiceLayout.radio => [
+        for (final opt in _data.options) _radio(opt),
+      ],
     };
   }
 
-  Widget _radio(JsonMap opt) {
-    final val = opt['value'] as String?;
-    final lbl = opt['label'] as String?;
-    if (val == null || lbl == null) return const SizedBox.shrink();
+  Widget _radio(LdLabeledOption opt) {
     return LdRadio(
-      label: lbl,
-      checked: !_isCustomSelected && val == widget.selected,
-      onChanged: (_) => _selectOption(val),
+      label: opt.label,
+      checked: !_isCustomSelected && opt.value == widget.selected,
+      onChanged: (_) => _selectOption(opt.value),
     );
   }
 
-  Widget _chip(JsonMap opt) {
-    final val = opt['value'] as String?;
-    final lbl = opt['label'] as String?;
-    if (val == null || lbl == null) return const SizedBox.shrink();
-    final selected = !_isCustomSelected && val == widget.selected;
+  Widget _chip(LdLabeledOption opt) {
+    final selected = !_isCustomSelected && opt.value == widget.selected;
     return LdButton(
       mode: selected ? LdButtonMode.filled : LdButtonMode.outline,
-
-      onPressed: () => _selectOption(val),
-      child: Text(lbl),
+      onPressed: () => _selectOption(opt.value),
+      child: Text(opt.label),
     );
   }
 
-  Widget _listOption(JsonMap opt) {
-    final val = opt['value'] as String?;
-    final lbl = opt['label'] as String?;
-    if (val == null || lbl == null) return const SizedBox.shrink();
-    final description = opt['description'] as String?;
-    final selected = !_isCustomSelected && val == widget.selected;
+  Widget _listOption(LdLabeledOption opt) {
+    final description = opt.description;
+    final selected = !_isCustomSelected && opt.value == widget.selected;
     return LdListItem(
-      title: Text(lbl),
+      title: Text(opt.label),
       subtitle: description != null && description.isNotEmpty
           ? Text(description)
           : null,
       selectionControl: LdSelectionControl.radio,
       isSelected: selected,
-      onSelectionChanged: (_) => _selectOption(val),
-      onPressed: () => _selectOption(val),
+      onSelectionChanged: (_) => _selectOption(opt.value),
+      onPressed: () => _selectOption(opt.value),
     );
   }
 
   Widget _buildCustom() {
     return LdInput(
-      label: widget.customLabel,
-      hint: widget.customHint,
+      label: _data.customLabel,
+      hint: _data.customHint,
       controller: _customCtrl,
       onChanged: _onCustomChanged,
     );

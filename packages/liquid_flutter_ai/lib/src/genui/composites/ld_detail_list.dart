@@ -5,20 +5,26 @@ import 'package:liquid_flutter_ai/src/genui/composites/helpers.dart';
 import 'package:liquid_flutter_ai_shared/liquid_flutter_ai_shared.dart';
 import 'package:liquid_flutter_md/liquid_flutter_md.dart';
 
-final ldDetailList = CatalogItem(
+final ldDetailList = ldCatalogItem(
   name: 'LdDetailList',
-  dataSchema: ldDetailListSchema,
-  widgetBuilder: (ctx) {
-    final d = ctx.data as JsonMap;
-    final title = d['title'] as String?;
-    final items = objectList(d['items']);
-    if (items.isEmpty) {
-      final error = FormatException(
-        'LdDetailList "${ctx.id}" requires at least one item',
-      );
-      ctx.reportError(error, StackTrace.current);
-      return FallbackWidget(error: error);
-    }
+  schema: ldDetailListSchema,
+  parse: LdDetailListData.fromJson,
+  builder: (ctx, data) => LdDetailList(catalogContext: ctx, data: data),
+);
+
+class LdDetailList extends StatelessWidget {
+  const LdDetailList({
+    super.key,
+    required this.catalogContext,
+    required this.data,
+  });
+
+  final CatalogItemContext catalogContext;
+  final LdDetailListData data;
+
+  @override
+  Widget build(BuildContext context) {
+    final title = data.title;
 
     return LdAutoSpace(
       children: [
@@ -27,53 +33,59 @@ final ldDetailList = CatalogItem(
           padding: EdgeInsets.zero,
           child: Column(
             children: [
-              for (final item in items)
+              for (final item in data.items)
                 LdListItem.trailingForward(
-                  title: Text(item['title'] as String? ?? ''),
-                  subtitle: (item['subtitle'] as String?)?.isNotEmpty == true
-                      ? Text(item['subtitle'] as String)
+                  title: Text(item.title),
+                  subtitle: item.subtitle?.isNotEmpty == true
+                      ? Text(item.subtitle!)
                       : null,
-                  onPressed: () => _openDetail(ctx, item),
+                  onPressed: () => _openDetail(item),
                 ),
             ],
           ),
         ),
       ],
     );
-  },
-);
+  }
 
-Future<void> _openDetail(CatalogItemContext ctx, JsonMap item) async {
-  final buildContext = ctx.buildContext;
-  final markdown = item['markdown'] as String? ?? '';
-  final title = item['title'] as String? ?? '';
-  final actions = objectList(item['actions']);
+  Future<void> _openDetail(LdDetailListItem item) async {
+    final buildContext = catalogContext.buildContext;
+    await LdModalRoute<void>(
+      context: buildContext,
+      pageBuilder: (modalContext) =>
+          _LdDetailPage(catalogContext: catalogContext, item: item),
+    ).show(buildContext);
+  }
+}
 
-  await LdModalRoute<void>(
-    context: buildContext,
-    pageBuilder: (modalContext) {
-      return LdScaffold(
-        body: LdAppBar.top(
-          title: LdText.h(title),
-          child: LdAppBar.bottom(
-            actions: [
-              for (final action in actions)
-                LdFlexibleChild(
-                  child: LdButton(
-                    width: double.infinity,
+class _LdDetailPage extends StatelessWidget {
+  const _LdDetailPage({required this.catalogContext, required this.item});
 
-                    mode: compositeBtnMode(action['mode'] as String?),
-                    onPressed: () async {
-                      await dispatchAction(ctx, action['action'] as JsonMap?);
-                    },
-                    child: Text(action['label'] as String? ?? 'Action'),
-                  ),
+  final CatalogItemContext catalogContext;
+  final LdDetailListItem item;
+
+  @override
+  Widget build(BuildContext context) {
+    return LdScaffold(
+      body: LdAppBar.top(
+        title: LdText.h(item.title),
+        child: LdAppBar.bottom(
+          actions: [
+            for (final action in item.actions)
+              LdFlexibleChild(
+                child: LdButton(
+                  width: double.infinity,
+                  mode: compositeBtnMode(action.mode),
+                  onPressed: () async {
+                    await dispatchLdAction(catalogContext, action.action);
+                  },
+                  child: Text(action.label),
                 ),
-            ],
-            child: LdScaffoldBody(children: [LdMarkdown(data: markdown)]),
-          ),
+              ),
+          ],
+          child: LdScaffoldBody(children: [LdMarkdown(data: item.markdown)]),
         ),
-      );
-    },
-  ).show(buildContext);
+      ),
+    );
+  }
 }

@@ -1,21 +1,29 @@
 import 'package:flutter/material.dart';
-import 'package:genui/genui.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
+import 'package:liquid_flutter_ai/src/genui/composites/helpers.dart';
 import 'package:liquid_flutter_ai_shared/liquid_flutter_ai_shared.dart';
 
-final ldCallout = CatalogItem(
+final ldCallout = ldCatalogItem(
   name: 'LdCallout',
-  dataSchema: ldCalloutSchema,
-  widgetBuilder: (ctx) {
-    final d = ctx.data as JsonMap;
-    final type = switch (d['type'] as String?) {
-      'warning' => LdHintType.warning,
-      'success' => LdHintType.success,
-      'error' => LdHintType.error,
-      _ => LdHintType.info,
+  schema: ldCalloutSchema,
+  parse: LdCalloutData.fromJson,
+  builder: (_, data) => LdCallout(data: data),
+);
+
+class LdCallout extends StatelessWidget {
+  const LdCallout({super.key, required this.data});
+
+  final LdCalloutData data;
+
+  @override
+  Widget build(BuildContext context) {
+    final type = switch (data.type) {
+      LdGenuiTone.warning => LdHintType.warning,
+      LdGenuiTone.success => LdHintType.success,
+      LdGenuiTone.error => LdHintType.error,
+      LdGenuiTone.info => LdHintType.info,
     };
-    final title = d['title'] as String?;
-    final body = d['body'] as String? ?? '';
+    final title = data.title;
 
     return LdHint(
       type: type,
@@ -24,9 +32,9 @@ final ldCallout = CatalogItem(
       child: LdAutoSpace(
         children: [
           if (title != null && title.isNotEmpty) LdText.h(title),
-          LdText.p(body),
+          LdText.p(data.body),
         ],
       ),
     );
-  },
-);
+  }
+}

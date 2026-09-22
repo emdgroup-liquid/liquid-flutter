@@ -3,65 +3,76 @@ import 'package:genui/genui.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter_ai/src/genui/composites/helpers.dart';
 import 'package:liquid_flutter_ai_shared/liquid_flutter_ai_shared.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
-final ldConfirm = CatalogItem(
+final ldConfirm = ldCatalogItem(
   name: 'LdConfirm',
-  dataSchema: ldConfirmSchema,
-  widgetBuilder: (ctx) {
-    final d = ctx.data as JsonMap;
-    final title = d['title'] as String? ?? '';
-    final message = d['message'] as String?;
-    final tone = d['tone'] as String? ?? 'info';
-    final primary = d['primary'] as JsonMap?;
-    final secondary = d['secondary'] as JsonMap?;
+  schema: ldConfirmSchema,
+  parse: LdConfirmData.fromJson,
+  builder: (ctx, data) => LdConfirm(catalogContext: ctx, data: data),
+);
 
-    if (title.isEmpty || primary == null) {
-      final error = FormatException(
-        'LdConfirm "${ctx.id}" requires title and primary{label,action}',
-      );
-      ctx.reportError(error, StackTrace.current);
-      return FallbackWidget(error: error);
-    }
+class LdConfirm extends StatelessWidget {
+  const LdConfirm({
+    super.key,
+    required this.catalogContext,
+    required this.data,
+  });
 
-    return Builder(
-      builder: (context) {
-        final theme = LdTheme.of(context);
-        final color = switch (tone) {
-          'warning' => theme.warning,
-          'danger' => theme.error,
-          _ => null,
-        };
+  final CatalogItemContext catalogContext;
+  final LdConfirmData data;
 
-        return LdAutoSpace(
-          children: [
-            LdText.hs(title),
-            if (message != null && message.isNotEmpty) LdText.p(message),
-            LdDivider(),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                if (secondary != null) ...[
+  @override
+  Widget build(BuildContext context) {
+    final theme = LdTheme.of(context);
+    final color = switch (data.tone) {
+      LdConfirmTone.warning => theme.warning,
+      LdConfirmTone.danger => theme.error,
+      LdConfirmTone.info => null,
+    };
+    final message = data.message;
+    final secondary = data.secondary;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        LdBadge(
+          symmetric: true,
+          color: color,
+          size: LdSize.l,
+          child: Icon(LucideIcons.circleQuestionMark),
+        ),
+
+        Expanded(
+          child: LdAutoSpace(
+            children: [
+              LdText.h(data.title),
+              if (message != null && message.isNotEmpty) LdText.p(message),
+              LdHorizontalScroll(
+                children: [
+                  if (secondary != null) ...[
+                    LdButton(
+                      size: LdSize.l,
+                      mode: LdButtonMode.outline,
+                      onPressed: () =>
+                          dispatchLdAction(catalogContext, secondary.action),
+                      child: Text(secondary.label),
+                    ),
+                  ],
                   LdButton(
-                    size: LdSize.m,
-                    mode: LdButtonMode.outline,
+                    mode: LdButtonMode.filled,
+                    color: color,
+                    size: LdSize.l,
                     onPressed: () =>
-                        dispatchAction(ctx, secondary['action'] as JsonMap?),
-                    child: Text(secondary['label'] as String? ?? 'Cancel'),
+                        dispatchLdAction(catalogContext, data.primary.action),
+                    child: Text(data.primary.label),
                   ),
                 ],
-                LdButton(
-                  mode: LdButtonMode.filled,
-                  color: color,
-                  size: LdSize.m,
-                  onPressed: () =>
-                      dispatchAction(ctx, primary['action'] as JsonMap?),
-                  child: Text(primary['label'] as String? ?? 'Confirm'),
-                ),
-              ],
-            ).spaceS(),
-          ],
-        );
-      },
-    );
-  },
-);
+              ),
+            ],
+          ),
+        ),
+      ],
+    ).spaceS();
+  }
+}
