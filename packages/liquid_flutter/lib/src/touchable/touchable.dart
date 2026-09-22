@@ -120,22 +120,23 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
   @override
   void didUpdateWidget(covariant LdTouchableSurface oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.focusNode == widget.focusNode) {
-      return;
+    if (oldWidget.focusNode != widget.focusNode) {
+      final hadFocus = _focusNode?.hasFocus ?? false;
+
+      if (_createdFocusNode) {
+        _focusNode?.dispose();
+      }
+
+      _focusNode = widget.focusNode ?? FocusNode();
+      _createdFocusNode = widget.focusNode == null;
+      _hasFocus = _focusNode?.hasFocus ?? false;
+
+      if (hadFocus) {
+        _focusNode?.requestFocus();
+      }
     }
-
-    final hadFocus = _focusNode?.hasFocus ?? false;
-
-    if (_createdFocusNode) {
-      _focusNode?.dispose();
-    }
-
-    _focusNode = widget.focusNode ?? FocusNode();
-    _createdFocusNode = widget.focusNode == null;
-    _hasFocus = _focusNode?.hasFocus ?? false;
-
-    if (hadFocus) {
-      _focusNode?.requestFocus();
+    if (oldWidget.active && !widget.active && _focusNode?.hasFocus == true) {
+      _focusNode?.unfocus();
     }
   }
 

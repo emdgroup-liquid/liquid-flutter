@@ -50,6 +50,15 @@ class _LdMonkeyPickerScopeState<T extends Identifiable<IdType>, IdType> extends 
     );
   }
 
+  @override
+  didUpdateWidget(oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialSelection != oldWidget.initialSelection) {
+      print('widget.initialSelection: ${widget.initialSelection}');
+      _controller.initialSelection = widget.initialSelection;
+    }
+  }
+
   void _applyResolved(LdMonkeyResolvedRouteDefinitions<T, IdType> resolved) {
     if (_lastResolved == resolved) {
       return;
@@ -129,8 +138,6 @@ class _LdMonkeyPickerPage<T extends Identifiable<IdType>, IdType> extends Statel
   @override
   Widget build(BuildContext context) {
     final selection = context.watch<LdMonkeySelection<T, IdType>>();
-
-    print('selection: ${selection.selection}');
 
     final canDismiss = ldChooseCanDismissPicker<IdType>(
       initial: initialSelection,

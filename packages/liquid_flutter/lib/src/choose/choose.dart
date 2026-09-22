@@ -25,7 +25,7 @@ bool ldChooseCanDismissPicker<IdType>({
   if (allowEmpty) {
     return true;
   }
-  if (initial.isEmpty) {
+  if (initial.isNotEmpty) {
     return true;
   }
   return false;

@@ -471,7 +471,7 @@ class _LdGalleryTabState extends State<LdGalleryTab>
                       0,
                       0,
                       constraints.maxWidth,
-                      constraints.maxHeight - inset.bottom,
+                      constraints.maxHeight,
                     );
                     return LdSpring(
                       position: _cameraExpanded ? 1 : 0,
@@ -594,40 +594,25 @@ class _CameraEntryTile extends StatelessWidget {
       children: [
         const ColoredBox(color: Colors.black),
         ldCameraFittedPreview(context, session),
-        Positioned(
-          left: 6,
-          bottom: 6,
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.45),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: SafeArea(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      LucideIcons.camera,
-                      color: Colors.white,
-                      size: 13,
-                    ),
-                    ldHSpacerXS,
-                    Text(
-                      label,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        height: 1,
-                      ),
-                    ),
-                  ],
+        Align(
+          alignment: Alignment.bottomLeft,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(LucideIcons.camera, color: Colors.white, size: 13),
+              ldHSpacerXS,
+              Text(
+                label,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  height: 1,
                 ),
               ),
-            ),
-          ),
+            ],
+          ).padS(),
         ),
       ],
     );

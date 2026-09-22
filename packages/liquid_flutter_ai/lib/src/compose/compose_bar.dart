@@ -279,20 +279,17 @@ class _LdComposeBarState extends State<LdComposeBar> {
       content: Builder(
         builder: (context) {
           return Column(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (hasAttachments) _buildAttachmentStrip(context),
-              _buildChrome(context),
+              _buildInputRow(context),
             ],
           ).spaceM();
         },
       ),
       child: widget.child,
     );
-  }
-
-  Widget _buildChrome(BuildContext context) {
-    return _buildInputRow(context);
   }
 
   Widget _buildAttachmentStrip(BuildContext context) {

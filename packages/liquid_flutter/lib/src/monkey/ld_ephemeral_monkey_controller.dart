@@ -54,8 +54,7 @@ class LdEphemeralMonkeyController<T extends Identifiable<IdType>, IdType> extend
       );
 
   /// Non-listenable [LdMonkeyRouterController] for [Provider].
-  LdMonkeyRouterController<T, IdType> get controllerDelegate =>
-      _LdEphemeralMonkeyControllerDelegate<T, IdType>(this);
+  LdMonkeyRouterController<T, IdType> get controllerDelegate => _LdEphemeralMonkeyControllerDelegate<T, IdType>(this);
 
   void replaceDefinitions({
     required Set<LdFilterOption<T, IdType>> filters,
@@ -95,6 +94,11 @@ class LdEphemeralMonkeyController<T extends Identifiable<IdType>, IdType> extend
     _sortOptions = sortOptions;
     notifyListeners();
   }
+
+  set initialSelection(Set<IdType> initialSelection) {
+    _selection = initialSelection;
+    notifyListeners();
+  }
 }
 
 class _LdEphemeralMonkeyControllerDelegate<T extends Identifiable<IdType>, IdType>
@@ -104,12 +108,10 @@ class _LdEphemeralMonkeyControllerDelegate<T extends Identifiable<IdType>, IdTyp
   final LdEphemeralMonkeyController<T, IdType> _delegate;
 
   @override
-  void updateFilter(BuildContext context, LdFilterOption<T, IdType> filter) =>
-      _delegate.updateFilter(filter);
+  void updateFilter(BuildContext context, LdFilterOption<T, IdType> filter) => _delegate.updateFilter(filter);
 
   @override
-  void updateSelection(BuildContext context, Set<IdType> selection) =>
-      _delegate.updateSelection(selection);
+  void updateSelection(BuildContext context, Set<IdType> selection) => _delegate.updateSelection(selection);
 
   @override
   void updateShowSelectionControls(BuildContext context, bool showSelectionControls) =>
@@ -120,6 +122,5 @@ class _LdEphemeralMonkeyControllerDelegate<T extends Identifiable<IdType>, IdTyp
       _delegate.updateSortOptions(sortOptions);
 
   @override
-  void updateViewing(BuildContext context, Set<IdType> viewingItems) =>
-      _delegate.updateViewing(viewingItems);
+  void updateViewing(BuildContext context, Set<IdType> viewingItems) => _delegate.updateViewing(viewingItems);
 }
