@@ -1133,6 +1133,92 @@ void main() {
     expect(find.text('Message 0'), findsNothing);
   });
 
+  testWidgets('LdConversation fling unfocuses the compose field', (
+    tester,
+  ) async {
+    final composeFocus = FocusNode();
+    addTearDown(composeFocus.dispose);
+
+    await tester.pumpWidget(
+      _wrap(
+        Column(
+          children: [
+            Expanded(
+              child: LdConversation(
+                items: [
+                  for (var i = 0; i < 40; i++)
+                    LdUserMessageItem(id: 'u$i', text: 'Message $i'),
+                ],
+              ),
+            ),
+            TextField(focusNode: composeFocus),
+          ],
+        ),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    composeFocus.requestFocus();
+    await tester.pump();
+    expect(composeFocus.hasFocus, isTrue);
+
+    final listCenter = tester.getCenter(find.byType(ListView));
+    final gesture = await tester.startGesture(listCenter);
+    await gesture.moveBy(const Offset(0, 20));
+    await tester.pump();
+    await gesture.moveBy(const Offset(0, 80));
+    await tester.pump();
+    await gesture.up();
+    await tester.pump();
+
+    expect(composeFocus.hasFocus, isFalse);
+  });
+
+  testWidgets(
+    'LdConversation keeps compose focus when dismissKeyboardOnFling is false',
+    (tester) async {
+      final composeFocus = FocusNode();
+      addTearDown(composeFocus.dispose);
+
+      await tester.pumpWidget(
+        _wrap(
+          Column(
+            children: [
+              Expanded(
+                child: LdConversation(
+                  dismissKeyboardOnFling: false,
+                  items: [
+                    for (var i = 0; i < 40; i++)
+                      LdUserMessageItem(id: 'u$i', text: 'Message $i'),
+                  ],
+                ),
+              ),
+              TextField(focusNode: composeFocus),
+            ],
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      composeFocus.requestFocus();
+      await tester.pump();
+      expect(composeFocus.hasFocus, isTrue);
+
+      final listCenter = tester.getCenter(find.byType(ListView));
+      final gesture = await tester.startGesture(listCenter);
+      await gesture.moveBy(const Offset(0, 20));
+      await tester.pump();
+      await gesture.moveBy(const Offset(0, 80));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      expect(composeFocus.hasFocus, isTrue);
+    },
+  );
+
   testWidgets('LdConversation follows new items while at the bottom', (
     tester,
   ) async {

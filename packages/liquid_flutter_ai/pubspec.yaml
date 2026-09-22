@@ -22,7 +22,6 @@ dependencies:
   scroll_velocity_notifier: ^0.0.14
   waveform_flutter: ^1.2.0
   waveform_recorder: ^1.8.1
-  cupertino_interactive_keyboard: ^1.0.0
   camera: ^0.12.1
   photo_manager: ^3.12.0
   permission_handler: ^13.0.2

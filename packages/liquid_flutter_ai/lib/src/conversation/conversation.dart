@@ -1,4 +1,3 @@
-import 'package:cupertino_interactive_keyboard/cupertino_interactive_keyboard.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter_ai/src/bubbles/agent_activity_group.dart';
@@ -13,6 +12,7 @@ import 'package:liquid_flutter_ai/src/conversation/approval_actions.dart';
 import 'package:liquid_flutter_ai/src/conversation/group_items.dart';
 import 'package:liquid_flutter_ai/src/models/conversation_item.dart';
 import 'package:liquid_flutter_ai/src/send/outgoing_scope.dart';
+import 'package:scroll_velocity_notifier/scroll_velocity_notifier.dart';
 
 typedef LdConversationItemBuilder =
     Widget Function(
@@ -83,6 +83,9 @@ class LdConversation extends StatefulWidget {
   final ScrollController? scrollController;
   final EdgeInsetsGeometry? padding;
 
+  /// Steal focus from the compose field when the list is flung quickly.
+  final bool dismissKeyboardOnFling;
+
   const LdConversation({
     super.key,
     required this.items,
@@ -99,6 +102,7 @@ class LdConversation extends StatefulWidget {
     this.footer,
     this.scrollController,
     this.padding,
+    this.dismissKeyboardOnFling = true,
   });
 
   /// Default item → widget mapping. Exposed so custom [groupBuilder]s can
@@ -193,6 +197,10 @@ class _LdConversationState extends State<LdConversation> {
 
   final FocusScopeNode _focusScopeNode = FocusScopeNode();
 
+  /// Match mo conversation list: only dismiss on a decisive fling.
+  static const _flingVelocityThreshold = 20.0;
+  static const _flingScrollDeltaThreshold = 30.0;
+
   /// Owns the list's [ScrollController] when the caller does not provide one.
   /// A [_BottomAnchoredScrollController] starts the non-reversed list at the
   /// bottom so a conversation opens on its newest messages without a jump.
@@ -277,6 +285,22 @@ class _LdConversationState extends State<LdConversation> {
     final pinned =
         metrics.maxScrollExtent - metrics.pixels <= _bottomPinThreshold;
     _pinnedToBottom = pinned;
+    return false;
+  }
+
+  /// Dismisses the soft keyboard when the list is flung quickly enough to
+  /// look intentional, by stealing focus from the compose field.
+  bool _onFlingNotification(ScrollNotification notification, double velocity) {
+    if (!widget.dismissKeyboardOnFling) {
+      return false;
+    }
+    if (notification is! ScrollUpdateNotification) {
+      return false;
+    }
+    if (velocity.abs() > _flingVelocityThreshold &&
+        (notification.scrollDelta?.abs() ?? 0) > _flingScrollDeltaThreshold) {
+      _focusScopeNode.requestFocus();
+    }
     return false;
   }
 
@@ -438,7 +462,8 @@ class _LdConversationState extends State<LdConversation> {
       ),
     );
 
-    return CupertinoInteractiveKeyboard(
+    return ScrollVelocityNotifier(
+      onNotification: _onFlingNotification,
       child: FocusScope(node: _focusScopeNode, child: body),
     );
   }
