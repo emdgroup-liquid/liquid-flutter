@@ -259,8 +259,7 @@ class _LdInputState extends State<LdInput> {
       // When a custom paste handler is set, always surface a paste button even
       // if the platform clipboard reports no pasteable text (e.g. an image on
       // iOS), so the handler gets a chance to consume it.
-      final hasPaste =
-          buttonItems.any((item) => item.type == ContextMenuButtonType.paste);
+      final hasPaste = buttonItems.any((item) => item.type == ContextMenuButtonType.paste);
       if (!hasPaste) {
         final pasteItem = ContextMenuButtonItem(
           type: ContextMenuButtonType.paste,
@@ -268,8 +267,7 @@ class _LdInputState extends State<LdInput> {
             _runCustomPaste();
           },
         );
-        final selectAllIndex =
-            buttonItems.indexWhere((item) => item.type == ContextMenuButtonType.selectAll);
+        final selectAllIndex = buttonItems.indexWhere((item) => item.type == ContextMenuButtonType.selectAll);
         if (selectAllIndex >= 0) {
           buttonItems.insert(selectAllIndex, pasteItem);
         } else {

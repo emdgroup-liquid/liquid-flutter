@@ -48,9 +48,11 @@ typedef LdToolCallPressedCallback =
 /// This avoids the index-jump behavior of a `reverse: true` list, where new
 /// content inserted near the anchor shifts whatever the user is reading.
 ///
-/// When [dismissKeyboardOnFling] is true (default), a fast fling on the list
-/// moves focus into an empty [FocusScope] so the compose field loses focus and
-/// the soft keyboard dismisses.
+/// When [dismissKeyboardOnFling] is true (default), a fast downward fling
+/// (scrolling toward older messages) moves focus into an empty [FocusScope]
+/// so the compose field loses focus and the soft keyboard dismisses. An
+/// upward jump, such as pinning to the newest message when the keyboard
+/// opens, does not dismiss.
 class LdConversation extends StatefulWidget {
   final List<LdConversationItem> items;
   final bool group;
@@ -83,7 +85,7 @@ class LdConversation extends StatefulWidget {
   final ScrollController? scrollController;
   final EdgeInsetsGeometry? padding;
 
-  /// Steal focus from the compose field when the list is flung quickly.
+  /// Steal focus from the compose field on a fast downward fling.
   final bool dismissKeyboardOnFling;
 
   const LdConversation({
@@ -288,8 +290,10 @@ class _LdConversationState extends State<LdConversation> {
     return false;
   }
 
-  /// Dismisses the soft keyboard when the list is flung quickly enough to
-  /// look intentional, by stealing focus from the compose field.
+  /// Dismisses the soft keyboard on a decisive downward fling (pixels
+  /// decreasing, toward older messages). A jump toward the bottom — the
+  /// list pinning when the keyboard opens — has the opposite sign and is
+  /// ignored.
   bool _onFlingNotification(ScrollNotification notification, double velocity) {
     if (!widget.dismissKeyboardOnFling) {
       return false;
@@ -297,8 +301,9 @@ class _LdConversationState extends State<LdConversation> {
     if (notification is! ScrollUpdateNotification) {
       return false;
     }
-    if (velocity.abs() > _flingVelocityThreshold &&
-        (notification.scrollDelta?.abs() ?? 0) > _flingScrollDeltaThreshold) {
+    final scrollDelta = notification.scrollDelta ?? 0;
+    if (velocity < -_flingVelocityThreshold &&
+        scrollDelta < -_flingScrollDeltaThreshold) {
       _focusScopeNode.requestFocus();
     }
     return false;
