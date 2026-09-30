@@ -10,6 +10,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:provider/provider.dart';
 
 import 'appbar_metrics_test_utils.dart';
+import 'overflow_test_utils.dart';
 
 /// Helper: wraps [bar] (which has [child]) in a minimal scaffold-like tree.
 /// The bar's wrappedChild provides MediaQuery insets to its subtree.
@@ -391,8 +392,8 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(tester.renderObject<RenderBox>(find.text('Filter items')).hasSize, isFalse);
-      expect(tester.renderObject<RenderBox>(find.text('Save all changes')).hasSize, isFalse);
+      expect(isOnStage(tester, find.text('Filter items')), isFalse);
+      expect(isOnStage(tester, find.text('Save all changes')), isFalse);
     });
 
     testWidgets('App bar actions compact when wrapped in LdContextMenu', (WidgetTester tester) async {
@@ -440,8 +441,8 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(tester.takeException(), isNull);
-      expect(tester.renderObject<RenderBox>(find.text('Theme')).hasSize, isFalse);
-      expect(tester.renderObject<RenderBox>(find.text('GitHub')).hasSize, isFalse);
+      expect(isOnStage(tester, find.text('Theme')), isFalse);
+      expect(isOnStage(tester, find.text('GitHub')), isFalse);
       expect(find.byIcon(LucideIcons.paintBucket), findsWidgets);
     });
 

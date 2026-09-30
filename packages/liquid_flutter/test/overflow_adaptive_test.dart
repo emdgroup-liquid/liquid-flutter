@@ -4,6 +4,8 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter_test_utils/ld_frame.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
+import 'overflow_test_utils.dart';
+
 Widget _overflowHarness({
   required double width,
   required List<Widget> children,
@@ -27,14 +29,6 @@ Widget _overflowHarness({
       ),
     ),
   );
-}
-
-bool _hasLayoutSize(Finder finder, WidgetTester tester) {
-  final elements = finder.evaluate();
-  if (elements.isEmpty) {
-    return false;
-  }
-  return tester.renderObject<RenderBox>(finder).hasSize;
 }
 
 /// Simulates [LdContextMenu] placing a trigger in the overflow row without being
@@ -82,8 +76,8 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(_hasLayoutSize(find.byKey(expandedKey), tester), isTrue);
-      expect(_hasLayoutSize(find.byKey(compactKey), tester), isFalse);
+      expect(isOnStage(tester, find.byKey(expandedKey)), isTrue);
+      expect(isOnStage(tester, find.byKey(compactKey)), isFalse);
       expect(find.text('Other'), findsOneWidget);
       expect(find.text('+0'), findsNothing);
     });
@@ -120,8 +114,8 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(_hasLayoutSize(find.byKey(expandedKey), tester), isFalse);
-      expect(_hasLayoutSize(find.byKey(compactKey), tester), isTrue);
+      expect(isOnStage(tester, find.byKey(expandedKey)), isFalse);
+      expect(isOnStage(tester, find.byKey(compactKey)), isTrue);
       expect(find.byIcon(LucideIcons.save), findsOneWidget);
     });
 
@@ -169,7 +163,7 @@ void main() {
       final row = tester.renderObject<RenderBox>(find.byType(LdOverflowView));
       for (final label in ['Tasks', 'Search', 'Refresh', 'New Task', 'Select']) {
         final finder = find.text(label);
-        if (!_hasLayoutSize(finder, tester)) {
+        if (!isOnStage(tester, finder)) {
           continue;
         }
         final box = tester.renderObject<RenderBox>(finder);
@@ -318,8 +312,8 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(_hasLayoutSize(find.byKey(expandedKey), tester), isFalse);
-      expect(_hasLayoutSize(find.byKey(compactKey), tester), isTrue);
+      expect(isOnStage(tester, find.byKey(expandedKey)), isFalse);
+      expect(isOnStage(tester, find.byKey(compactKey)), isTrue);
     });
 
     testWidgets('compacts adaptive children progressively from the trailing edge', (tester) async {
@@ -365,10 +359,10 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(_hasLayoutSize(find.byKey(firstExpandedKey), tester), isTrue);
-      expect(_hasLayoutSize(find.byKey(secondExpandedKey), tester), isFalse);
-      expect(_hasLayoutSize(find.byKey(secondCompactKey), tester), isTrue);
-      expect(_hasLayoutSize(find.byKey(firstCompactKey), tester), isFalse);
+      expect(isOnStage(tester, find.byKey(firstExpandedKey)), isTrue);
+      expect(isOnStage(tester, find.byKey(secondExpandedKey)), isFalse);
+      expect(isOnStage(tester, find.byKey(secondCompactKey)), isTrue);
+      expect(isOnStage(tester, find.byKey(firstCompactKey)), isFalse);
     });
 
     testWidgets('compacts all adaptive children when space is very tight', (tester) async {
@@ -414,10 +408,10 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(_hasLayoutSize(find.byKey(firstExpandedKey), tester), isFalse);
-      expect(_hasLayoutSize(find.byKey(secondExpandedKey), tester), isFalse);
-      expect(_hasLayoutSize(find.byKey(firstCompactKey), tester), isTrue);
-      expect(_hasLayoutSize(find.byKey(secondCompactKey), tester), isTrue);
+      expect(isOnStage(tester, find.byKey(firstExpandedKey)), isFalse);
+      expect(isOnStage(tester, find.byKey(secondExpandedKey)), isFalse);
+      expect(isOnStage(tester, find.byKey(firstCompactKey)), isTrue);
+      expect(isOnStage(tester, find.byKey(secondCompactKey)), isTrue);
     });
   });
 }
