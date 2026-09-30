@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter_test_utils/ld_frame.dart';
 
+import 'overflow_test_utils.dart';
+
 Widget _overflowHarness({
   required double width,
   required List<Widget> children,
@@ -26,14 +28,6 @@ Widget _overflowHarness({
       ),
     ),
   );
-}
-
-bool _hasLayoutSize(Finder finder, WidgetTester tester) {
-  final elements = finder.evaluate();
-  if (elements.isEmpty) {
-    return false;
-  }
-  return tester.renderObject<RenderBox>(finder).hasSize;
 }
 
 void main() {
@@ -72,7 +66,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Pinned'), findsOneWidget);
-      expect(_hasLayoutSize(find.text('Pinned'), tester), isTrue);
+      expect(isOnStage(tester, find.text('Pinned')), isTrue);
       expect(find.text('Overflowable'), findsNothing);
       expect(find.text('+1'), findsOneWidget);
     });
@@ -111,7 +105,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Pinned'), findsOneWidget);
-      expect(_hasLayoutSize(find.text('Pinned'), tester), isTrue);
+      expect(isOnStage(tester, find.text('Pinned')), isTrue);
       expect(find.text('Overflowable'), findsNothing);
       expect(find.text('+1'), findsOneWidget);
     });
