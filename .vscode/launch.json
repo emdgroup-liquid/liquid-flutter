@@ -27,6 +27,27 @@
             "flutterMode": "release"
         },
         {
+            "name": "liquid-gen",
+            "cwd": "apps/liquid-gen",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "liquid-gen (profile mode)",
+            "cwd": "apps/liquid-gen",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "liquid-gen (release mode)",
+            "cwd": "apps/liquid-gen",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        
+        {
             "name": "Update goldens",
             "request": "launch",
             "type": "dart",
