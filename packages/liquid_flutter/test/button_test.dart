@@ -232,17 +232,22 @@ void main() {
     await tester.tap(find.text('Send'));
     await tester.pump();
 
-    expect(inputFocusNode.hasPrimaryFocus, isTrue,
-        reason: 'noFocusOnTap should keep focus on the input');
+    expect(inputFocusNode.hasPrimaryFocus, isTrue, reason: 'noFocusOnTap should keep focus on the input');
 
     await tester.pumpWidget(buildButton(noFocusOnTap: false));
     inputFocusNode.requestFocus();
     await tester.pump();
 
+    // A touch (the tester's default pointer) never moves the focus: the
+    // input keeps its keyboard.
     await tester.tap(find.text('Send'));
     await tester.pump();
 
-    expect(inputFocusNode.hasPrimaryFocus, isFalse,
-        reason: 'default button tap should move focus away from the input');
+    expect(inputFocusNode.hasPrimaryFocus, isTrue, reason: 'a touch on a button leaves the focus on the input');
+
+    await tester.tap(find.text('Send'), kind: PointerDeviceKind.mouse);
+    await tester.pump();
+
+    expect(inputFocusNode.hasPrimaryFocus, isFalse, reason: 'a mouse click moves the focus to the button');
   });
 }
