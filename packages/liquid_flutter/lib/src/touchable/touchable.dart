@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb;
+import 'package:flutter/gestures.dart' show PointerDeviceKind;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
@@ -29,7 +31,10 @@ class LdTouchableSurface extends StatefulWidget {
 
   /// When true, tapping does not request focus for this surface — the
   /// currently focused node keeps focus (e.g. a compose input's soft
-  /// keyboard stays open).
+  /// keyboard stays open). A touch never moves the focus here, whatever
+  /// this says: on a phone a tap on a button is not a request for keyboard
+  /// focus, and the field being typed in keeps its keyboard. A mouse click,
+  /// a stylus or keyboard navigation still focus the surface.
   final bool noFocusOnTap;
 
   /// When true, uses [TextFieldTapRegion] so taps on text selection handles and
@@ -150,7 +155,7 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
       behavior: innerBehavior,
       onTapDown: (d) => _safeSetState(() {
         if (!widget.disabled) {
-          if (!widget.noFocusOnTap) {
+          if (!widget.noFocusOnTap && d.kind != PointerDeviceKind.touch) {
             _focusNode?.requestFocus();
           }
           _pressed = true;
@@ -230,7 +235,7 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
       child: _TapRegionWrapper(
         textFieldTapRegion: widget.textFieldTapRegion,
         onTapOutside: (details) {
-          if (widget.allowTapOutside) {
+          if (widget.allowTapOutside || _keepsFocusOnTapOutside(details)) {
             return;
           }
           _safeSetState(() {
@@ -259,6 +264,24 @@ class _LdTouchableSurfaceState extends State<LdTouchableSurface> {
         }),
       ),
     );
+  }
+}
+
+/// Whether a tap outside leaves the focus where it is: a touch on a mobile
+/// platform does (a tap next to a text field is not a request to close the
+/// keyboard), as Flutter's own [TextField] decides; every other pointer, and
+/// every tap on a desktop platform, takes the focus away.
+bool _keepsFocusOnTapOutside(PointerDownEvent event) {
+  if (kIsWeb) return false;
+  switch (defaultTargetPlatform) {
+    case TargetPlatform.android:
+    case TargetPlatform.iOS:
+    case TargetPlatform.fuchsia:
+      return event.kind == PointerDeviceKind.touch;
+    case TargetPlatform.linux:
+    case TargetPlatform.macOS:
+    case TargetPlatform.windows:
+      return false;
   }
 }
 
