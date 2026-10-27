@@ -3,53 +3,37 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 void main() {
-  test('ldChooseCanConfirmSelection requires a change or non-empty selection', () {
+  test('ldChooseCanConfirmSelection needs a selection unless empty is allowed', () {
     expect(
-      ldChooseCanConfirmSelection<String>(current: {}, initial: {}),
+      ldChooseCanConfirmSelection<String>(selection: {}, allowEmpty: false),
       isFalse,
     );
     expect(
-      ldChooseCanConfirmSelection<String>(current: {}, initial: {'a'}),
+      ldChooseCanConfirmSelection<String>(selection: {'a'}, allowEmpty: false),
       isTrue,
     );
     expect(
-      ldChooseCanConfirmSelection<String>(current: {'a'}, initial: {}),
-      isTrue,
-    );
-    expect(
-      ldChooseCanConfirmSelection<String>(current: {'a'}, initial: {'a'}),
+      ldChooseCanConfirmSelection<String>(selection: {}, allowEmpty: true),
       isTrue,
     );
   });
 
   test('ldChooseCanDismissPicker respects allowEmpty', () {
     expect(
-      ldChooseCanDismissPicker<String>(
-        current: {},
-        initial: {},
-        allowEmpty: true,
-      ),
+      ldChooseCanDismissPicker<String>(initial: {}, allowEmpty: true),
       isTrue,
     );
     expect(
-      ldChooseCanDismissPicker<String>(
-        current: {},
-        initial: {},
-        allowEmpty: false,
-      ),
+      ldChooseCanDismissPicker<String>(initial: {}, allowEmpty: false),
       isFalse,
     );
     expect(
-      ldChooseCanDismissPicker<String>(
-        current: {'a'},
-        initial: {},
-        allowEmpty: false,
-      ),
+      ldChooseCanDismissPicker<String>(initial: {'a'}, allowEmpty: false),
       isTrue,
     );
   });
 
-  testWidgets('allowEmpty does not confirm unchanged empty selection', (tester) async {
+  testWidgets('allowEmpty confirms an empty selection', (tester) async {
     Set<String>? result;
 
     await tester.pumpWidget(
@@ -76,13 +60,12 @@ void main() {
     await tester.tap(find.byKey(const Key('ldChoose_trigger')));
     await tester.pumpAndSettle();
 
-    final doneButton = tester.widget<LdButton>(find.byKey(const Key('ldChoose_done')));
-    expect(doneButton.disabled, isTrue);
+    expect(tester.widget<LdAppBarAction>(find.byKey(const Key('ldChoose_done'))).disabled, isFalse);
 
     await tester.tap(find.byKey(const Key('ldChoose_done')));
     await tester.pumpAndSettle();
 
-    expect(result, isNull);
+    expect(result, isEmpty);
   });
 
   testWidgets('allowEmpty false keeps Done disabled until selection', (tester) async {
@@ -110,13 +93,13 @@ void main() {
     await tester.tap(find.byKey(const Key('ldChoose_trigger')));
     await tester.pumpAndSettle();
 
-    final doneButton = tester.widget<LdButton>(find.byKey(const Key('ldChoose_done')));
+    final doneButton = tester.widget<LdAppBarAction>(find.byKey(const Key('ldChoose_done')));
     expect(doneButton.disabled, isTrue);
 
     await tester.tap(find.text('Apple pie'));
     await tester.pumpAndSettle();
 
-    final enabledDoneButton = tester.widget<LdButton>(find.byKey(const Key('ldChoose_done')));
+    final enabledDoneButton = tester.widget<LdAppBarAction>(find.byKey(const Key('ldChoose_done')));
     expect(enabledDoneButton.disabled, isFalse);
   });
 
@@ -153,7 +136,7 @@ void main() {
     await tester.tap(find.text('Clear'));
     await tester.pumpAndSettle();
 
-    final doneButton = tester.widget<LdButton>(find.byKey(const Key('ldChoose_done')));
+    final doneButton = tester.widget<LdAppBarAction>(find.byKey(const Key('ldChoose_done')));
     expect(doneButton.disabled, isFalse);
 
     await tester.tap(find.byKey(const Key('ldChoose_done')));
@@ -193,7 +176,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      tester.widget<LdButton>(find.byKey(const Key('ldChoose_done'))).disabled,
+      tester.widget<LdAppBarAction>(find.byKey(const Key('ldChoose_done'))).disabled,
       isFalse,
     );
 
@@ -201,7 +184,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(
-      tester.widget<LdButton>(find.byKey(const Key('ldChoose_done'))).disabled,
+      tester.widget<LdAppBarAction>(find.byKey(const Key('ldChoose_done'))).disabled,
       isTrue,
     );
   });

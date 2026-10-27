@@ -8,6 +8,12 @@ import 'package:provider/provider.dart';
 import 'appbar_metrics_test_utils.dart';
 import 'appbar_scroll_test_utils.dart';
 
+/// Bare builders: no chrome inside, the outer margin as padding outside.
+Widget _inside(BuildContext context, LdAppBarFrameMetrics metrics, Widget child) => child;
+
+Widget _outside(BuildContext context, LdAppBarFrameMetrics metrics, Widget child) =>
+    Padding(padding: metrics.outerMargin, child: child);
+
 /// Minimal wrapper that provides the Liquid theme and localizations.
 Widget _withTheme(Widget child) {
   ldDisableAnimations = true;
@@ -43,6 +49,8 @@ void main() {
       await tester.pumpWidget(
         _withTheme(
           AppBarFrame(
+            insideBuilder: _inside,
+            outsideBuilder: _outside,
             position: LdAppBarPosition.top,
             wrappedChild: const SizedBox.expand(key: bodyKey),
             child: const Text('TopBar'),
@@ -66,6 +74,8 @@ void main() {
       await tester.pumpWidget(
         _withTheme(
           AppBarFrame(
+            insideBuilder: _inside,
+            outsideBuilder: _outside,
             position: LdAppBarPosition.bottom,
             wrappedChild: const ColoredBox(
               color: Colors.green,
@@ -96,6 +106,8 @@ void main() {
       await tester.pumpWidget(
         _withTheme(
           AppBarFrame(
+            insideBuilder: _inside,
+            outsideBuilder: _outside,
             position: LdAppBarPosition.top,
             wrappedChild: Builder(builder: (context) {
               capturedPadding = MediaQuery.paddingOf(context);
@@ -137,8 +149,12 @@ void main() {
       await tester.pumpWidget(
         _withTheme(
           AppBarFrame(
+            insideBuilder: _inside,
+            outsideBuilder: _outside,
             position: LdAppBarPosition.top,
             wrappedChild: AppBarFrame(
+              insideBuilder: _inside,
+              outsideBuilder: _outside,
               position: LdAppBarPosition.bottom,
               wrappedChild: Builder(builder: (context) {
                 innerPadding = MediaQuery.paddingOf(context);
@@ -174,6 +190,8 @@ void main() {
       await tester.pumpWidget(
         _withTheme(
           AppBarFrame(
+            insideBuilder: _inside,
+            outsideBuilder: _outside,
             position: LdAppBarPosition.top,
             wrappedChild: Builder(builder: (context) {
               capturedMetrics = context.watch<LdAppBarMetrics?>();
@@ -196,6 +214,8 @@ void main() {
       await tester.pumpWidget(
         _withTheme(
           AppBarFrame(
+            insideBuilder: _inside,
+            outsideBuilder: _outside,
             position: LdAppBarPosition.top,
             wrappedChild: Builder(builder: (context) {
               capturedMetrics = context.watch<LdAppBarMetrics?>();
@@ -214,10 +234,16 @@ void main() {
       await tester.pumpWidget(
         _withTheme(
           AppBarFrame(
+            insideBuilder: _inside,
+            outsideBuilder: _outside,
             position: LdAppBarPosition.top,
             wrappedChild: AppBarFrame(
+              insideBuilder: _inside,
+              outsideBuilder: _outside,
               position: LdAppBarPosition.top,
               wrappedChild: AppBarFrame(
+                insideBuilder: _inside,
+                outsideBuilder: _outside,
                 position: LdAppBarPosition.top,
                 wrappedChild: const SizedBox.expand(),
                 child: const SizedBox(height: 48, child: Text('Third')),
@@ -247,8 +273,12 @@ void main() {
       await tester.pumpWidget(
         _withTheme(
           AppBarFrame(
+            insideBuilder: _inside,
+            outsideBuilder: _outside,
             position: LdAppBarPosition.top,
             wrappedChild: AppBarFrame(
+              insideBuilder: _inside,
+              outsideBuilder: _outside,
               position: LdAppBarPosition.top,
               wrappedChild: Builder(builder: (context) {
                 innerMetrics = context.watch<LdAppBarMetrics?>();
@@ -273,8 +303,12 @@ void main() {
       await tester.pumpWidget(
         _withTheme(
           AppBarFrame(
+            insideBuilder: _inside,
+            outsideBuilder: _outside,
             position: LdAppBarPosition.top,
             wrappedChild: AppBarFrame(
+              insideBuilder: _inside,
+              outsideBuilder: _outside,
               position: LdAppBarPosition.bottom,
               wrappedChild: Builder(builder: (context) {
                 bottomMetrics = context.watch<LdAppBarMetrics?>();
@@ -325,6 +359,8 @@ void main() {
       await tester.pumpWidget(
         _withTheme(
           AppBarFrame(
+            insideBuilder: _inside,
+            outsideBuilder: _outside,
             position: LdAppBarPosition.top,
             scrollBehavior: LdAppBarScrollBehavior.always,
             wrappedChild: Builder(builder: (context) {
@@ -363,6 +399,8 @@ void main() {
       await tester.pumpWidget(
         _withTheme(
           AppBarFrame(
+            insideBuilder: _inside,
+            outsideBuilder: _outside,
             position: LdAppBarPosition.top,
             scrollBehavior: LdAppBarScrollBehavior.always,
             wrappedChild: ListView.builder(
@@ -398,6 +436,8 @@ void main() {
       await tester.pumpWidget(
         _withTheme(
           AppBarFrame(
+            insideBuilder: _inside,
+            outsideBuilder: _outside,
             position: LdAppBarPosition.top,
             scrollBehavior: LdAppBarScrollBehavior.always,
             wrappedChild: Builder(builder: (context) {
@@ -439,6 +479,8 @@ void main() {
       await tester.pumpWidget(
         _withTheme(
           AppBarFrame(
+            insideBuilder: _inside,
+            outsideBuilder: _outside,
             position: LdAppBarPosition.top,
             scrollBehavior: LdAppBarScrollBehavior.always,
             wrappedChild: Builder(builder: (context) {
@@ -472,6 +514,8 @@ void main() {
       await tester.pumpWidget(
         _withTheme(
           AppBarFrame(
+            insideBuilder: _inside,
+            outsideBuilder: _outside,
             position: LdAppBarPosition.top,
             scrollBehavior: LdAppBarScrollBehavior.always,
             wrappedChild: Builder(builder: (context) {
@@ -513,6 +557,8 @@ void main() {
       await tester.pumpWidget(
         _withTheme(
           AppBarFrame(
+            insideBuilder: _inside,
+            outsideBuilder: _outside,
             position: LdAppBarPosition.top,
             scrollBehavior: LdAppBarScrollBehavior.static,
             wrappedChild: Builder(builder: (context) {
@@ -547,6 +593,8 @@ void main() {
       await tester.pumpWidget(
         _withTheme(
           AppBarFrame(
+            insideBuilder: _inside,
+            outsideBuilder: _outside,
             position: LdAppBarPosition.top,
             scrollBehavior: LdAppBarScrollBehavior.static,
             wrappedChild: Builder(builder: (context) {
@@ -587,6 +635,8 @@ void main() {
       await tester.pumpWidget(
         _withTheme(
           AppBarFrame(
+            insideBuilder: _inside,
+            outsideBuilder: _outside,
             position: LdAppBarPosition.top,
             scrollBehavior: LdAppBarScrollBehavior.always,
             wrappedChild: Builder(builder: (context) {
@@ -649,6 +699,8 @@ void main() {
       await tester.pumpWidget(
         _withTheme(
           AppBarFrame(
+            insideBuilder: _inside,
+            outsideBuilder: _outside,
             position: LdAppBarPosition.top,
             scrollBehavior: LdAppBarScrollBehavior.always,
             wrappedChild: Builder(builder: (context) {
@@ -715,6 +767,8 @@ void main() {
       await tester.pumpWidget(
         _withTheme(
           AppBarFrame(
+            insideBuilder: _inside,
+            outsideBuilder: _outside,
             position: LdAppBarPosition.top,
             scrollBehavior: LdAppBarScrollBehavior.always,
             wrappedChild: LayoutBuilder(
@@ -761,6 +815,8 @@ void main() {
       await tester.pumpWidget(
         _withTheme(
           AppBarFrame(
+            insideBuilder: _inside,
+            outsideBuilder: _outside,
             position: LdAppBarPosition.top,
             scrollBehavior: LdAppBarScrollBehavior.always,
             wrappedChild: Builder(
@@ -806,6 +862,8 @@ void main() {
       await tester.pumpWidget(
         _withTheme(
           AppBarFrame(
+            insideBuilder: _inside,
+            outsideBuilder: _outside,
             position: LdAppBarPosition.top,
             scrollBehavior: LdAppBarScrollBehavior.always,
             wrappedChild: Builder(
@@ -827,7 +885,9 @@ void main() {
       final barH = bodyMetrics!.barHeightForPosition;
       final barTopBefore = tester.getTopLeft(find.text('Bar')).dy;
 
-      await fakeAppBarScroll(tester, startOffset: 300, endOffset: 300 + barH * 2);
+      // The bar travels a fifth of the scroll distance while hiding, so this
+      // scroll is long enough to hide it completely before the gesture ends.
+      await fakeAppBarScroll(tester, startOffset: 300, endOffset: 300 + barH * 6);
       await tester.pumpAndSettle();
 
       expect(bodyMetrics!.hideOffsetForPosition, greaterThan(barH * 0.9));
@@ -850,6 +910,8 @@ void main() {
       await tester.pumpWidget(
         _withTheme(
           AppBarFrame(
+            insideBuilder: _inside,
+            outsideBuilder: _outside,
             position: LdAppBarPosition.top,
             scrollBehavior: LdAppBarScrollBehavior.always,
             wrappedChild: ListView.builder(
@@ -1041,6 +1103,8 @@ void main() {
       await tester.pumpWidget(
         _withTheme(
           AppBarFrame(
+            insideBuilder: _inside,
+            outsideBuilder: _outside,
             position: LdAppBarPosition.top,
             scrollBehavior: LdAppBarScrollBehavior.always,
             wrappedChild: Builder(builder: (context) {
@@ -1084,6 +1148,8 @@ void main() {
       await tester.pumpWidget(
         _withTheme(
           AppBarFrame(
+            insideBuilder: _inside,
+            outsideBuilder: _outside,
             position: LdAppBarPosition.top,
             scrollBehavior: LdAppBarScrollBehavior.always,
             wrappedChild: Builder(builder: (context) {
@@ -1123,6 +1189,8 @@ void main() {
       await tester.pumpWidget(
         _withTheme(
           AppBarFrame(
+            insideBuilder: _inside,
+            outsideBuilder: _outside,
             position: LdAppBarPosition.top,
             scrollBehavior: LdAppBarScrollBehavior.always,
             wrappedChild: Builder(builder: (context) {
@@ -1172,6 +1240,8 @@ void main() {
       await tester.pumpWidget(
         _withTheme(
           AppBarFrame(
+            insideBuilder: _inside,
+            outsideBuilder: _outside,
             position: LdAppBarPosition.top,
             scrollBehavior: LdAppBarScrollBehavior.always,
             wrappedChild: Builder(builder: (context) {
@@ -1234,11 +1304,15 @@ void main() {
       await tester.pumpWidget(
         _withTheme(
           AppBarFrame(
+            insideBuilder: _inside,
+            outsideBuilder: _outside,
             position: LdAppBarPosition.top,
             scrollBehavior: LdAppBarScrollBehavior.always,
             wrappedChild: Builder(builder: (outerContext) {
               outerMetrics = outerContext.watch<LdAppBarMetrics?>();
               return AppBarFrame(
+                insideBuilder: _inside,
+                outsideBuilder: _outside,
                 position: LdAppBarPosition.top,
                 scrollBehavior: LdAppBarScrollBehavior.static,
                 wrappedChild: Builder(builder: (context) {
@@ -1320,6 +1394,8 @@ void main() {
       await tester.pumpWidget(
         withCustomMediaQuery(
           AppBarFrame(
+            insideBuilder: _inside,
+            outsideBuilder: _outside,
             position: LdAppBarPosition.top,
             wrappedChild: Builder(builder: (context) {
               capturedPadding = MediaQuery.paddingOf(context);
@@ -1361,6 +1437,8 @@ void main() {
       await tester.pumpWidget(
         withCustomMediaQuery(
           AppBarFrame(
+            insideBuilder: _inside,
+            outsideBuilder: _outside,
             position: LdAppBarPosition.bottom,
             scrollBehavior: LdAppBarScrollBehavior.always,
             wrappedChild: Builder(builder: (context) {
@@ -1406,6 +1484,8 @@ void main() {
       await tester.pumpWidget(
         withCustomMediaQuery(
           AppBarFrame(
+            insideBuilder: _inside,
+            outsideBuilder: _outside,
             position: LdAppBarPosition.bottom,
             scrollBehavior: LdAppBarScrollBehavior.always,
             wrappedChild: Builder(builder: (context) {
@@ -1449,6 +1529,8 @@ void main() {
       await tester.pumpWidget(
         withCustomMediaQuery(
           AppBarFrame(
+            insideBuilder: _inside,
+            outsideBuilder: _outside,
             position: LdAppBarPosition.top,
             scrollBehavior: LdAppBarScrollBehavior.always,
             wrappedChild: Builder(builder: (context) {
@@ -1496,6 +1578,8 @@ void main() {
       await tester.pumpWidget(
         withCustomMediaQuery(
           AppBarFrame(
+            insideBuilder: _inside,
+            outsideBuilder: _outside,
             position: LdAppBarPosition.top,
             wrappedChild: Builder(builder: (context) {
               capturedPadding = MediaQuery.paddingOf(context);
@@ -1589,6 +1673,8 @@ void main() {
       await tester.pumpWidget(
         withMediaQuery(
           AppBarFrame(
+            insideBuilder: _inside,
+            outsideBuilder: _outside,
             position: LdAppBarPosition.top,
             avoidViewInsets: true,
             wrappedChild: Builder(builder: (context) {
@@ -1616,6 +1702,8 @@ void main() {
       await tester.pumpWidget(
         withMediaQuery(
           AppBarFrame(
+            insideBuilder: _inside,
+            outsideBuilder: _outside,
             position: LdAppBarPosition.top,
             avoidViewInsets: true,
             wrappedChild: Builder(builder: (context) {
@@ -1662,6 +1750,8 @@ void main() {
       await tester.pumpWidget(
         withMediaQuery(
           AppBarFrame(
+            insideBuilder: _inside,
+            outsideBuilder: _outside,
             position: LdAppBarPosition.bottom,
             avoidViewInsets: false,
             wrappedChild: Builder(builder: (context) {
@@ -1688,6 +1778,8 @@ void main() {
       await tester.pumpWidget(
         withMediaQuery(
           AppBarFrame(
+            insideBuilder: _inside,
+            outsideBuilder: _outside,
             position: LdAppBarPosition.bottom,
             avoidViewInsets: false,
             wrappedChild: Builder(builder: (context) {
@@ -1741,6 +1833,8 @@ void main() {
       await tester.pumpWidget(
         withMediaQuery(
           AppBarFrame(
+            insideBuilder: _inside,
+            outsideBuilder: _outside,
             position: LdAppBarPosition.bottom,
             avoidViewInsets: true,
             wrappedChild: Builder(builder: (context) {
@@ -1772,6 +1866,8 @@ void main() {
       await tester.pumpWidget(
         withMediaQuery(
           AppBarFrame(
+            insideBuilder: _inside,
+            outsideBuilder: _outside,
             position: LdAppBarPosition.bottom,
             avoidViewInsets: true,
             wrappedChild: Builder(builder: (context) {
@@ -1822,6 +1918,8 @@ void main() {
       await tester.pumpWidget(
         withMediaQuery(
           AppBarFrame(
+            insideBuilder: _inside,
+            outsideBuilder: _outside,
             position: LdAppBarPosition.top,
             avoidViewInsets: true,
             scrollBehavior: LdAppBarScrollBehavior.always,

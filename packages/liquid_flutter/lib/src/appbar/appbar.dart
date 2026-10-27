@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/appbar/appbar_decoration.dart';
-import 'package:liquid_flutter/src/appbar/appbar_scrolled_under.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 

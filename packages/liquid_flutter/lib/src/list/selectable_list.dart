@@ -218,7 +218,6 @@ class LdSelectableListState<T extends Identifiable<IdType>, IdType> extends Stat
 
   void _tryScrollToInitialSelection(Set<IdType> initialSelectedItems) async {
     if (initialSelectedItems.isEmpty) {
-      print('initialSelectedItems is empty');
       return;
     }
     final listController = widget.listController is LdListController<T, IdType>
