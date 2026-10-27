@@ -105,6 +105,7 @@ class _LdSubmitState<T, Arg> extends State<LdSubmit<T, Arg>> {
   bool _createdController = false;
 
   bool _isInitialRender = true;
+  Timer? _initialRenderTimer;
 
   @override
   void initState() {
@@ -122,7 +123,7 @@ class _LdSubmitState<T, Arg> extends State<LdSubmit<T, Arg>> {
       _controller?.init();
     });
 
-    Future.delayed(Durations.medium1, () {
+    _initialRenderTimer = Timer(Durations.medium1, () {
       if (mounted) {
         setState(() {
           _isInitialRender = false;
@@ -167,6 +168,7 @@ class _LdSubmitState<T, Arg> extends State<LdSubmit<T, Arg>> {
 
   @override
   void dispose() {
+    _initialRenderTimer?.cancel();
     _argNotifier.dispose();
     if (_createdController) {
       _controller?.dispose();
