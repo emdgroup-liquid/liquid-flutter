@@ -148,12 +148,12 @@ class LdScaffoldBody extends StatelessWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     properties.add(IterableProperty<Widget>('children', children));
     properties.add(IterableProperty<Widget>('slivers', slivers));
-    properties.add(FlagProperty('autoSpaceChildren', value: autoSpaceChildren));
-    properties.add(FlagProperty('reverse', value: reverse));
-    properties.add(FlagProperty('addContainer', value: addContainer));
-    properties.add(FlagProperty('shrinkWrap', value: shrinkWrap));
-    properties.add(FlagProperty('scrollEdgeFade', value: scrollEdgeFade));
-    properties.add(FlagProperty('resizeToAvoidBottomInset', value: resizeToAvoidBottomInset));
+    properties.add(DiagnosticsProperty<bool>('autoSpaceChildren', autoSpaceChildren));
+    properties.add(DiagnosticsProperty<bool>('reverse', reverse));
+    properties.add(DiagnosticsProperty<bool>('addContainer', addContainer));
+    properties.add(DiagnosticsProperty<bool>('shrinkWrap', shrinkWrap));
+    properties.add(DiagnosticsProperty<bool>('scrollEdgeFade', scrollEdgeFade));
+    properties.add(DiagnosticsProperty<bool>('resizeToAvoidBottomInset', resizeToAvoidBottomInset));
 
     properties.add(ColorProperty('backgroundColor', backgroundColor));
 
