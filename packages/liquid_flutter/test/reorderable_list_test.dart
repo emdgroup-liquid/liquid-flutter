@@ -180,6 +180,7 @@ void main() {
       // the pointer stays still while the viewport scrolls underneath it.
       final scrollableRect = tester.getRect(find.byType(Scrollable).first);
       await gesture.moveTo(Offset(scrollableRect.center.dx, scrollableRect.bottom - 10));
+      await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));
 
       expect(scrollController.offset, greaterThan(0), reason: 'holding near the bottom edge must auto-scroll');

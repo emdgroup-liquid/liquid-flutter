@@ -170,10 +170,11 @@ class _LdListReorderScopeState<T extends Identifiable<IdType>, IdType> extends S
   }
 
   void _onDragStarted(IdType id, int fromIndex) {
-    debugPrint('[reorder] _onDragStarted id=$id fromIndex=$fromIndex');
     if (_draggingId != null) {
       return;
     }
+
+    _lastDragPosition = null;
 
     unawaited(HapticFeedback.mediumImpact());
 
@@ -198,14 +199,20 @@ class _LdListReorderScopeState<T extends Identifiable<IdType>, IdType> extends S
       return;
     }
 
-    _dropIndex = _nearestDropIndex(details.globalPosition.dy);
+    // The first update after the drag is accepted reports the pointer-down
+    // position together with the movement that triggered acceptance in
+    // [DragUpdateDetails.delta], so the pointer is tracked by accumulating
+    // deltas rather than by reading [DragUpdateDetails.globalPosition].
+    final position = (_lastDragPosition ?? details.globalPosition) + details.delta;
+    _lastDragPosition = position;
+
+    _dropIndex = _nearestDropIndex(position.dy);
 
     _markOverlayNeedsBuild();
 
-    _lastDragPosition = details.globalPosition;
     final autoScroller = _autoScroller;
     if (autoScroller != null) {
-      autoScroller.startAutoScrollIfNecessary(_dragTargetRect(details.globalPosition));
+      autoScroller.startAutoScrollIfNecessary(_dragTargetRect(position));
     }
   }
 
