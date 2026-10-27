@@ -43,6 +43,7 @@ class LdException extends Error {
     return LdException(
       canRetry: canRetry ?? this.canRetry,
       type: type ?? this.type,
+      attempt: attempt ?? this.attempt,
       exception: exception ?? this.exception,
       stackTrace: stackTrace ?? this.stackTrace,
     );
@@ -92,6 +93,30 @@ class LdLocalizedException extends LdException {
     super.stackTrace,
     super.exception,
   });
+
+  @override
+  LdLocalizedException copyWith({
+    String? message,
+    String? moreInfo,
+    bool? canRetry,
+    LdHintType? type,
+    int? attempt,
+    dynamic exception,
+    StackTrace? stackTrace,
+  }) {
+    return LdLocalizedException(
+      message: message ?? this.message,
+      moreInfo: moreInfo ?? this.moreInfo,
+      additionalBuilder: additionalBuilder,
+      additionalDetailsBuilder: additionalDetailsBuilder,
+      customIconBuilder: customIconBuilder,
+      canRetry: canRetry ?? this.canRetry,
+      type: type ?? this.type,
+      attempt: attempt ?? this.attempt,
+      exception: exception ?? this.exception,
+      stackTrace: stackTrace ?? this.stackTrace,
+    );
+  }
 
   @override
   String toString() {
