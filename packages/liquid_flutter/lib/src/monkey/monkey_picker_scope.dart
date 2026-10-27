@@ -54,7 +54,6 @@ class _LdMonkeyPickerScopeState<T extends Identifiable<IdType>, IdType> extends 
   didUpdateWidget(oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.initialSelection != oldWidget.initialSelection) {
-      print('widget.initialSelection: ${widget.initialSelection}');
       _controller.initialSelection = widget.initialSelection;
     }
   }
