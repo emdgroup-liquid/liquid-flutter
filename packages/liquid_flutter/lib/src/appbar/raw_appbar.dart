@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
-import 'package:liquid_flutter/src/appbar/appbar_decoration.dart';
 
 /// How [LdRawAppBar] sizes and places its bar surface.
 enum LdRawAppBarLayout {
@@ -22,9 +21,10 @@ enum LdRawAppBarLayout {
 /// Use [layout] to choose a full-width expanding row ([LdRawAppBarLayout.expand])
 /// or an intrinsic-width cluster centered on the edge ([LdRawAppBarLayout.center]).
 ///
-/// Pass [insideDecoration] / [outsideDecoration] (or the `*Builder` variants)
-/// through to [AppBarFrame]. Builders win over static decorations when both
-/// are set, and receive the current `isScrolledUnder` value.
+/// [insideDecoration] paints the inner bar surface, [outsideDecoration] the
+/// outer frame around it. The `*Builder` variants win over the static
+/// decorations when both are set, and receive the current `isScrolledUnder`
+/// value.
 ///
 /// ```dart
 /// LdRawAppBar.bottom(
@@ -268,12 +268,27 @@ class LdRawAppBar extends StatelessWidget {
 
     return AppBarFrame(
       insideBuilder: (context, metrics, child) {
-        return child;
+        final decoration =
+            insideDecorationBuilder != null ? insideDecorationBuilder!(metrics.isScrolledUnder) : insideDecoration;
+        return AnimatedContainer(
+          key: Key('appbar_frame_inside_${metrics.position.name}'),
+          duration: const Duration(milliseconds: 100),
+          decoration: decoration,
+          clipBehavior: decoration != null ? Clip.hardEdge : Clip.none,
+          child: child,
+        );
       },
       outsideBuilder: (context, metrics, child) {
-        return Padding(
-          padding: metrics.outerMargin,
-          child: child,
+        final decoration =
+            outsideDecorationBuilder != null ? outsideDecorationBuilder!(metrics.isScrolledUnder) : outsideDecoration;
+        return AnimatedContainer(
+          key: Key('appbar_frame_outside_${metrics.position.name}'),
+          duration: const Duration(milliseconds: 100),
+          decoration: decoration,
+          child: Padding(
+            padding: metrics.outerMargin,
+            child: child,
+          ),
         );
       },
       addContainer: addContainer,

@@ -26,7 +26,7 @@ class LdAttachmentEmptyState extends StatelessWidget {
           children: [
             LdAvatar(child: Icon(icon)),
             LdText.p(message, textAlign: TextAlign.center, maxLines: 3),
-            if (action != null) action!,
+            ?action,
           ],
         ),
       ),

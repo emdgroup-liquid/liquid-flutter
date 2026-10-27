@@ -84,7 +84,7 @@ class LdAppBarMetrics {
   final EdgeInsets systemInsets;
 
   LdAppBarMetrics get rootMetricsOfSide {
-    if (this.level == 0 && this.position == position) {
+    if (level == 0) {
       return this;
     }
 

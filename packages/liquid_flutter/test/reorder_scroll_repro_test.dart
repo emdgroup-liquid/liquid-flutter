@@ -92,6 +92,8 @@ void main() {
 
       final gesture = await tester.startGesture(gripCenter);
       await tester.pump(const Duration(milliseconds: 20));
+      await gesture.moveBy(const Offset(0, 20));
+      await tester.pump();
 
       // Scroll the list far enough that Item 2 is culled from the viewport
       // and page 2 items appear.

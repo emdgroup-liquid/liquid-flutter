@@ -27,6 +27,13 @@ class _CounterProviderState extends State<CounterProvider> {
   }
 }
 
+/// LdSubmit renders nothing until [Durations.medium1] has elapsed after mount
+/// (unless `mountChildImmediately` is set), so drive the clock past that first.
+Future<void> pumpPastMountDelay(WidgetTester tester) async {
+  await tester.pump(Durations.medium1);
+  await tester.pumpAndSettle();
+}
+
 void main() {
   ldDisableAnimations = true;
 
@@ -190,7 +197,7 @@ void main() {
       ),
     );
 
-    await tester.pumpAndSettle();
+    await pumpPastMountDelay(tester);
 
     expect(find.byType(LdSubmit<int, void>), findsOneWidget);
 
@@ -234,7 +241,7 @@ void main() {
       ),
     );
 
-    await tester.pumpAndSettle();
+    await pumpPastMountDelay(tester);
 
     expect(find.byType(LdSubmit<int, void>), findsOneWidget);
     expect(find.byType(LdButton), findsOneWidget);
@@ -289,7 +296,7 @@ void main() {
       ),
     );
 
-    await tester.pumpAndSettle();
+    await pumpPastMountDelay(tester);
 
     // Verify initial state
     expect(find.byType(LdSubmit<int, void>), findsOneWidget);
@@ -341,7 +348,7 @@ void main() {
       ),
     );
 
-    await tester.pumpAndSettle();
+    await pumpPastMountDelay(tester);
 
     // Trigger action that will fail
     await tester.tap(find.text("Submit"));
@@ -405,7 +412,7 @@ void main() {
         ),
       );
 
-      await tester.pumpAndSettle();
+      await pumpPastMountDelay(tester);
 
       // Trigger both actions.
       final submitButtons = find.text("Submit");
@@ -463,7 +470,7 @@ void main() {
       ),
     );
 
-    await tester.pumpAndSettle();
+    await pumpPastMountDelay(tester);
 
     // Verify initial state
     expect(find.byType(LdSubmit<int, void>), findsOneWidget);
@@ -539,6 +546,7 @@ void main() {
         ),
       ),
     );
+    await pumpPastMountDelay(tester);
     await tester.tap(find.text("Submit"));
 
     await tester.pumpAndSettle();
@@ -581,7 +589,7 @@ void main() {
       ),
     );
 
-    await tester.pumpAndSettle();
+    await pumpPastMountDelay(tester);
 
     expect(find.text("The result is 2"), findsOneWidget);
 
@@ -649,7 +657,7 @@ void main() {
       ),
     );
 
-    await tester.pumpAndSettle();
+    await pumpPastMountDelay(tester);
     await tester.tap(find.text('Submit'));
     await tester.pump();
 

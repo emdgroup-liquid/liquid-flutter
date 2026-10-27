@@ -1646,9 +1646,14 @@ void main() {
           activeSortOption: activeSortOption,
         );
         await tester.pump();
+        // Let the moved-item reveal settle.
+        await tester.pump(const Duration(milliseconds: 500));
 
-        expect(updateCalls, equals(1));
+        // The item returned by reorderItem is applied locally; nothing is
+        // persisted a second time.
+        expect(updateCalls, equals(0));
         expect(getOffsetCalls, equals(0));
+        expect(repository.getItemById(2)?.value?.value, equals(3));
         expect(repository.getItemAt(0)?.value?.id, equals(1));
         expect(repository.getItemAt(1)?.value?.id, equals(3));
         expect(repository.getItemAt(2)?.value?.id, equals(4));

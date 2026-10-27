@@ -38,7 +38,7 @@ class LdListItemLoading extends StatelessWidget {
     // Mirror [LdListItemWidget]'s geometry so a loader occupies the exact same
     // vertical space as the real item it replaces (prevents scroll jumps).
     final config = Provider.of<LdListItemConfig?>(context, listen: true);
-    final padding = config?.padding ?? theme.balPad(LdSize.s);
+    final padding = config?.padding ?? theme.balPad(LdSize.m);
     // [LdAvatar] is the canonical leading; it is sized to paddingSize(m) * 3.
     final leadingSize = theme.paddingSize(size: LdSize.m) * 3;
     final labelSize = theme.labelSize(LdSize.m);

@@ -49,7 +49,7 @@ void main() {
         ),
       );
 
-      await tester.pumpAndSettle();
+      await pumpPastSubmitMountDelay(tester);
       router.go('/t/1');
       await tester.pumpAndSettle();
 
@@ -115,14 +115,14 @@ void main() {
             ),
           ),
         );
-        await tester.pumpAndSettle();
+        await pumpPastSubmitMountDelay(tester);
 
         // Navigating to the parent's detail page used to throw
         // ProviderNotFoundException for LdMonkeySelection<_ChildItem, String>
         // because the child scope was only mounted under the deeper detail
         // route. With the fix, the child scope wraps the parent detail too.
         router.go('/p/1');
-        await tester.pumpAndSettle();
+        await pumpPastSubmitMountDelay(tester);
 
         expect(tester.takeException(), isNull);
         expect(find.text('A'), findsOneWidget);
