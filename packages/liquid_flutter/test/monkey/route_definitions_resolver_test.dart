@@ -177,7 +177,7 @@ void main() {
         ),
       );
 
-      await tester.pumpAndSettle();
+      await pumpPastSubmitMountDelay(tester);
       expect(find.text('selected:Gold'), findsOneWidget);
     });
 
@@ -251,7 +251,7 @@ void main() {
         ),
       );
 
-      await tester.pumpAndSettle();
+      await pumpPastSubmitMountDelay(tester);
       expect(find.textContaining('Active 1'), findsOneWidget);
 
       await tester.tap(find.text('Refresh'));

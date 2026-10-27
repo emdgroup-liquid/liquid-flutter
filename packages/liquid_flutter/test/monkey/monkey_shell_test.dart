@@ -99,7 +99,7 @@ void main() {
           ),
         );
 
-        await tester.pumpAndSettle();
+        await pumpPastSubmitMountDelay(tester);
 
         // The filter state should reflect the query parameter
         final ctx = tester.element(find.byType(LdMonkeyShell<TestItem, int>).last);
@@ -146,7 +146,7 @@ void main() {
           ),
         );
 
-        await tester.pumpAndSettle();
+        await pumpPastSubmitMountDelay(tester);
 
         final ctx = tester.element(find.byType(LdMonkeyShell<TestItem, int>).last);
         final sortAndFilterState = ctx.read<LdMonkeySortAndFilterState<TestItem, int>>();
@@ -196,7 +196,7 @@ void main() {
           ),
         );
 
-        await tester.pumpAndSettle();
+        await pumpPastSubmitMountDelay(tester);
 
         final ctx = tester.element(find.byType(LdMonkeyShell<TestItem, int>).last);
         final active = ctx
@@ -260,7 +260,7 @@ void main() {
           ),
         );
 
-        await tester.pumpAndSettle();
+        await pumpPastSubmitMountDelay(tester);
 
         final ctx = tester.element(find.byType(LdMonkeyShell<TestItem, int>).last);
         final sortAndFilterState = ctx.read<LdMonkeySortAndFilterState<TestItem, int>>();
