@@ -88,6 +88,8 @@ void main() {
 
       final gesture = await tester.startGesture(center);
       await tester.pump(const Duration(milliseconds: 50));
+      await gesture.moveBy(const Offset(0, 20));
+      await tester.pump();
 
       // While drag is held, scroll the list so that Item 1 is culled from the
       // viewport.  Without KeepAlive the Draggable's state gets deactivated and
