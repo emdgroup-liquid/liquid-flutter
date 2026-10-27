@@ -79,7 +79,7 @@ Widget _wrapDetailForm({
                 ),
                 child: Provider<LdMonkeyRouterController<_TestTask, int>>.value(
                   value: _StubRouter(),
-                  child: SingleChildScrollView(child: child),
+                  child: child,
                 ),
               ),
             ),
@@ -125,6 +125,7 @@ Widget _detailFormFor(List<_TestTask> tasks) {
     ),
     mode: LdFormMode.edit,
     saveMode: LdReactiveFormSaveMode.manualSubmit,
+    controls: LdFormControls.none,
     detailToFormValues: (task) => {
       'title': task.title,
     },
@@ -176,6 +177,7 @@ void main() {
           ),
           mode: LdFormMode.edit,
           saveMode: LdReactiveFormSaveMode.manualSubmit,
+          controls: LdFormControls.none,
           detailToFormValues: (task) => {
             'title': task.title,
           },
@@ -247,6 +249,7 @@ void main() {
               ),
               mode: LdFormMode.edit,
               saveMode: LdReactiveFormSaveMode.manualSubmit,
+              controls: LdFormControls.none,
               detailToFormValues: (task) => {
                 'title': task.title,
               },
@@ -318,7 +321,7 @@ void main() {
                   onPressed: () => Navigator.of(context).maybePop(),
                 ),
                 Expanded(
-                  child: SingleChildScrollView(child: _detailFormFor(tasks)),
+                  child: _detailFormFor(tasks),
                 ),
               ],
             ),
@@ -406,7 +409,7 @@ void main() {
                   onPressed: () => Navigator.of(context).maybePop(),
                 ),
                 Expanded(
-                  child: SingleChildScrollView(child: _detailFormFor(tasks)),
+                  child: _detailFormFor(tasks),
                 ),
               ],
             ),
@@ -475,6 +478,7 @@ void main() {
           ),
           mode: LdFormMode.edit,
           saveMode: LdReactiveFormSaveMode.manualSubmit,
+          controls: LdFormControls.none,
           detailToFormValues: (task) => {'title': task.title},
           formToUpdatePayload: (form, task) => task.copyWith(
             title: form.control('title').value as String,
@@ -525,6 +529,7 @@ void main() {
           ),
           mode: LdFormMode.edit,
           saveMode: LdReactiveFormSaveMode.manualSubmit,
+          controls: LdFormControls.none,
           detailToFormValues: (task) => {'title': task.title},
           formToUpdatePayload: (form, task) => task.copyWith(
             title: form.control('title').value as String,

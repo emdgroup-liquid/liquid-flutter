@@ -290,6 +290,18 @@ LdListController<TestItem, int> createTestListController({
   );
 }
 
+/// Pumps past the delay [LdSubmit] waits before mounting its child, then
+/// settles.
+///
+/// [LdMonkeyRouteDefinitionsResolver] resolves through an [LdSubmit], so the
+/// shell below it stays unmounted until that delay has elapsed. Nothing
+/// schedules a frame in the meantime, which means [WidgetTester.pumpAndSettle]
+/// on its own returns before the clock gets there.
+Future<void> pumpPastSubmitMountDelay(WidgetTester tester) async {
+  await tester.pump(Durations.medium1 + const Duration(milliseconds: 50));
+  await tester.pumpAndSettle();
+}
+
 /// Creates a test item
 TestItem createTestItem(int id, {String? name, int? value, bool? active, String? category}) {
   return TestItem(
@@ -538,20 +550,23 @@ Widget wrapMonkeyDetailPage<T extends Identifiable<IdType>, IdType>({
   return LdThemeProvider(
     child: MaterialApp(
       localizationsDelegates: LiquidLocalizations.localizationsDelegates,
-      home: ListenableProvider<LdListController<T, IdType>>.value(
-        value: repository,
-        child: Provider<LdMonkeySelection<T, IdType>>.value(
-          value: selection,
-          child: Provider<LdMonkeyEffectiveLayoutMode>.value(
-            value: layoutMode,
-            child: Provider<LdMonkeySortAndFilterState<T, IdType>>.value(
-              value: LdMonkeySortAndFilterState<T, IdType>(
-                filters: filters,
-                sortOptions: [],
-              ),
-              child: Provider<LdMonkeyActions<T, IdType>>.value(
-                value: actions,
-                child: child,
+      home: ChangeNotifierProvider<LdMonkeyActionScope<T, IdType>>(
+        create: (_) => LdMonkeyActionScope<T, IdType>(),
+        child: ListenableProvider<LdListController<T, IdType>>.value(
+          value: repository,
+          child: Provider<LdMonkeySelection<T, IdType>>.value(
+            value: selection,
+            child: Provider<LdMonkeyEffectiveLayoutMode>.value(
+              value: layoutMode,
+              child: Provider<LdMonkeySortAndFilterState<T, IdType>>.value(
+                value: LdMonkeySortAndFilterState<T, IdType>(
+                  filters: filters,
+                  sortOptions: [],
+                ),
+                child: Provider<LdMonkeyActions<T, IdType>>.value(
+                  value: actions,
+                  child: child,
+                ),
               ),
             ),
           ),
