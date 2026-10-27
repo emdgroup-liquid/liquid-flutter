@@ -663,10 +663,12 @@ class _CapturedReview extends StatelessWidget {
               ),
             ),
             child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: theme.paddingSize(size: LdSize.l),
-                vertical: theme.paddingSize(size: LdSize.m),
-              ),
+              padding:
+                  MediaQuery.paddingOf(context).copyWith(top: 0) +
+                  EdgeInsets.symmetric(
+                    horizontal: theme.paddingSize(size: LdSize.l),
+                    vertical: theme.paddingSize(size: LdSize.m),
+                  ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
