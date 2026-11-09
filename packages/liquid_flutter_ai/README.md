@@ -22,7 +22,8 @@ Pure-Dart allow-rule and GenUI schema helpers live in
 - **`LdSendFlyScope`** — animated send-from-compose-to-list transition.
 - **Allow-rules** — picker/editor UI on top of `liquid_flutter_ai_shared`.
 - **GenUI** — Liquid catalog helpers and surface widgets (`buildLdCatalog`,
-  surface manager / strip).
+  surface manager / strip), rendered with
+  [a2ui_flutter](https://pub.dev/packages/a2ui_flutter).
 - **Usage** — context usage indicator and cost modal helpers.
 
 ## Installation

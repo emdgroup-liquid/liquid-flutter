@@ -1,5 +1,6 @@
-import 'dart:async';
+import 'dart:convert';
 
+import 'package:a2ui_core/a2ui_core.dart' show A2uiProtocolVersion, ActionMessage, ErrorMessage, Subscription;
 import 'package:flutter/material.dart';
 import 'package:liquid/components/component_page.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
@@ -16,7 +17,7 @@ class GenuiCatalogDemo extends StatefulWidget {
 
 class _GenuiCatalogDemoState extends State<GenuiCatalogDemo> {
   late final LdGenuiSurfaceManager _manager;
-  StreamSubscription<Object>? _submitSub;
+  late final List<Subscription> _subscriptions;
   String? _lastAction;
 
   static const _samples = <_GenuiSample>[
@@ -140,9 +141,16 @@ class _GenuiCatalogDemoState extends State<GenuiCatalogDemo> {
   void initState() {
     super.initState();
     _manager = LdGenuiSurfaceManager();
-    _submitSub = _manager.controller.onSubmit.listen((message) {
-      setState(() => _lastAction = message.toString());
-    });
+    final model = _manager.processor.model;
+    final version = A2uiProtocolVersion.v0_9.jsonValue;
+    _subscriptions = [
+      model.onAction.subscribe((action) {
+        setState(() => _lastAction = jsonEncode(ActionMessage(version: version, action: action).toJson()));
+      }),
+      model.onError.subscribe((error) {
+        setState(() => _lastAction = jsonEncode(ErrorMessage(version: version, error: error).toJson()));
+      }),
+    ];
     for (final sample in _samples) {
       _manager.processMessageText(sample.genui);
     }
@@ -150,7 +158,9 @@ class _GenuiCatalogDemoState extends State<GenuiCatalogDemo> {
 
   @override
   void dispose() {
-    _submitSub?.cancel();
+    for (final subscription in _subscriptions) {
+      subscription.unsubscribe();
+    }
     _manager.dispose();
     super.dispose();
   }

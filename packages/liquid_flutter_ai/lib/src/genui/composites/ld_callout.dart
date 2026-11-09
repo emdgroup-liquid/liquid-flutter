@@ -7,7 +7,7 @@ final ldCallout = ldCatalogItem(
   name: 'LdCallout',
   schema: ldCalloutSchema,
   parse: LdCalloutData.fromJson,
-  builder: (_, data) => LdCallout(data: data),
+  builder: (_, _, data) => LdCallout(data: data),
 );
 
 class LdCallout extends StatelessWidget {

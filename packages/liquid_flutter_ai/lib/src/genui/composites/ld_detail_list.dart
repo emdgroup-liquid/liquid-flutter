@@ -1,5 +1,6 @@
+import 'package:a2ui_core/a2ui_core.dart' show ComponentNode;
+import 'package:a2ui_flutter/a2ui_flutter.dart';
 import 'package:flutter/material.dart';
-import 'package:genui/genui.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter_ai/src/genui/composites/helpers.dart';
 import 'package:liquid_flutter_ai_shared/liquid_flutter_ai_shared.dart';
@@ -9,17 +10,13 @@ final ldDetailList = ldCatalogItem(
   name: 'LdDetailList',
   schema: ldDetailListSchema,
   parse: LdDetailListData.fromJson,
-  builder: (ctx, data) => LdDetailList(catalogContext: ctx, data: data),
+  builder: (node, _, data) => LdDetailList(node: node, data: data),
 );
 
 class LdDetailList extends StatelessWidget {
-  const LdDetailList({
-    super.key,
-    required this.catalogContext,
-    required this.data,
-  });
+  const LdDetailList({super.key, required this.node, required this.data});
 
-  final CatalogItemContext catalogContext;
+  final ComponentNode<ComponentImplementation> node;
   final LdDetailListData data;
 
   @override
@@ -39,7 +36,7 @@ class LdDetailList extends StatelessWidget {
                   subtitle: item.subtitle?.isNotEmpty == true
                       ? Text(item.subtitle!)
                       : null,
-                  onPressed: () => _openDetail(item),
+                  onPressed: () => _openDetail(context, item),
                 ),
             ],
           ),
@@ -48,20 +45,18 @@ class LdDetailList extends StatelessWidget {
     );
   }
 
-  Future<void> _openDetail(LdDetailListItem item) async {
-    final buildContext = catalogContext.buildContext;
+  Future<void> _openDetail(BuildContext context, LdDetailListItem item) async {
     await LdModalRoute<void>(
-      context: buildContext,
-      pageBuilder: (modalContext) =>
-          _LdDetailPage(catalogContext: catalogContext, item: item),
-    ).show(buildContext);
+      context: context,
+      pageBuilder: (modalContext) => _LdDetailPage(node: node, item: item),
+    ).show(context);
   }
 }
 
 class _LdDetailPage extends StatelessWidget {
-  const _LdDetailPage({required this.catalogContext, required this.item});
+  const _LdDetailPage({required this.node, required this.item});
 
-  final CatalogItemContext catalogContext;
+  final ComponentNode<ComponentImplementation> node;
   final LdDetailListItem item;
 
   @override
@@ -77,7 +72,7 @@ class _LdDetailPage extends StatelessWidget {
                   width: double.infinity,
                   mode: compositeBtnMode(action.mode),
                   onPressed: () async {
-                    await dispatchLdAction(catalogContext, action.action);
+                    await dispatchLdAction(node, action.action);
                   },
                   child: Text(action.label),
                 ),

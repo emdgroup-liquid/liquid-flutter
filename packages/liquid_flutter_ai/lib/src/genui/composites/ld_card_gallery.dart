@@ -1,5 +1,6 @@
+import 'package:a2ui_core/a2ui_core.dart' show ComponentNode;
+import 'package:a2ui_flutter/a2ui_flutter.dart';
 import 'package:flutter/material.dart';
-import 'package:genui/genui.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter_ai/src/genui/composites/helpers.dart';
 import 'package:liquid_flutter_ai_shared/liquid_flutter_ai_shared.dart';
@@ -10,37 +11,41 @@ final ldCardGallery = ldCatalogItem(
   name: 'LdCardGallery',
   schema: ldCardGallerySchema,
   parse: LdCardGalleryData.fromJson,
-  builder: (ctx, data) => LdCardGallery(catalogContext: ctx, data: data),
+  builder: (node, props, data) =>
+      LdCardGallery(node: node, props: props, data: data),
 );
 
 class LdCardGallery extends StatelessWidget {
   const LdCardGallery({
     super.key,
-    required this.catalogContext,
+    required this.node,
+    required this.props,
     required this.data,
   });
 
-  final CatalogItemContext catalogContext;
+  final ComponentNode<ComponentImplementation> node;
+  final ComponentProps props;
   final LdCardGalleryData data;
 
   @override
   Widget build(BuildContext context) {
     if (data.selected == null) {
       return _LdCardGalleryBody(
-        catalogContext: catalogContext,
+        node: node,
         data: data,
         selected: null,
+        onSelected: null,
       );
     }
 
     return bindWritableString(
-      catalogContext,
-      ref: data.selected,
-      fallbackPath: '${catalogContext.id}.selected',
-      builder: (context, selected) => _LdCardGalleryBody(
-        catalogContext: catalogContext,
+      props,
+      'selected',
+      builder: (context, selected, onSelected) => _LdCardGalleryBody(
+        node: node,
         data: data,
         selected: selected,
+        onSelected: onSelected,
       ),
     );
   }
@@ -48,14 +53,16 @@ class LdCardGallery extends StatelessWidget {
 
 class _LdCardGalleryBody extends StatelessWidget {
   const _LdCardGalleryBody({
-    required this.catalogContext,
+    required this.node,
     required this.data,
     required this.selected,
+    required this.onSelected,
   });
 
-  final CatalogItemContext catalogContext;
+  final ComponentNode<ComponentImplementation> node;
   final LdCardGalleryData data;
   final String? selected;
+  final ValueChanged<String>? onSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -80,19 +87,8 @@ class _LdCardGalleryBody extends StatelessWidget {
   }
 
   void _onCardTap(LdGalleryCard card) {
-    if (data.selected != null) {
-      catalogContext.dataContext.update(
-        DataPath(
-          writableStringPath(data.selected, '${catalogContext.id}.selected'),
-        ),
-        card.id,
-      );
-    }
-    dispatchLdAction(
-      catalogContext,
-      card.action,
-      extraContext: {'id': card.id},
-    );
+    onSelected?.call(card.id);
+    dispatchLdAction(node, card.action, extraContext: {'id': card.id});
   }
 }
 
