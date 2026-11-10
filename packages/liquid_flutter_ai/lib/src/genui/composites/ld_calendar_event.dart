@@ -1,5 +1,6 @@
+import 'package:a2ui_core/a2ui_core.dart' show ComponentNode;
+import 'package:a2ui_flutter/a2ui_flutter.dart';
 import 'package:flutter/material.dart';
-import 'package:genui/genui.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter_ai/src/genui/composites/helpers.dart';
 import 'package:liquid_flutter_ai_shared/liquid_flutter_ai_shared.dart';
@@ -10,17 +11,13 @@ final ldCalendarEvent = ldCatalogItem(
   name: 'LdCalendarEvent',
   schema: ldCalendarEventSchema,
   parse: LdCalendarEventData.fromJson,
-  builder: (ctx, data) => LdCalendarEvent(catalogContext: ctx, data: data),
+  builder: (node, _, data) => LdCalendarEvent(node: node, data: data),
 );
 
 class LdCalendarEvent extends StatelessWidget {
-  const LdCalendarEvent({
-    super.key,
-    required this.catalogContext,
-    required this.data,
-  });
+  const LdCalendarEvent({super.key, required this.node, required this.data});
 
-  final CatalogItemContext catalogContext;
+  final ComponentNode<ComponentImplementation> node;
   final LdCalendarEventData data;
 
   @override
@@ -68,7 +65,7 @@ class LdCalendarEvent extends StatelessWidget {
                 LdButton(
                   mode: LdButtonMode.outline,
                   size: LdSize.l,
-                  onPressed: () => dispatchLdAction(catalogContext, action),
+                  onPressed: () => dispatchLdAction(node, action),
                   child: const Text('Open'),
                 ),
             ],

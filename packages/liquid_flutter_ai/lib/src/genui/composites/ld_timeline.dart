@@ -1,5 +1,6 @@
+import 'package:a2ui_core/a2ui_core.dart' show ComponentNode;
+import 'package:a2ui_flutter/a2ui_flutter.dart';
 import 'package:flutter/material.dart';
-import 'package:genui/genui.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter_ai/src/genui/composites/helpers.dart';
 import 'package:liquid_flutter_ai_shared/liquid_flutter_ai_shared.dart';
@@ -8,17 +9,13 @@ final ldTimeline = ldCatalogItem(
   name: 'LdTimeline',
   schema: ldTimelineSchema,
   parse: LdTimelineData.fromJson,
-  builder: (ctx, data) => LdGenuiTimeline(catalogContext: ctx, data: data),
+  builder: (node, _, data) => LdGenuiTimeline(node: node, data: data),
 );
 
 class LdGenuiTimeline extends StatelessWidget {
-  const LdGenuiTimeline({
-    super.key,
-    required this.catalogContext,
-    required this.data,
-  });
+  const LdGenuiTimeline({super.key, required this.node, required this.data});
 
-  final CatalogItemContext catalogContext;
+  final ComponentNode<ComponentImplementation> node;
   final LdTimelineData data;
 
   @override
@@ -35,9 +32,9 @@ class LdGenuiTimeline extends StatelessWidget {
               LdTimelineItem(
                 time: switch (item.time) {
                   String time => Text(time),
-                  _ => FallbackWidget(
+                  _ => LdGenuiFallback(
                     error: FormatException(
-                      'LdTimelineItem "${catalogContext.id}" time is required',
+                      'LdTimelineItem "${node.componentId}" time is required',
                     ),
                   ),
                 },

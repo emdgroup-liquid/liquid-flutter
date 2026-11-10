@@ -1,5 +1,6 @@
+import 'package:a2ui_core/a2ui_core.dart' show ComponentNode;
+import 'package:a2ui_flutter/a2ui_flutter.dart';
 import 'package:flutter/material.dart';
-import 'package:genui/genui.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter_ai/src/genui/composites/helpers.dart';
 import 'package:liquid_flutter_ai_shared/liquid_flutter_ai_shared.dart';
@@ -8,35 +9,32 @@ final ldMultipleChoice = ldCatalogItem(
   name: 'LdMultipleChoice',
   schema: ldMultipleChoiceSchema,
   parse: LdMultipleChoiceData.fromJson,
-  builder: (ctx, data) => LdMultipleChoice(catalogContext: ctx, data: data),
+  builder: (node, props, data) =>
+      LdMultipleChoice(node: node, props: props, data: data),
 );
 
 class LdMultipleChoice extends StatelessWidget {
   const LdMultipleChoice({
     super.key,
-    required this.catalogContext,
+    required this.node,
+    required this.props,
     required this.data,
   });
 
-  final CatalogItemContext catalogContext;
+  final ComponentNode<ComponentImplementation> node;
+  final ComponentProps props;
   final LdMultipleChoiceData data;
 
   @override
   Widget build(BuildContext context) {
-    final path = writableStringPath(
-      data.selected,
-      '${catalogContext.id}.selected',
-    );
-
     return bindWritableString(
-      catalogContext,
-      ref: data.selected,
-      fallbackPath: path,
-      builder: (context, selected) => _LdMultipleChoiceForm(
-        catalogContext: catalogContext,
+      props,
+      'selected',
+      builder: (context, selected, onSelected) => _LdMultipleChoiceForm(
+        node: node,
         data: data,
         selected: selected,
-        path: path,
+        onSelected: onSelected,
       ),
     );
   }
@@ -44,16 +42,16 @@ class LdMultipleChoice extends StatelessWidget {
 
 class _LdMultipleChoiceForm extends StatefulWidget {
   const _LdMultipleChoiceForm({
-    required this.catalogContext,
+    required this.node,
     required this.data,
     required this.selected,
-    required this.path,
+    required this.onSelected,
   });
 
-  final CatalogItemContext catalogContext;
+  final ComponentNode<ComponentImplementation> node;
   final LdMultipleChoiceData data;
   final String? selected;
-  final String path;
+  final ValueChanged<String> onSelected;
 
   @override
   State<_LdMultipleChoiceForm> createState() => _LdMultipleChoiceFormState();
@@ -113,13 +111,13 @@ class _LdMultipleChoiceFormState extends State<_LdMultipleChoiceForm> {
     if (_customCtrl.text.isNotEmpty) {
       _customCtrl.clear();
     }
-    widget.catalogContext.dataContext.update(DataPath(widget.path), value);
+    widget.onSelected(value);
     setState(() {});
   }
 
   void _onCustomChanged(String value) {
     final trimmed = value.trim();
-    widget.catalogContext.dataContext.update(DataPath(widget.path), trimmed);
+    widget.onSelected(trimmed);
     setState(() {});
   }
 
@@ -153,14 +151,10 @@ class _LdMultipleChoiceFormState extends State<_LdMultipleChoiceForm> {
   void _submit() {
     final selected = _effectiveSelection;
     if (selected == null) return;
-    widget.catalogContext.dispatchEvent(
-      UserActionEvent(
-        name: 'multipleChoiceSubmit',
-        sourceComponentId: widget.catalogContext.id,
-        timestamp: DateTime.now(),
-        context: {'selected': selected},
-      ),
-    );
+    widget.node.context?.dispatchAction({
+      'name': 'multipleChoiceSubmit',
+      'context': {'selected': selected},
+    });
   }
 
   List<Widget> _buildOptions() {

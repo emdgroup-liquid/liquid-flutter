@@ -1,21 +1,34 @@
 import 'dart:convert';
 
+import 'package:a2ui_core/a2ui_core.dart';
+import 'package:a2ui_flutter/a2ui_flutter.dart';
 import 'package:flutter/foundation.dart';
-import 'package:genui/genui.dart';
 import 'package:liquid_flutter_ai/src/genui/ld_catalog.dart';
 import 'package:liquid_flutter_ai_shared/liquid_flutter_ai_shared.dart';
 
-/// Parses ```genui blocks from message text and feeds a [SurfaceController].
+/// Parses ```genui blocks from message text and feeds a [MessageProcessor].
 class LdGenuiSurfaceManager {
   LdGenuiSurfaceManager({
-    Catalog? catalog,
+    CatalogImplementation? catalog,
     this.catalogId = kLdGenuiCatalogId,
   }) {
-    controller = SurfaceController(catalogs: [catalog ?? buildLdCatalog()]);
+    processor = MessageProcessor<ComponentImplementation>(
+      catalogs: [catalog ?? buildLdCatalog()],
+      // Agents send a surface over several lines, which the strict graph
+      // checks would reject.
+      validationConfig: ValidationConfig.relaxed,
+      reportErrorsOnly: true,
+    );
   }
 
-  late final SurfaceController controller;
+  /// Holds the surfaces. User actions arrive on `processor.model.onAction`
+  /// and errors to report to the agent on `processor.model.onError`.
+  late final MessageProcessor<ComponentImplementation> processor;
   final String catalogId;
+
+  /// Surface ids in [activeSurfaceIds] order: a surface moves to the end when
+  /// it is created or its components are updated.
+  final List<String> _surfaceOrder = [];
 
   /// Anchor (e.g. the piece id of the message) that last created or updated
   /// each active surface, keyed by surface id. Cleared on deleteSurface.
@@ -33,8 +46,8 @@ class LdGenuiSurfaceManager {
   /// Returns the cleaned text (with genui blocks removed) for display.
   ///
   /// When [reportErrors] is true (default), JSON / parse failures are reported
-  /// via [SurfaceController.reportError] so listeners on [onSubmit] can react.
-  /// Pass `false` when replaying history so old failures do not auto-submit.
+  /// on `processor.model.onError` so listeners there can react. Pass `false`
+  /// when replaying history so old failures do not auto-submit.
   ///
   /// [anchor] is recorded as the position where every surface created or
   /// updated by this text lives (e.g. the owning message piece id). Surfaces
@@ -81,8 +94,9 @@ class LdGenuiSurfaceManager {
     for (final line in lines) {
       final trimmed = line.trim();
       if (trimmed.isEmpty) continue;
+      Map<String, Object?>? json;
       try {
-        final json = _decodeGenuiJson(trimmed, reportErrors: reportErrors);
+        json = _decodeGenuiJson(trimmed, reportErrors: reportErrors);
         if (json == null) continue;
         if (json['createSurface'] is Map) {
           final surface = Map<String, Object?>.from(
@@ -91,42 +105,69 @@ class LdGenuiSurfaceManager {
           surface.putIfAbsent('catalogId', () => catalogId);
           json['createSurface'] = surface;
         }
-        final message = A2uiMessage.fromJson(json);
+        final message = AgentToRendererMessage.fromJson(json);
         _trackAnchor(message, anchor);
-        controller.handleMessage(message);
-      } catch (e, stack) {
+        _trackOrder(message);
+        processor.processMessages(message);
+      } on A2uiError catch (e) {
         debugPrint('LdGenuiSurfaceManager: failed to handle genui line: $e');
         debugPrint(
           'LdGenuiSurfaceManager: line=${_preview(trimmed)}',
         );
         if (reportErrors) {
-          controller.reportError(e, stack);
+          _reportError(e, rawMessage: json);
         }
       }
     }
   }
 
-  void _trackAnchor(A2uiMessage message, Object? anchor) {
+  void _trackAnchor(AgentToRendererMessage message, Object? anchor) {
     switch (message) {
-      case CreateSurface(:final surfaceId):
+      case CreateSurfaceMessage(:final surfaceId):
         _anchorBySurfaceId[surfaceId] = anchor;
-      case UpdateComponents(:final surfaceId):
+      case UpdateComponentsMessage(:final surfaceId):
         _anchorBySurfaceId[surfaceId] = anchor;
-      case UpdateDataModel(:final surfaceId):
+      case UpdateDataModelMessage(:final surfaceId):
         _anchorBySurfaceId[surfaceId] = anchor;
-      case DeleteSurface(:final surfaceId):
+      case DeleteSurfaceMessage(:final surfaceId):
         _anchorBySurfaceId.remove(surfaceId);
     }
+  }
+
+  void _trackOrder(AgentToRendererMessage message) {
+    switch (message) {
+      case CreateSurfaceMessage(:final surfaceId) ||
+          UpdateComponentsMessage(:final surfaceId):
+        _surfaceOrder
+          ..remove(surfaceId)
+          ..add(surfaceId);
+      case DeleteSurfaceMessage(:final surfaceId):
+        _surfaceOrder.remove(surfaceId);
+    }
+  }
+
+  /// Reports [error] on `processor.model.onError` the way the processor
+  /// reports a message it rejects.
+  void _reportError(A2uiError error, {Object? rawMessage}) {
+    processor.model.emitError(
+      MessageErrorMapper.map(error, rawMessage: rawMessage).error,
+    );
   }
 
   /// Deletes [surfaceId] and drops its anchor, so the surface no longer
   /// renders inline in the transcript.
   ///
-  /// Routes through the manager (rather than calling the controller directly)
+  /// Routes through the manager (rather than calling the processor directly)
   /// so [_anchorBySurfaceId] stays in sync with the registry.
   void deleteSurface(String surfaceId) {
     _anchorBySurfaceId.remove(surfaceId);
-    controller.handleMessage(DeleteSurface(surfaceId: surfaceId));
+    _surfaceOrder.remove(surfaceId);
+    processor.processMessages(
+      DeleteSurfaceMessage(
+        version: A2uiProtocolVersion.v0_9.jsonValue,
+        surfaceId: surfaceId,
+      ),
+    );
   }
 
   /// Decodes a genui action line, tolerating a common LLM mistake of one or
@@ -144,9 +185,8 @@ class LdGenuiSurfaceManager {
         debugPrint('LdGenuiSurfaceManager: failed to parse genui JSON: $e');
         debugPrint('LdGenuiSurfaceManager: line=${_preview(trimmed)}');
         if (reportErrors) {
-          controller.reportError(
-            FormatException('GenUI JSON parse failed: $e'),
-            StackTrace.current,
+          _reportError(
+            A2uiParseError('GenUI JSON parse failed: $e', rawContent: trimmed),
           );
         }
         return null;
@@ -159,9 +199,8 @@ class LdGenuiSurfaceManager {
       } on FormatException catch (e2) {
         debugPrint('LdGenuiSurfaceManager: failed to parse genui JSON: $e2');
         if (reportErrors) {
-          controller.reportError(
-            FormatException('GenUI JSON parse failed: $e2'),
-            StackTrace.current,
+          _reportError(
+            A2uiParseError('GenUI JSON parse failed: $e2', rawContent: trimmed),
           );
         }
         return null;
@@ -173,11 +212,11 @@ class LdGenuiSurfaceManager {
         'LdGenuiSurfaceManager: expected JSON object, got ${decoded.runtimeType}',
       );
       if (reportErrors) {
-        controller.reportError(
-          FormatException(
+        _reportError(
+          A2uiParseError(
             'GenUI JSON expected object, got ${decoded.runtimeType}',
+            rawContent: trimmed,
           ),
-          StackTrace.current,
         );
       }
       return null;
@@ -215,12 +254,16 @@ class LdGenuiSurfaceManager {
     return processMessageText(content, reportErrors: false);
   }
 
-  Iterable<String> get activeSurfaceIds => controller.activeSurfaceIds;
+  Iterable<String> get activeSurfaceIds => List.unmodifiable([
+    for (final id in _surfaceOrder)
+      if (processor.model.getSurface(id) != null) id,
+  ]);
 
-  SurfaceContext contextFor(String surfaceId) =>
-      controller.contextFor(surfaceId);
+  /// The surface [surfaceId], or null until the agent creates it.
+  SurfaceModel<ComponentImplementation>? surfaceFor(String surfaceId) =>
+      processor.model.getSurface(surfaceId);
 
   void dispose() {
-    controller.dispose();
+    processor.dispose();
   }
 }

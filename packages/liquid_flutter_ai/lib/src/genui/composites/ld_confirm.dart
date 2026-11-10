@@ -1,5 +1,6 @@
+import 'package:a2ui_core/a2ui_core.dart' show ComponentNode;
+import 'package:a2ui_flutter/a2ui_flutter.dart';
 import 'package:flutter/material.dart';
-import 'package:genui/genui.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter_ai/src/genui/composites/helpers.dart';
 import 'package:liquid_flutter_ai_shared/liquid_flutter_ai_shared.dart';
@@ -9,17 +10,13 @@ final ldConfirm = ldCatalogItem(
   name: 'LdConfirm',
   schema: ldConfirmSchema,
   parse: LdConfirmData.fromJson,
-  builder: (ctx, data) => LdConfirm(catalogContext: ctx, data: data),
+  builder: (node, _, data) => LdConfirm(node: node, data: data),
 );
 
 class LdConfirm extends StatelessWidget {
-  const LdConfirm({
-    super.key,
-    required this.catalogContext,
-    required this.data,
-  });
+  const LdConfirm({super.key, required this.node, required this.data});
 
-  final CatalogItemContext catalogContext;
+  final ComponentNode<ComponentImplementation> node;
   final LdConfirmData data;
 
   @override
@@ -54,8 +51,7 @@ class LdConfirm extends StatelessWidget {
                     LdButton(
                       size: LdSize.l,
                       mode: LdButtonMode.outline,
-                      onPressed: () =>
-                          dispatchLdAction(catalogContext, secondary.action),
+                      onPressed: () => dispatchLdAction(node, secondary.action),
                       child: Text(secondary.label),
                     ),
                   ],
@@ -64,7 +60,7 @@ class LdConfirm extends StatelessWidget {
                     color: color,
                     size: LdSize.l,
                     onPressed: () =>
-                        dispatchLdAction(catalogContext, data.primary.action),
+                        dispatchLdAction(node, data.primary.action),
                     child: Text(data.primary.label),
                   ),
                 ],

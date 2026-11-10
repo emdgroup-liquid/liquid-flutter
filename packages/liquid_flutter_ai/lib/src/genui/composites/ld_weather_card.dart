@@ -1,5 +1,5 @@
+import 'package:a2ui_flutter/a2ui_flutter.dart';
 import 'package:flutter/material.dart';
-import 'package:genui/genui.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter_ai/src/genui/composites/helpers.dart';
 import 'package:liquid_flutter_ai_shared/liquid_flutter_ai_shared.dart';
@@ -9,26 +9,20 @@ final ldWeatherCard = ldCatalogItem(
   name: 'LdWeatherCard',
   schema: ldWeatherCardSchema,
   parse: LdWeatherCardData.fromJson,
-  builder: (ctx, data) => LdWeatherCard(catalogContext: ctx, data: data),
+  builder: (_, props, data) => LdWeatherCard(props: props, data: data),
 );
 
 class LdWeatherCard extends StatelessWidget {
-  const LdWeatherCard({
-    super.key,
-    required this.catalogContext,
-    required this.data,
-  });
+  const LdWeatherCard({super.key, required this.props, required this.data});
 
-  final CatalogItemContext catalogContext;
+  final ComponentProps props;
   final LdWeatherCardData data;
 
   @override
   Widget build(BuildContext context) {
-    return BoundNumber(
-      dataContext: catalogContext.dataContext,
-      value: data.temperature.boundValue,
-      builder: (context, temperature) =>
-          _LdWeatherCardBody(data: data, temperature: temperature),
+    return _LdWeatherCardBody(
+      data: data,
+      temperature: props.number('temperature'),
     );
   }
 }
