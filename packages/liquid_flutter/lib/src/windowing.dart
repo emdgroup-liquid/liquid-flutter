@@ -10,8 +10,10 @@
 // ignore_for_file: implementation_imports, invalid_use_of_internal_member
 
 import 'dart:async';
+import 'dart:ui' show AppExitType;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/src/foundation/_features.dart' show isWindowingEnabled;
 import 'package:flutter/src/widgets/_window.dart' as fw;
 import 'package:flutter/src/widgets/_window_positioner.dart' as fw_positioner;
@@ -132,6 +134,142 @@ class LdWindowAnchorTracker {
       renderObject.getTransformTo(null),
       Offset.zero & renderObject.size,
     );
+  }
+}
+
+/// Hosts [child] in a native regular window when the desktop windowing API is
+/// available.
+///
+/// Use this with [runWidget] (not [runApp]):
+///
+/// ```dart
+/// void main() {
+///   runWidget(
+///     LdWindowRoot(
+///       title: 'My App',
+///       child: const MyApp(),
+///     ),
+///   );
+/// }
+/// ```
+///
+/// When windowing is unavailable, the widget renders [child] into the implicit
+/// view so the same entry point still works on mobile, web and older Flutter
+/// versions.
+class LdWindowRoot extends StatefulWidget {
+  const LdWindowRoot({
+    super.key,
+    required this.child,
+    this.title = 'Liquid Flutter',
+    this.size = const Size(1280, 800),
+    this.constraints,
+    this.onCloseRequested,
+  });
+
+  /// The application widget.
+  final Widget child;
+
+  /// Native window title.
+  final String title;
+
+  /// Initial content size of the native window.
+  final Size size;
+
+  /// Optional size constraints for the native window.
+  final BoxConstraints? constraints;
+
+  /// Called when the user requests to close the window.
+  ///
+  /// Defaults to exiting the application.
+  final VoidCallback? onCloseRequested;
+
+  @override
+  State<LdWindowRoot> createState() => _LdWindowRootState();
+}
+
+class _LdWindowRootState extends State<LdWindowRoot> {
+  fw.RegularWindowController? _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    if (!LdWindowing.isCompiledIn || !LdWindowing.isSupportedPlatform) {
+      return;
+    }
+    try {
+      _controller = _createRegularWindowController(
+        size: widget.size,
+        constraints: widget.constraints,
+        title: widget.title,
+        delegate: _LdWindowRootDelegate(widget.onCloseRequested),
+      );
+    } on UnsupportedError {
+      _controller = null;
+    }
+  }
+
+  @override
+  void dispose() {
+    final controller = _controller;
+    _controller = null;
+    controller?.destroy();
+    controller?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = _controller;
+    if (controller != null) {
+      return fw.RegularWindow(controller: controller, child: widget.child);
+    }
+    final view = WidgetsBinding.instance.platformDispatcher.implicitView;
+    if (view != null) {
+      return View(view: view, child: widget.child);
+    }
+    return widget.child;
+  }
+}
+
+class _LdWindowRootDelegate with fw.RegularWindowControllerDelegate {
+  _LdWindowRootDelegate(this.onCloseRequested);
+
+  final VoidCallback? onCloseRequested;
+
+  @override
+  void onWindowCloseRequested(fw.RegularWindowController controller) {
+    if (onCloseRequested != null) {
+      onCloseRequested!();
+      return;
+    }
+    ServicesBinding.instance.exitApplication(AppExitType.required);
+  }
+}
+
+// Flutter renamed the regular window size/constraint parameters from
+// `preferredSize`/`preferredConstraints` (3.44) to `size`/`constraints` (3.47).
+fw.RegularWindowController _createRegularWindowController({
+  required Size size,
+  required BoxConstraints? constraints,
+  required String title,
+  required fw.RegularWindowControllerDelegate delegate,
+}) {
+  final baseArgs = <Symbol, dynamic>{
+    #title: title,
+    #delegate: delegate,
+  };
+  try {
+    return Function.apply(fw.RegularWindowController.new, const [], {
+      ...baseArgs,
+      #size: size,
+      #constraints: constraints,
+    }) as fw.RegularWindowController;
+  } on NoSuchMethodError {
+    return Function.apply(fw.RegularWindowController.new, const [], {
+      ...baseArgs,
+      #preferredSize: size,
+      #preferredConstraints: constraints,
+    }) as fw.RegularWindowController;
   }
 }
 

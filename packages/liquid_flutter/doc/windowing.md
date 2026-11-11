@@ -25,25 +25,25 @@ is off, every component keeps its existing overlay behavior.
   on, but popups, tooltips and dialogs need a parent `WindowScope`:
 
   ```dart
-  import 'dart:ui';
-
-  import 'package:flutter/services.dart';
-  import 'package:flutter/src/widgets/_window.dart';
   import 'package:flutter/widgets.dart';
+  import 'package:liquid_flutter/liquid_flutter.dart';
 
   void main() {
     WidgetsFlutterBinding.ensureInitialized();
     runWidget(
-      RegularWindow(
-        controller: RegularWindowController(
-          title: 'My App',
-          size: const Size(1280, 800),
-        ),
+      LdWindowRoot(
+        title: 'My App',
+        size: const Size(1280, 800),
         child: const MyApp(),
       ),
     );
   }
   ```
+
+  `LdWindowRoot` uses Flutter's `RegularWindow` when windowing is available and
+  renders into the implicit view everywhere else, so the same entry point works
+  on every platform. The example app ships one at
+  [`apps/example/lib/main_windowing.dart`](../../../apps/example/lib/main_windowing.dart).
 
   Apps that keep `runApp` still compile and run; the components silently fall
   back to overlays because there is no parent window controller.
