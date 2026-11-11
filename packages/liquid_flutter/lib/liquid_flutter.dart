@@ -115,6 +115,7 @@ export 'src/list/table_row.dart';
 export 'src/tag.dart';
 export 'src/text.dart';
 export 'src/text_list.dart';
+export 'src/tooltip.dart';
 export 'src/theme/liquid_material_theme.dart';
 export 'src/theme/sizing_config.dart';
 export 'src/theme/platform.dart';
@@ -139,6 +140,7 @@ export 'src/touchable/outline_color.dart';
 export 'src/typography.dart';
 export 'src/version.dart';
 export 'src/window_frame.dart';
+export 'src/windowing.dart';
 export 'src/conditional_parent.dart';
 
 /// This variable defines whether TextStyle should use the `liquid_flutter`

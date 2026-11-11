@@ -79,7 +79,7 @@ class LdDrawerButton extends StatelessWidget {
 
     final showing = isShowing(context, type);
 
-    return Tooltip(
+    return LdTooltip(
       message: switch (type) {
         LdDrawerButtonType.open => LiquidLocalizations.of(context).openDrawer,
         LdDrawerButtonType.close => LiquidLocalizations.of(context).closeDrawer,

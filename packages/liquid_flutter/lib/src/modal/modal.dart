@@ -13,14 +13,18 @@ import 'package:provider/provider.dart';
 class LdModalPage<T> extends Page<T> {
   final LdModalRoute<T> Function(BuildContext context) builder;
 
-  const LdModalPage({
-    super.key,
-    required this.builder,
-  });
+  const LdModalPage({super.key, required this.builder});
 
   @override
   Route<T> createRoute(BuildContext context) {
     final route = builder(context);
+    final nativeRoute = route.createNativeWindowRoute<T>(
+      context,
+      settings: this,
+    );
+    if (nativeRoute != null) {
+      return nativeRoute;
+    }
     // Ensure the route's settings is set to this Page for page-based navigation
     return LdModalRoute<T>(
       context: route.context,
@@ -30,6 +34,8 @@ class LdModalPage<T> extends Page<T> {
       scaleParent: route.scaleParent,
       maintainState: route.maintainState,
       dialogSize: route.dialogSize,
+      windowMode: route.windowMode,
+      windowTitle: route.windowTitle,
       sheetBorderRadius: route.sheetBorderRadius,
       fixedDialogSize: route.fixedDialogSize,
       sheetAspectRatio: route.sheetAspectRatio,
@@ -51,6 +57,12 @@ class LdModalRoute<T> extends PageRoute<T> {
   final LdModalTypeMode modalTypeMode;
 
   final LdSize? dialogSize;
+
+  /// Whether the modal may be rendered in a native desktop dialog window.
+  final LdWindowMode windowMode;
+
+  /// Optional title for the native dialog window.
+  final String? windowTitle;
 
   final Size? fixedDialogSize;
 
@@ -79,6 +91,8 @@ class LdModalRoute<T> extends PageRoute<T> {
     this.scaleParent = true,
     this.maintainState = true,
     this.dialogSize,
+    this.windowMode = LdWindowMode.auto,
+    this.windowTitle,
     this.sheetBorderRadius,
     this.fixedDialogSize,
     this.sheetAspectRatio,
@@ -101,15 +115,117 @@ class LdModalRoute<T> extends PageRoute<T> {
   }
 
   static bool hasParentSheet(BuildContext context) {
+    final modalRouteInfo = Provider.of<LdModalRouteInfo?>(context, listen: false);
+    if (modalRouteInfo != null) {
+      return modalRouteInfo.isSheet;
+    }
     final modalRoute = ModalRoute.of(context);
     return modalRoute is LdModalRoute;
   }
 
-  Future<T?> show(
+  Future<T?> show(BuildContext context, {bool useRootNavigator = false}) {
+    final navigator = useRootNavigator ? Navigator.of(context, rootNavigator: true) : Navigator.of(context);
+    final nativeRoute = createNativeWindowRoute<T>(context, settings: settings);
+    if (nativeRoute != null) {
+      return navigator.push<T>(nativeRoute);
+    }
+    return navigator.push<T>(this);
+  }
+
+  /// Creates a route that renders this modal in a native desktop dialog window.
+  ///
+  /// Returns `null` when windowing is unavailable, when the platform is not a
+  /// supported desktop platform, or when this route should render as a sheet.
+  /// Callers must fall back to pushing this route directly.
+  Route<R>? createNativeWindowRoute<R>(
     BuildContext context, {
-    bool useRootNavigator = false,
-  }) =>
-      (useRootNavigator ? Navigator.of(context, rootNavigator: true) : Navigator.of(context)).push<T>(this);
+    RouteSettings? settings,
+  }) {
+    if (windowMode == LdWindowMode.disabled) {
+      return null;
+    }
+    final adapter = LdWindowingScope.maybeAdapter(context);
+    if (adapter == null) {
+      return null;
+    }
+    final screenSize = MediaQuery.sizeOf(context);
+    if (_shouldBeSheet(
+      BoxConstraints(maxWidth: screenSize.width, maxHeight: screenSize.height),
+    )) {
+      return null;
+    }
+
+    final notifications = LdNotificationsController.maybeOf(context);
+    final surfaceInfo = LdSurfaceInfo.maybeOf(context);
+    try {
+      return adapter.createDialogRoute<R>(
+        context: context,
+        size: _configuredDialogSize(context),
+        title: windowTitle,
+        settings: settings ?? this.settings,
+        providers: [
+          ListenableProvider<LdTheme>.value(value: LdTheme.of(context)),
+          if (notifications != null)
+            ListenableProvider<LdNotificationsController>.value(
+              value: notifications,
+            ),
+          if (surfaceInfo != null) Provider<LdSurfaceInfo>.value(value: surfaceInfo),
+        ],
+        builder: _buildWindowContent,
+      );
+    } on UnsupportedError {
+      return null;
+    }
+  }
+
+  Size _configuredDialogSize(BuildContext context) {
+    final availableSize = MediaQuery.sizeOf(context);
+    late Size configuredSize;
+    switch (dialogSize ?? LdSize.m) {
+      case LdSize.xs:
+        configuredSize = const Size(400, 300);
+      case LdSize.s:
+        configuredSize = const Size(300, 400);
+      case LdSize.m:
+        configuredSize = const Size(500, 500);
+      case LdSize.l:
+        configuredSize = const Size(900, 700);
+    }
+    if (fixedDialogSize != null) {
+      configuredSize = fixedDialogSize!;
+    }
+    final minPadding = LdTheme.of(context).pad(size: LdSize.l);
+    return Size(
+      configuredSize.width.clamp(
+        0.0,
+        availableSize.width - minPadding.horizontal,
+      ),
+      configuredSize.height.clamp(
+        0.0,
+        availableSize.height - minPadding.vertical,
+      ),
+    );
+  }
+
+  Widget _buildWindowContent(BuildContext context) {
+    final theme = LdTheme.of(context);
+    return ColoredBox(
+      color: theme.background,
+      child: LdAppBarConfigProvider(
+        config: LdAppBarConfig(
+          scrollBehavior: LdAppBarScrollBehavior.static,
+          attachedMode: LdAppBarAttachedMode.attached,
+        ),
+        child: Provider.value(
+          value: LdModalRouteInfo(isSheet: false),
+          child: Provider.value(
+            value: LdAppBarMetrics.reset(context),
+            child: Builder(builder: pageBuilder),
+          ),
+        ),
+      ),
+    );
+  }
 
   /// Determines if this route should behave as a sheet based on modalTypeMode and screen size.
   bool _shouldBeSheet(BoxConstraints constraints) {
@@ -162,11 +278,8 @@ class LdModalRoute<T> extends PageRoute<T> {
       0.0,
       mediaQuery.size.height,
     );
-    final BorderRadius effectiveBorderRadius = sheetBorderRadius ??
-        theme.radius(LdSize.l).copyWith(
-              bottomLeft: Radius.zero,
-              bottomRight: Radius.zero,
-            );
+    final BorderRadius effectiveBorderRadius =
+        sheetBorderRadius ?? theme.radius(LdSize.l).copyWith(bottomLeft: Radius.zero, bottomRight: Radius.zero);
     final AnimationController? sheetController = controller;
 
     Widget sheet = Container(
@@ -205,26 +318,28 @@ class LdModalRoute<T> extends PageRoute<T> {
           viewPadding: mediaQuery.viewPadding.copyWith(top: 0),
           viewInsets: mediaQuery.viewInsets.copyWith(top: 0),
         ),
-        child: Builder(builder: (context) {
-          return Align(
-            alignment: Alignment.bottomCenter,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(maxHeight: maxSheetHeight),
-              child: Container(
-                margin: sheetInsets,
-                child: Provider.value(
-                  value: LdAppBarMetrics.reset(context),
-                  child: LdAppBarConfigProvider(
-                    config: LdAppBarConfig(
-                      scrollBehavior: LdAppBarScrollBehavior.static,
+        child: Builder(
+          builder: (context) {
+            return Align(
+              alignment: Alignment.bottomCenter,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxHeight: maxSheetHeight),
+                child: Container(
+                  margin: sheetInsets,
+                  child: Provider.value(
+                    value: LdAppBarMetrics.reset(context),
+                    child: LdAppBarConfigProvider(
+                      config: LdAppBarConfig(
+                        scrollBehavior: LdAppBarScrollBehavior.static,
+                      ),
+                      child: sheet,
                     ),
-                    child: sheet,
                   ),
                 ),
               ),
-            ),
-          );
-        }),
+            );
+          },
+        ),
       ),
     );
   }
@@ -280,33 +395,35 @@ class LdModalRoute<T> extends PageRoute<T> {
         removeLeft: true,
         removeRight: true,
         removeBottom: true,
-        child: Builder(builder: (context) {
-          return Center(
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minWidth: 0,
-                maxWidth: maxWidth,
-                minHeight: 0,
-                maxHeight: maxHeight,
-              ),
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: dialogBorderRadius ?? theme.radius(LdSize.m),
-                  border: Border.all(
-                    color: theme.stroke,
-                    width: LdTheme.of(context).borderWidth,
-                    strokeAlign: BorderSide.strokeAlignOutside,
+        child: Builder(
+          builder: (context) {
+            return Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minWidth: 0,
+                  maxWidth: maxWidth,
+                  minHeight: 0,
+                  maxHeight: maxHeight,
+                ),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: dialogBorderRadius ?? theme.radius(LdSize.m),
+                    border: Border.all(
+                      color: theme.stroke,
+                      width: LdTheme.of(context).borderWidth,
+                      strokeAlign: BorderSide.strokeAlignOutside,
+                    ),
+                  ),
+                  clipBehavior: Clip.hardEdge,
+                  child: Provider.value(
+                    value: LdAppBarMetrics.reset(context),
+                    child: Builder(builder: pageBuilder),
                   ),
                 ),
-                clipBehavior: Clip.hardEdge,
-                child: Provider.value(
-                  value: LdAppBarMetrics.reset(context),
-                  child: Builder(builder: pageBuilder),
-                ),
               ),
-            ),
-          );
-        }),
+            );
+          },
+        ),
       ),
     );
   }
@@ -317,11 +434,12 @@ class LdModalRoute<T> extends PageRoute<T> {
     Animation<double> animation,
     Animation<double> secondaryAnimation,
   ) {
-    return LayoutBuilder(builder: (context, constraints) {
-      final bool isSheet = _shouldBeSheet(constraints);
-      final modalRouteInfo = LdModalRouteInfo(isSheet: isSheet);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final bool isSheet = _shouldBeSheet(constraints);
+        final modalRouteInfo = LdModalRouteInfo(isSheet: isSheet);
 
-      return Provider.value(
+        return Provider.value(
           value: modalRouteInfo,
           child: LdAppBarConfigProvider(
             config: LdAppBarConfig(
@@ -332,8 +450,10 @@ class LdModalRoute<T> extends PageRoute<T> {
               true => _buildSheetContent(context, pageBuilder),
               false => _buildDialogContent(context, pageBuilder),
             },
-          ));
-    });
+          ),
+        );
+      },
+    );
   }
 
   /// Builds transitions for sheet mode using CupertinoSheetTransition.
@@ -380,10 +500,7 @@ class LdModalRoute<T> extends PageRoute<T> {
 
     return FadeTransition(
       opacity: opacityAnimation,
-      child: ScaleTransition(
-        scale: scaleAnimation,
-        child: child,
-      ),
+      child: ScaleTransition(scale: scaleAnimation, child: child),
     );
   }
 
@@ -394,15 +511,27 @@ class LdModalRoute<T> extends PageRoute<T> {
     Animation<double> secondaryAnimation,
     Widget child,
   ) {
-    return LayoutBuilder(builder: (context, constraints) {
-      final bool isSheet = _shouldBeSheet(constraints);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final bool isSheet = _shouldBeSheet(constraints);
 
-      if (isSheet) {
-        return _buildSheetTransitions(context, animation, secondaryAnimation, child);
-      } else {
-        return _buildDialogTransitions(context, animation, secondaryAnimation, child);
-      }
-    });
+        if (isSheet) {
+          return _buildSheetTransitions(
+            context,
+            animation,
+            secondaryAnimation,
+            child,
+          );
+        } else {
+          return _buildDialogTransitions(
+            context,
+            animation,
+            secondaryAnimation,
+            child,
+          );
+        }
+      },
+    );
   }
 
   @override
@@ -436,8 +565,12 @@ class LdModalRoute<T> extends PageRoute<T> {
       parent: secondaryAnimation,
     );
 
-    final Animation<Offset> slideAnimation = curvedAnimation.drive(_kDialogMidUpTween);
-    final Animation<double> scaleAnimation = curvedAnimation.drive(_kDialogScaleTween);
+    final Animation<Offset> slideAnimation = curvedAnimation.drive(
+      _kDialogMidUpTween,
+    );
+    final Animation<double> scaleAnimation = curvedAnimation.drive(
+      _kDialogScaleTween,
+    );
     curvedAnimation.dispose();
 
     return SlideTransition(
@@ -641,6 +774,9 @@ class LdModalRouteInfo {
 extension LdModalRouteExtension on BuildContext {
   /// Whether this context is inside an [LdModalRoute].
   bool get isInLdModal {
+    if (watch<LdModalRouteInfo?>() != null) {
+      return true;
+    }
     final modalRoute = ModalRoute.of(this);
     return modalRoute is LdModalRoute;
   }

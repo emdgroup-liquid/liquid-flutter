@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -30,9 +31,22 @@ enum LdContextPositionMode {
 }
 
 typedef LdContextMenuBuilder = Widget Function(
-    BuildContext context, bool isShuttle, VoidCallback trigger, bool isOpen, Widget? child);
+  BuildContext context,
+  bool isShuttle,
+  VoidCallback trigger,
+  bool isOpen,
+  Widget? child,
+);
 
 class LdContextMenuDissmissNotification extends Notification {}
+
+/// Allows widgets rendered in a native popup window to close the context menu.
+class LdContextMenuHandle {
+  const LdContextMenuHandle({required this.close});
+
+  /// Closes the context menu.
+  final VoidCallback close;
+}
 
 class LdContextMenu extends StatefulWidget {
   const LdContextMenu({
@@ -48,6 +62,7 @@ class LdContextMenu extends StatefulWidget {
     this.visible,
     this.disabled = false,
     this.positionMode = LdContextPositionMode.auto,
+    this.windowMode = LdWindowMode.auto,
     this.child,
     this.triggerColor,
     this.menuProviders,
@@ -74,13 +89,14 @@ class LdContextMenu extends StatefulWidget {
   final LdContextZoomMode zoomMode;
   final LdContextPositionMode positionMode;
 
+  /// Whether a native popup window may be used for this menu.
+  final LdWindowMode windowMode;
+
   final Widget? child;
 
   final LdContextMenuBuilder builder;
 
-  final Widget Function(
-    BuildContext context,
-  ) menuBuilder;
+  final Widget Function(BuildContext context) menuBuilder;
 
   @override
   State<LdContextMenu> createState() => LdContextMenuState();
@@ -99,8 +115,13 @@ class LdContextMenuState extends State<LdContextMenu> {
 
   bool _isOpen = false;
 
+  LdWindowHandle? _windowHandle;
+  LdWindowAnchorTracker? _windowTracker;
+
   @override
   void dispose() {
+    _windowTracker?.dispose();
+    _windowHandle?.close();
     _menuSizeNotifier.dispose();
     super.dispose();
   }
@@ -130,6 +151,139 @@ class LdContextMenuState extends State<LdContextMenu> {
     return _triggerBox?.size;
   }
 
+  Rect? _getTriggerRect() {
+    final renderObject = _triggerKey.currentContext?.findRenderObject();
+    if (renderObject is! RenderBox || !renderObject.hasSize) {
+      return null;
+    }
+    return MatrixUtils.transformRect(
+      renderObject.getTransformTo(null),
+      Offset.zero & renderObject.size,
+    );
+  }
+
+  bool _tryOpenInWindow(Offset? globalPosition) {
+    if (widget.windowMode == LdWindowMode.disabled) {
+      return false;
+    }
+    final adapter = LdWindowingScope.maybeAdapter(context);
+    if (adapter == null) {
+      return false;
+    }
+
+    final triggerRect = _getTriggerRect();
+    final useCursor = _effectivePositionMode == LdContextPositionMode.relativeCursor && globalPosition != null;
+    if (!useCursor && (triggerRect == null || triggerRect.isEmpty)) {
+      return false;
+    }
+    final anchorRect = useCursor ? Rect.fromLTWH(globalPosition.dx, globalPosition.dy, 1, 1) : triggerRect;
+    if (anchorRect == null) {
+      return false;
+    }
+
+    final notifications = LdNotificationsController.maybeOf(context);
+    final surfaceInfo = LdSurfaceInfo.maybeOf(context);
+    late LdWindowHandle? handle;
+    handle = adapter.showPopup(
+      context: context,
+      anchorRect: anchorRect,
+      position: LdWindowPosition(
+        above: widget.placeAboveTrigger,
+        align: LdWindowAlign.start,
+        offset: Offset(0, widget.placeAboveTrigger ? -4 : 4),
+      ),
+      constraints: widget.inheritTriggerWidth && triggerRect != null
+          ? BoxConstraints(
+              minWidth: triggerRect.width,
+              maxWidth: triggerRect.width,
+              maxHeight: 560,
+            )
+          : const BoxConstraints(maxWidth: 420, maxHeight: 560),
+      providers: [
+        ...(widget.menuProviders?.call(context) ?? []),
+        ListenableProvider<LdTheme>.value(value: LdTheme.of(context)),
+        if (notifications != null)
+          ListenableProvider<LdNotificationsController>.value(
+            value: notifications,
+          ),
+        if (surfaceInfo != null) Provider<LdSurfaceInfo>.value(value: surfaceInfo),
+        Provider<LdContextMenuHandle>.value(
+          value: LdContextMenuHandle(close: () => handle?.close()),
+        ),
+      ],
+      builder: _buildWindowMenu,
+    );
+
+    if (handle == null) {
+      return false;
+    }
+
+    setState(() {
+      _isOpen = true;
+      _windowHandle = handle;
+    });
+    if (!useCursor) {
+      _windowTracker = LdWindowAnchorTracker(
+        target: _triggerKey,
+        onChanged: handle.updateAnchor,
+      );
+    }
+    unawaited(
+      handle.closed.then((_) {
+        _windowTracker?.dispose();
+        _windowTracker = null;
+        _windowHandle = null;
+        if (mounted) {
+          setState(() {
+            _isOpen = false;
+          });
+        }
+      }),
+    );
+    return true;
+  }
+
+  Widget _buildWindowMenu(BuildContext context) {
+    return NotificationListener<LdContextMenuDissmissNotification>(
+      onNotification: (notification) {
+        _windowHandle?.close();
+        return true;
+      },
+      child: _wrapNativeMenuDecoration(
+        context,
+        SingleChildScrollView(
+          child: Provider.value(
+            value: LdAppBarActionDisplayMode.contextMenu,
+            child: widget.menuBuilder(context),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _wrapNativeMenuDecoration(BuildContext context, Widget child) {
+    final theme = LdTheme.of(context);
+    return Material(
+      type: MaterialType.transparency,
+      child: Container(
+        clipBehavior: Clip.hardEdge,
+        decoration: BoxDecoration(
+          color: theme.surface,
+          borderRadius: theme.radius(LdSize.s),
+          border: Border.all(
+            color: theme.floatingBorder,
+            width: theme.borderWidth,
+            strokeAlign: BorderSide.strokeAlignOutside,
+          ),
+          boxShadow: [
+            BoxShadow(color: Colors.black.withAlpha(55), blurRadius: 12),
+          ],
+        ),
+        child: child,
+      ),
+    );
+  }
+
   void open({Offset? globalPosition}) async {
     if (widget.disabled) {
       return;
@@ -139,6 +293,9 @@ class LdContextMenuState extends State<LdContextMenu> {
       return;
     }
     _cursorPosition = globalPosition;
+    if (_tryOpenInWindow(globalPosition)) {
+      return;
+    }
     setState(() {
       _isOpen = true;
     });
@@ -159,11 +316,16 @@ class LdContextMenuState extends State<LdContextMenu> {
         providers: [
           ...(widget.menuProviders?.call(context) ?? []),
           ListenableProvider.value(value: LdTheme.of(context)),
-          ListenableProvider.value(value: LdNotificationsController.maybeOf(context))
+          ListenableProvider.value(
+            value: LdNotificationsController.maybeOf(context),
+          ),
         ],
         child: widget.child,
       ),
     );
+    if (!mounted) {
+      return;
+    }
     setState(() {
       _isOpen = false;
     });
@@ -295,7 +457,10 @@ class LdContextMenuRoute extends ModalRoute<void> {
       if (inheritTriggerWidth) {
         triggerSize = Size(this.triggerSize.width, this.triggerSize.height + 5);
       } else {
-        triggerSize = Size(this.triggerSize.width + 5, this.triggerSize.height + 5);
+        triggerSize = Size(
+          this.triggerSize.width + 5,
+          this.triggerSize.height + 5,
+        );
       }
     } else {
       // Position relative to cursor position (e.g., right-click location)
@@ -320,7 +485,10 @@ class LdContextMenuRoute extends ModalRoute<void> {
     final availableHeight = availableBottom - availableTop;
 
     // Constrain menu size to available space
-    final constrainedMenuWidth = min(inheritTriggerWidth ? triggerSize.width : menuSize.width, availableWidth);
+    final constrainedMenuWidth = min(
+      inheritTriggerWidth ? triggerSize.width : menuSize.width,
+      availableWidth,
+    );
     final constrainedMenuHeight = min(menuSize.height, availableHeight);
 
     // Step 1: Try default position (below and right of trigger/cursor)
@@ -400,21 +568,26 @@ class LdContextMenuRoute extends ModalRoute<void> {
   }
 
   @override
-  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+  Widget buildPage(
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+  ) {
     return ValueListenableBuilder<Size>(
-        valueListenable: _menuSizeNotifier,
-        builder: (context, size, child) {
-          return Stack(
-            children: [
-              GestureDetector(
-                onTap: () {
-                  Navigator.of(context, rootNavigator: true).maybePop();
-                },
-                behavior: HitTestBehavior.opaque,
-              ),
-            ],
-          );
-        });
+      valueListenable: _menuSizeNotifier,
+      builder: (context, size, child) {
+        return Stack(
+          children: [
+            GestureDetector(
+              onTap: () {
+                Navigator.of(context, rootNavigator: true).maybePop();
+              },
+              behavior: HitTestBehavior.opaque,
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -425,23 +598,20 @@ class LdContextMenuRoute extends ModalRoute<void> {
     Widget child,
   ) {
     if (_menuSizeNotifier.value == Size.zero) {
-      return Stack(
-        children: [
-          _buildOffstageMenuForMeasurement(context),
-        ],
-      );
+      return Stack(children: [_buildOffstageMenuForMeasurement(context)]);
     }
 
     return ValueListenableBuilder(
-        valueListenable: _menuSizeNotifier,
-        builder: (context, menuSize, child) {
-          return Stack(
-            fit: StackFit.expand,
-            children: [
-              _buildAnimatedMenuTransition(context, menuSize, animation),
-            ],
-          );
-        });
+      valueListenable: _menuSizeNotifier,
+      builder: (context, menuSize, child) {
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            _buildAnimatedMenuTransition(context, menuSize, animation),
+          ],
+        );
+      },
+    );
   }
 
   Widget _buildOffstageMenuForMeasurement(BuildContext context) {
@@ -450,18 +620,20 @@ class LdContextMenuRoute extends ModalRoute<void> {
         onSizeChange: (size) {
           _menuSizeNotifier.value = size;
         },
-        child: _wrapWithProviders(
-          context,
-          (context2) => menuBuilder(
-            context2,
-          ),
-        ),
+        child: _wrapWithProviders(context, (context2) => menuBuilder(context2)),
       ),
     );
   }
 
-  Widget _buildAnimatedMenuTransition(BuildContext context, Size menuSize, Animation<double>? animation) {
-    final (endRect, alignment, maxConstraints) = _resizeMenuToScreen(context, menuSize);
+  Widget _buildAnimatedMenuTransition(
+    BuildContext context,
+    Size menuSize,
+    Animation<double>? animation,
+  ) {
+    final (endRect, alignment, maxConstraints) = _resizeMenuToScreen(
+      context,
+      menuSize,
+    );
 
     // Calculate triggerRect from triggerPosition and triggerSize
     final triggerRect = Rect.fromLTWH(
@@ -477,78 +649,81 @@ class LdContextMenuRoute extends ModalRoute<void> {
 
         return true;
       },
-      child: Builder(builder: (context) {
-        if (animation == null) {
-          return Positioned(
-            left: endRect.left,
-            top: endRect.top,
-            width: endRect.width,
-            height: endRect.height,
-            child: _wrapWithProviders(
-              context,
-              (context2) => _wrapMenuContent(
-                context2,
-                menuBuilder(context2),
-                alignment,
-                maxConstraints,
-                false,
-              ),
-            ),
-          );
-        }
-
-        return AnimatedBuilder(
-          animation: animation,
-          builder: (context, child) {
-            // Evaluate curves against [animation.value] — do not construct
-            // [CurvedAnimation] here; each instance registers a status listener
-            // on [animation] and would leak for the lifetime of the route.
-            final moveT = Curves.easeInOut.transform(animation.value);
-            final animatedRect = RectTween(
-              begin: triggerRect,
-              end: endRect,
-            ).transform(moveT)!;
-
-            // Content starts revealing at 70% of the animation.
-            final revealT = const Interval(0.7, 1.0, curve: Curves.decelerate).transform(animation.value);
-
+      child: Builder(
+        builder: (context) {
+          if (animation == null) {
             return Positioned(
-              left: animatedRect.left,
-              top: animatedRect.top,
-              width: animatedRect.width,
-              height: animatedRect.height,
+              left: endRect.left,
+              top: endRect.top,
+              width: endRect.width,
+              height: endRect.height,
               child: _wrapWithProviders(
                 context,
-                (context2) => Stack(
-                  children: [
-                    // Decoration is always visible during shape transformation
-                    Positioned.fill(
-                      child: _wrapMenuDecoration(
-                        context2,
-                        alignment,
-                        maxConstraints,
-                        animation,
-                        Opacity(
-                          opacity: revealT,
-                          child: child,
-                        ),
-                      ),
-                    ),
-                    // Content is revealed with animation
-                  ],
+                (context2) => _wrapMenuContent(
+                  context2,
+                  menuBuilder(context2),
+                  alignment,
+                  maxConstraints,
+                  false,
                 ),
               ),
             );
-          },
-          child: _wrapMenuContent(
-            context,
-            menuBuilder(context),
-            alignment,
-            maxConstraints,
-            animation.isAnimating,
-          ),
-        );
-      }),
+          }
+
+          return AnimatedBuilder(
+            animation: animation,
+            builder: (context, child) {
+              // Evaluate curves against [animation.value] — do not construct
+              // [CurvedAnimation] here; each instance registers a status listener
+              // on [animation] and would leak for the lifetime of the route.
+              final moveT = Curves.easeInOut.transform(animation.value);
+              final animatedRect = RectTween(
+                begin: triggerRect,
+                end: endRect,
+              ).transform(moveT)!;
+
+              // Content starts revealing at 70% of the animation.
+              final revealT = const Interval(
+                0.7,
+                1.0,
+                curve: Curves.decelerate,
+              ).transform(animation.value);
+
+              return Positioned(
+                left: animatedRect.left,
+                top: animatedRect.top,
+                width: animatedRect.width,
+                height: animatedRect.height,
+                child: _wrapWithProviders(
+                  context,
+                  (context2) => Stack(
+                    children: [
+                      // Decoration is always visible during shape transformation
+                      Positioned.fill(
+                        child: _wrapMenuDecoration(
+                          context2,
+                          alignment,
+                          maxConstraints,
+                          animation,
+                          Opacity(opacity: revealT, child: child),
+                        ),
+                      ),
+                      // Content is revealed with animation
+                    ],
+                  ),
+                ),
+              );
+            },
+            child: _wrapMenuContent(
+              context,
+              menuBuilder(context),
+              alignment,
+              maxConstraints,
+              animation.isAnimating,
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -591,9 +766,7 @@ class LdContextMenuRoute extends ModalRoute<void> {
             color: ColorTween(
               begin: LdTheme.of(context).surface.withAlpha(0),
               end: LdTheme.of(context).surface,
-            ).transform(
-              const Interval(0.1, 0.8).transform(animation.value),
-            ),
+            ).transform(const Interval(0.1, 0.8).transform(animation.value)),
             borderRadius: scaleFromTrigger
                 ? BorderRadius.circular(
                     Tween<double>(
@@ -603,12 +776,13 @@ class LdContextMenuRoute extends ModalRoute<void> {
                   )
                 : LdTheme.of(context).radius(LdSize.s),
             boxShadow: [
-              BoxShadow(color: Colors.black.withAlpha((animation.value * 55).toInt()), blurRadius: 12),
+              BoxShadow(
+                color: Colors.black.withAlpha((animation.value * 55).toInt()),
+                blurRadius: 12,
+              ),
             ],
             border: Border.all(
-              color: LdTheme.of(context).floatingBorder.withAlpha(
-                    (animation.value * 255).toInt(),
-                  ),
+              color: LdTheme.of(context).floatingBorder.withAlpha((animation.value * 255).toInt()),
               width: LdTheme.of(context).borderWidth,
               strokeAlign: BorderSide.strokeAlignOutside,
             ),
@@ -620,7 +794,12 @@ class LdContextMenuRoute extends ModalRoute<void> {
   }
 
   Widget _wrapMenuContent(
-      BuildContext context, Widget menu, Alignment alignment, Size maxConstraints, bool isAnimating) {
+    BuildContext context,
+    Widget menu,
+    Alignment alignment,
+    Size maxConstraints,
+    bool isAnimating,
+  ) {
     return Material(
       type: MaterialType.transparency,
       child: ConstrainedBox(
@@ -662,7 +841,10 @@ class LdContextMenuRoute extends ModalRoute<void> {
     );
   }
 
-  Widget _wrapWithProviders(BuildContext context, Widget Function(BuildContext context) builder) {
+  Widget _wrapWithProviders(
+    BuildContext context,
+    Widget Function(BuildContext context) builder,
+  ) {
     return providers != null && providers!.isNotEmpty
         ? MultiProvider(
             providers: providers!,
@@ -676,5 +858,10 @@ class LdContextMenuRoute extends ModalRoute<void> {
 }
 
 Future<void> maybePopContextMenu(BuildContext context) async {
+  final handle = context.read<LdContextMenuHandle?>();
+  if (handle != null) {
+    handle.close();
+    return;
+  }
   LdContextMenuDissmissNotification().dispatch(context);
 }
