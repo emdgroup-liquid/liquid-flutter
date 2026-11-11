@@ -20,6 +20,12 @@ is off, every component keeps its existing overlay behavior.
   flutter config --enable-windowing
   ```
 
+> At the time of writing, Flutter gates the flag to the `master` channel.
+> Stable builds ship the framework API but keep `isWindowingEnabled` false, so
+> the components keep using overlays. This implementation targets the stable
+> controller names (`RegularWindowController` / `RegularWindow`); Flutter main
+> renamed them to `WindowController` / `Window`.
+
 - Host the app in a `RegularWindow` when you want child windows. Flutter's
   `WidgetsApp` automatically installs a `WindowManager` when the feature flag is
   on, but popups, tooltips and dialogs need a parent `WindowScope`:
