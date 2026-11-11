@@ -51,7 +51,7 @@ class HomeReportIssueCard extends StatelessWidget {
               LdButton.ghost(child: Text('Cancel'), onPressed: () {}),
               LdButton(child: Text('Submit'), onPressed: () {}),
             ],
-          ),
+          ).spaceS(),
         ],
       ),
     );
