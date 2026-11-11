@@ -268,10 +268,16 @@ class LdRawAppBar extends StatelessWidget {
 
     return AppBarFrame(
       insideBuilder: (context, metrics, child) {
-        return child;
+        return Container(
+          decoration: insideDecorationBuilder != null ? insideDecorationBuilder!(metrics.isScrolledUnder) : insideDecoration,
+        
+          child: child,
+        );
+
       },
       outsideBuilder: (context, metrics, child) {
-        return Padding(
+        return Container(
+          decoration: outsideDecorationBuilder != null ? outsideDecorationBuilder!(metrics.isScrolledUnder) : outsideDecoration,
           padding: metrics.outerMargin,
           child: child,
         );
