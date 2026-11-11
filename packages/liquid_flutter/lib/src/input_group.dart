@@ -240,7 +240,7 @@ Widget ldGroupLabelTooltip({
   if (label == null || label.isEmpty || LdControlGroupScope.of(context) == null) {
     return child;
   }
-  return Tooltip(message: label, child: child);
+  return LdTooltip(message: label, child: child);
 }
 
 /// A static text or icon add-on for an [LdInputGroup] (Bootstrap's

@@ -142,7 +142,7 @@ class LdAppBarAction extends StatelessWidget {
   Widget _wrapTooltip(Widget child) {
     return LdWrapConditional(
       condition: tooltip != null,
-      builder: (context, wrappedChild) => Tooltip(
+      builder: (context, wrappedChild) => LdTooltip(
         message: tooltip!,
         child: wrappedChild,
       ),

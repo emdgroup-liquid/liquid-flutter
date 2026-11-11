@@ -543,7 +543,7 @@ class _LdSpeedReaderState extends State<LdSpeedReader> {
               children: [
                 LdReveal.quick(
                   revealed: !state.isPlaying && state.currentParagraphIndex > 0,
-                  child: Tooltip(
+                  child: LdTooltip(
                     message: 'Jump Back Paragraph',
                     child: LdButton.outline(
                       child: const Icon(LucideIcons.arrowBigLeftDash),
@@ -555,7 +555,7 @@ class _LdSpeedReaderState extends State<LdSpeedReader> {
                 ),
                 LdReveal.quick(
                   revealed: !state.isPlaying && (state.currentSentenceIndex > 0 || state.currentParagraphIndex > 0),
-                  child: Tooltip(
+                  child: LdTooltip(
                     message: 'Jump Back Sentence',
                     child: LdButton.outline(
                       child: const Icon(LucideIcons.arrowBigLeft),
@@ -568,7 +568,7 @@ class _LdSpeedReaderState extends State<LdSpeedReader> {
                 // Restart button
                 LdReveal.quick(
                   revealed: !state.isPlaying,
-                  child: Tooltip(
+                  child: LdTooltip(
                     message: 'Restart',
                     child: LdButton.outline(
                       onPressed: () {
@@ -581,7 +581,7 @@ class _LdSpeedReaderState extends State<LdSpeedReader> {
                 ),
                 LdReveal.quick(
                   revealed: state.isPlaying,
-                  child: Tooltip(
+                  child: LdTooltip(
                     message: 'Pause',
                     child: LdButton(
                       active: state.isPlaying,
@@ -596,7 +596,7 @@ class _LdSpeedReaderState extends State<LdSpeedReader> {
                 ),
                 LdReveal.quick(
                   revealed: !state.isPlaying,
-                  child: Tooltip(
+                  child: LdTooltip(
                     message: 'Start',
                     child: LdButton(
                       onPressed: () {

@@ -44,6 +44,8 @@ class LdModalBuilderState extends State<LdModalBuilder> {
       scaleParent: widget.modal.scaleParent,
       maintainState: widget.modal.maintainState,
       dialogSize: widget.modal.dialogSize,
+      windowMode: widget.modal.windowMode,
+      windowTitle: widget.modal.windowTitle,
       sheetBorderRadius: widget.modal.sheetBorderRadius,
       fixedDialogSize: widget.modal.fixedDialogSize,
       sheetAspectRatio: widget.modal.sheetAspectRatio,
@@ -53,6 +55,13 @@ class LdModalBuilderState extends State<LdModalBuilder> {
       barrierLabel: widget.modal.barrierLabel,
       settings: widget.modal.settings,
     );
+    final nativeRoute = route.createNativeWindowRoute(
+      context,
+      settings: route.settings,
+    );
+    if (nativeRoute != null) {
+      return await safeContext.push(nativeRoute);
+    }
     return await safeContext.push(route);
   }
 
@@ -65,9 +74,6 @@ class LdModalBuilderState extends State<LdModalBuilder> {
   Widget build(BuildContext context) {
     // Make sure the sheet is not bigger than the screen
 
-    return widget.builder(
-      context,
-      () => open(context),
-    );
+    return widget.builder(context, () => open(context));
   }
 }
