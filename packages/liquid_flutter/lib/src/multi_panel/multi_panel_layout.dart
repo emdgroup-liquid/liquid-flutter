@@ -265,8 +265,15 @@ class _LdMultiPanelLayoutState extends State<LdMultiPanelLayout> {
   Widget _buildSideBySide(BoxConstraints constraints) {
     _totalWidth = max(1, constraints.maxWidth);
 
-    final minPanelFraction = widget.minPanelWidth / _totalWidth;
-    final maxPanelFraction = 1 - ((widget.minBodyWidth ?? 1) / _totalWidth);
+    // A nested layout spans the full width of its parent's panel, and the
+    // MediaQuery padding tells it how much of that lies under the parent's
+    // body. Those strips are not visible, so they do not count towards the
+    // minimum widths.
+    final inheritedPadding = MediaQuery.of(context).padding;
+    final hiddenPanelWidth = _panelIsLeft ? inheritedPadding.left : inheritedPadding.right;
+    final hiddenBodyWidth = _panelIsLeft ? inheritedPadding.right : inheritedPadding.left;
+    final minPanelFraction = (widget.minPanelWidth + hiddenPanelWidth) / _totalWidth;
+    final maxPanelFraction = 1 - (((widget.minBodyWidth ?? 1) + hiddenBodyWidth) / _totalWidth);
 
     if (_internalPanelFraction == 0 && widget.initialPanelFraction != null) {
       _internalPanelFraction = widget.initialPanelFraction!;

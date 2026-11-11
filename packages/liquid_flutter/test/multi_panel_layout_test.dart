@@ -874,5 +874,58 @@ void main() {
       );
       expect(panelState.width, drawerWidth);
     });
+    // -------------------------------------------------------------------------
+    // Nested layouts: the inner one spans the outer panel's full width, with
+    // the strip under the outer body reported as MediaQuery padding.
+    // -------------------------------------------------------------------------
+    testWidgets('nested sideBySide keeps minBodyWidth clear of the inherited inset', (WidgetTester tester) async {
+      const outerBodyWidth = 300.0;
+      const innerMinBodyWidth = 150.0;
+      final reportedWidths = <double>[];
+      double? innerBodyInset;
+
+      await tester.pumpWidget(
+        _wrap(
+          LdMultiPanelLayout(
+            mode: LdMultiPanelLayoutMode.sideBySide,
+            panelPosition: LdPanelPosition.right,
+            panelWidth: 800 - outerBodyWidth,
+            initialPanelVisible: true,
+            body: _placeholder('outer body', Colors.blue),
+            panel: LdMultiPanelLayout(
+              mode: LdMultiPanelLayoutMode.sideBySide,
+              panelPosition: LdPanelPosition.right,
+              allowResize: true,
+              panelWidth: 300,
+              minBodyWidth: innerMinBodyWidth,
+              initialPanelVisible: true,
+              onPanelWidthChanged: reportedWidths.add,
+              body: Builder(
+                builder: (context) {
+                  innerBodyInset = MediaQuery.of(context).padding.left;
+                  return _placeholder('inner body', Colors.green);
+                },
+              ),
+              panel: _placeholder('inner panel', Colors.red),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(innerBodyInset, closeTo(outerBodyWidth, 1));
+
+      // The inner handle sits at the inner body's right edge, x = 500.
+      await performPanGesture(
+        tester,
+        startPosition: const Offset(504, 400),
+        offset: const Offset(-400, 0),
+      );
+
+      // Only the part right of the outer body is visible, so the inner panel
+      // has to stop before it eats into those 150px.
+      expect(reportedWidths, isNotEmpty);
+      expect(reportedWidths.last, lessThanOrEqualTo(800 - outerBodyWidth - innerMinBodyWidth + 1));
+    });
   });
 }
