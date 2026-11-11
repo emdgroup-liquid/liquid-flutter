@@ -50,7 +50,7 @@ class _LdToolCallCardState extends State<LdToolCallCard>
             : null,
         leading: _buildLeading(theme),
         onPressed: () => _handlePressed(context),
-      ),
+      ).insetBottom(size: LdSize.s),
     );
   }
 

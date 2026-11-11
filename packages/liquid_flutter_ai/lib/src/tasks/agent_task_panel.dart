@@ -183,7 +183,7 @@ class _LdAgentTaskPanelState extends State<LdAgentTaskPanel> {
       return widget.child;
     }
 
-    final theme = LdTheme.of(context);
+    final theme = LdTheme.of(context,listen: true);
 
     return LdRawAppBar(
       addContainer: true,
@@ -198,10 +198,7 @@ class _LdAgentTaskPanelState extends State<LdAgentTaskPanel> {
       ),
       content: Builder(
         builder: (context) {
-          return Container(
-            padding: MediaQuery.of(context).padding,
-            child: _buildBody(context),
-          );
+          return _buildBody(context);
         },
       ),
       child: widget.child,
@@ -277,7 +274,7 @@ class _LdAgentTaskPanelState extends State<LdAgentTaskPanel> {
           ),
         ],
       ],
-    );
+    ).padM();
   }
 }
 

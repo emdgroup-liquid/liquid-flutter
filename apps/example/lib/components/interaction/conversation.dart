@@ -358,7 +358,7 @@ void greet(String topic) {
 Call out if you want this expanded into a full changelog entry, a PR description, or a customer-facing note.
 ''';
 
-    await Future<void>.delayed(_jitter(120, 420));
+    await Future<void>.delayed(_jitter(520, 920));
     if (!mounted) {
       return;
     }
@@ -858,7 +858,7 @@ class _RichFileResult extends StatelessWidget {
             ),
         ],
       ),
-    );
+    ).insetBottom(size: LdSize.s);
   }
 }
 
@@ -888,7 +888,7 @@ class _SubAgentRow extends StatelessWidget {
         subtitle: Text(statusLabel),
         borderRadius: theme.radius(LdSize.s),
       ),
-    );
+    ).insetBottom(size: LdSize.s);
   }
 
   String? _titleFromArgs(LdToolCallItem item) {

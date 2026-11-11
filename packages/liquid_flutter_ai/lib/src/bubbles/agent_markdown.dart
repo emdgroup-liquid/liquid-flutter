@@ -34,12 +34,14 @@ class LdAgentMarkdownReply extends StatelessWidget {
           ).spaceS(),
         ),
         if (markdown.isNotEmpty)
-          LdStreamReveal(
-            active: isStreaming,
-            child: SizedBox(
-              width: double.infinity,
-              child: SelectionArea(child: LdMarkdown(data: markdown)),
-            ),
+          LdReveal.quick(revealed: true,
+            child: LdStreamReveal(
+              active: isStreaming,
+              child: SizedBox(
+                width: double.infinity,
+                child: SelectionArea(child: LdMarkdown(data: markdown)),
+              ),
+            ).insetBottom(size: LdSize.s),
           ),
       ],
     );

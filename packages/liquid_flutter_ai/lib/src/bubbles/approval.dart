@@ -64,60 +64,51 @@ class LdApprovalCard extends StatelessWidget {
         child: LdAutoSpace(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
+            LdAutoSpace(
               crossAxisAlignment: CrossAxisAlignment.start,
+              defaultSpacing: LdSize.xs,
               children: [
-                AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 200),
-                  transitionBuilder: (child, animation) =>
-                      ScaleTransition(scale: animation, child: child),
-                  child: switch (item.status) {
-                    LdApprovalStatus.pending => LdIndicator.info(
-                      key: const Key('request_pending'),
-                      size: LdSize.l,
-                    ),
-                    LdApprovalStatus.approved => LdIndicator.success(
-                      key: const Key('request_approved'),
-                      size: LdSize.l,
-                    ),
-                    LdApprovalStatus.denied => LdIndicator.error(
-                      key: const Key('request_denied'),
-                      size: LdSize.l,
-                    ),
-                  },
-                ),
-                ldHSpacerS,
-                Expanded(
-                  child: LdAutoSpace(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    defaultSpacing: LdSize.xs,
-                    children: [
-                      LdText.h(item.title),
-                      if (hasDescription)
-                        LdText.p(
-                          item.description!,
-                          size: LdSize.s,
-                          color: theme.textMuted,
+                Row(
+                  children: [
+                    AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 200),
+                      transitionBuilder: (child, animation) =>
+                          ScaleTransition(scale: animation, child: child),
+                      child: switch (item.status) {
+                        LdApprovalStatus.pending => LdIndicator.info(
+                          key: const Key('request_pending'),
+                          size: LdSize.l,
                         ),
-                      switch (item.status) {
-                        LdApprovalStatus.pending => _buildPendingActions(
-                          context,
-                          theme,
+                        LdApprovalStatus.approved => LdIndicator.success(
+                          key: const Key('request_approved'),
+                          size: LdSize.l,
                         ),
-                        LdApprovalStatus.approved => LdText.l(
-                          'Request Approved',
+                        LdApprovalStatus.denied => LdIndicator.error(
+                          key: const Key('request_denied'),
+                          size: LdSize.l,
                         ),
-                        LdApprovalStatus.denied => LdText.l('Request Denied'),
                       },
-                      if (trailingBuilder != null) trailingBuilder!(context),
-                    ],
+                    ),
+                    Expanded(child: LdText.h(item.title)),
+                  ],
+                ).spaceS(),
+                if (hasDescription) ...[
+                  ldSpacerS,
+                  LdText.p(
+                    item.description!,
+                    size: LdSize.s,
+                    color: theme.textMuted,
                   ),
-                ),
+                ],
+                if (item.status == LdApprovalStatus.pending)
+                  _buildPendingActions(context, theme),
+
+                if (trailingBuilder != null) trailingBuilder!(context),
               ],
             ),
           ],
         ),
-      ),
+      ).insetBottom(size: LdSize.s),
     );
   }
 

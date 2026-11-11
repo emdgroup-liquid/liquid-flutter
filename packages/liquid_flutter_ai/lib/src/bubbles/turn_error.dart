@@ -31,6 +31,6 @@ class LdTurnErrorCard extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ).insetBottom(size: LdSize.s);
   }
 }

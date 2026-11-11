@@ -148,7 +148,7 @@ class _LdReasoningCardState extends State<LdReasoningCard> {
                 child: Text(widget.item.content, style: textStyle),
               ),
             ),
-          ),
+          ).insetBottom(size: LdSize.s),
         ),
       ],
     );

@@ -424,7 +424,7 @@ class _LdConversationState extends State<LdConversation> {
               );
         return KeyedSubtree(
           key: ValueKey(visualGroup.key),
-          child: child.padVertical(size: LdSize.xs),
+          child: child,
         );
       }
 

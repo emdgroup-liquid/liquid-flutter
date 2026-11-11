@@ -57,13 +57,12 @@ class _LdAgentActivityGroupState extends State<LdAgentActivityGroup> {
 
     // Always build both layers so AnimatedSize only changes height factors.
 
-    final body = Container(
-      child: Column(
+    final body =  Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           for (final item in widget.group.items) _buildItem(context, item),
         ],
-      ).spaceS(),
+      
     );
 
     return LdTouchableSurface(
@@ -141,7 +140,7 @@ class _LdAgentActivityGroupState extends State<LdAgentActivityGroup> {
           ),
         ],
       ).spaceS(),
-    );
+    ).insetBottom();
   }
 
   Widget _buildItem(BuildContext context, LdConversationItem item) {

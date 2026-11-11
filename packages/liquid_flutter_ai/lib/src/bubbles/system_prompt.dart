@@ -56,32 +56,34 @@ class _LdSystemPromptCardState extends State<LdSystemPromptCard> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
-        LdTouchableSurface(
-          onPressed: _toggle,
-          active: _expanded,
-          builder: (context, status, child) => Align(
-            alignment: Alignment.centerLeft,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  LucideIcons.scrollText,
-                  size: iconSize,
-                  color: theme.textMuted,
-                ),
-                Flexible(
-                  child: LdMute(
-                    child: LdText.l(title, overflow: TextOverflow.ellipsis),
+        LdReveal.quick(revealed: true,
+          child: LdTouchableSurface(
+            onPressed: _toggle,
+            active: _expanded,
+            builder: (context, status, child) => Align(
+              alignment: Alignment.centerLeft,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    LucideIcons.scrollText,
+                    size: iconSize,
+                    color: theme.textMuted,
                   ),
-                ),
-                Icon(
-                  _expanded ? LucideIcons.chevronUp : LucideIcons.chevronDown,
-                  size: iconSize,
-                  color: theme.textMuted,
-                ),
-              ],
-            ).spaceS(),
-          ),
+                  Flexible(
+                    child: LdMute(
+                      child: LdText.l(title, overflow: TextOverflow.ellipsis),
+                    ),
+                  ),
+                  Icon(
+                    _expanded ? LucideIcons.chevronUp : LucideIcons.chevronDown,
+                    size: iconSize,
+                    color: theme.textMuted,
+                  ),
+                ],
+              ).spaceS(),
+            ),
+          ).insetBottom(size: LdSize.s),
         ),
         LdReveal(
           revealed: _expanded,
@@ -95,7 +97,7 @@ class _LdSystemPromptCardState extends State<LdSystemPromptCard> {
                 style: textStyle,
               ),
             ],
-          ),
+          ).insetBottom(size: LdSize.s),
         ),
       ],
     );
