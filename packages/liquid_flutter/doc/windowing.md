@@ -22,13 +22,12 @@ is off, every component keeps its existing overlay behavior.
 
 > At the time of writing, Flutter gates the flag to the `master` channel.
 > Stable builds ship the framework API but keep `isWindowingEnabled` false, so
-> the components keep using overlays. This implementation targets the stable
-> controller names (`RegularWindowController` / `RegularWindow`); Flutter main
-> renamed them to `WindowController` / `Window`.
+> the components keep using overlays. The implementation targets the current
+> `master` names (`Window` / `WindowController`).
 
-- Host the app in a `RegularWindow` when you want child windows. Flutter's
-  `WidgetsApp` automatically installs a `WindowManager` when the feature flag is
-  on, but popups, tooltips and dialogs need a parent `WindowScope`:
+- Host the app in a `Window` when you want child windows. Starting with Flutter
+  master, `WidgetsApp` no longer installs a `WindowManager` on its own and
+  popups, tooltips and dialogs need a parent `WindowScope`:
 
   ```dart
   import 'package:flutter/widgets.dart';
@@ -46,13 +45,36 @@ is off, every component keeps its existing overlay behavior.
   }
   ```
 
-  `LdWindowRoot` uses Flutter's `RegularWindow` when windowing is available and
+  `LdWindowRoot` uses Flutter's `Window` when windowing is available and
   renders into the implicit view everywhere else, so the same entry point works
   on every platform. The example app ships one at
-  [`apps/example/lib/main_windowing.dart`](../../../apps/example/lib/main_windowing.dart).
+  [`apps/example/lib/main.dart`](../../../apps/example/lib/main.dart).
 
-  Apps that keep `runApp` still compile and run; the components silently fall
-  back to overlays because there is no parent window controller.
+  Apps that keep `runApp` still compile and run on stable Flutter. On a
+  multi-view capable host `runApp` throws because no implicit view exists, so
+  use `runWidget` together with `LdWindowRoot` (or any explicit `View`) instead.
+
+### Runner setup (macOS)
+
+Flutter can only enable multi-view while the engine has no view controller
+attached, so a windowing app must let the framework create its windows:
+
+- Create the `FlutterEngine` in `applicationDidFinishLaunching` and register the
+  generated plugins on the engine instead of a `FlutterViewController`.
+- Do not keep the default `MainFlutterWindow` / window from `MainMenu.xib`;
+  that window attaches a view controller before the first Flutter window exists
+  and the engine then asserts with
+  `Multiview can only be enabled before adding any view controllers`.
+
+[`apps/example/macos/Runner/AppDelegate.swift`](../../../apps/example/macos/Runner/AppDelegate.swift)
+shows a runner that works on both: it owns the engine when the framework
+supports windowing and falls back to a classic view-controller window on older
+Flutter versions.
+
+Hosts that attach a view controller up front must not use `LdWindowRoot` while
+windowing is enabled: Flutter asserts when the first window is created. Keep
+`runApp` for those, which renders into the implicit view; the components then
+fall back to overlays because no parent window exists.
 
 ## What uses a native window
 

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:liquid_flutter/src/notifications/notifications_controller.dart';
+import 'package:liquid_flutter/src/surface.dart';
 import 'package:liquid_flutter/src/text.dart';
 import 'package:liquid_flutter/src/theme/theme.dart';
 import 'package:liquid_flutter/src/tokens.dart';
@@ -122,6 +123,7 @@ class _LdTooltipState extends State<LdTooltip> {
     }
 
     final notifications = LdNotificationsController.maybeOf(context);
+    final surfaceInfo = LdSurfaceInfo.maybeOf(context);
     final handle = adapter.showTooltip(
       context: context,
       anchorRect: anchor,
@@ -137,6 +139,7 @@ class _LdTooltipState extends State<LdTooltip> {
           ListenableProvider<LdNotificationsController>.value(
             value: notifications,
           ),
+        if (surfaceInfo != null) Provider<LdSurfaceInfo>.value(value: surfaceInfo),
       ],
       builder: _buildWindowContent,
     );

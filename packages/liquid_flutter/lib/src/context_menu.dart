@@ -182,6 +182,7 @@ class LdContextMenuState extends State<LdContextMenu> {
     }
 
     final notifications = LdNotificationsController.maybeOf(context);
+    final surfaceInfo = LdSurfaceInfo.maybeOf(context);
     late LdWindowHandle? handle;
     handle = adapter.showPopup(
       context: context,
@@ -205,6 +206,7 @@ class LdContextMenuState extends State<LdContextMenu> {
           ListenableProvider<LdNotificationsController>.value(
             value: notifications,
           ),
+        if (surfaceInfo != null) Provider<LdSurfaceInfo>.value(value: surfaceInfo),
         Provider<LdContextMenuHandle>.value(
           value: LdContextMenuHandle(close: () => handle?.close()),
         ),

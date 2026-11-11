@@ -9,6 +9,19 @@ class LdSurfaceInfo {
   static LdSurfaceInfo of(BuildContext context, {bool listen = false}) {
     return Provider.of<LdSurfaceInfo>(context, listen: listen);
   }
+
+  /// Returns the closest [LdSurfaceInfo] or `null` when there is none.
+  ///
+  /// Useful for code that renders outside the widget tree of the app, such as
+  /// content hosted in a native window, where the surface information may not
+  /// have been provided.
+  static LdSurfaceInfo? maybeOf(BuildContext context) {
+    try {
+      return Provider.of<LdSurfaceInfo>(context, listen: false);
+    } on ProviderNotFoundException {
+      return null;
+    }
+  }
 }
 
 extension LdSurfaceInfoExtension on BuildContext {

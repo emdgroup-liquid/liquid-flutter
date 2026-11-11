@@ -156,6 +156,7 @@ class LdModalRoute<T> extends PageRoute<T> {
     }
 
     final notifications = LdNotificationsController.maybeOf(context);
+    final surfaceInfo = LdSurfaceInfo.maybeOf(context);
     try {
       return adapter.createDialogRoute<R>(
         context: context,
@@ -168,6 +169,7 @@ class LdModalRoute<T> extends PageRoute<T> {
             ListenableProvider<LdNotificationsController>.value(
               value: notifications,
             ),
+          if (surfaceInfo != null) Provider<LdSurfaceInfo>.value(value: surfaceInfo),
         ],
         builder: _buildWindowContent,
       );

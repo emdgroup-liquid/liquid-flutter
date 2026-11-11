@@ -18,6 +18,7 @@ import 'package:flutter/src/foundation/_features.dart' show isWindowingEnabled;
 import 'package:flutter/src/widgets/_window.dart' as fw;
 import 'package:flutter/src/widgets/_window_positioner.dart' as fw_positioner;
 import 'package:flutter/widgets.dart';
+import 'package:liquid_flutter/src/surface.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
@@ -188,7 +189,7 @@ class LdWindowRoot extends StatefulWidget {
 }
 
 class _LdWindowRootState extends State<LdWindowRoot> {
-  fw.RegularWindowController? _controller;
+  fw.WindowController? _controller;
 
   @override
   void initState() {
@@ -221,7 +222,14 @@ class _LdWindowRootState extends State<LdWindowRoot> {
   Widget build(BuildContext context) {
     final controller = _controller;
     if (controller != null) {
-      return fw.RegularWindow(controller: controller, child: widget.child);
+      return fw.WindowManager(
+        initialWindows: [
+          fw.WindowEntry(
+            controller: controller,
+            builder: (_) => widget.child,
+          ),
+        ],
+      );
     }
     final view = WidgetsBinding.instance.platformDispatcher.implicitView;
     if (view != null) {
@@ -231,13 +239,13 @@ class _LdWindowRootState extends State<LdWindowRoot> {
   }
 }
 
-class _LdWindowRootDelegate with fw.RegularWindowControllerDelegate {
+class _LdWindowRootDelegate with fw.WindowControllerDelegate {
   _LdWindowRootDelegate(this.onCloseRequested);
 
   final VoidCallback? onCloseRequested;
 
   @override
-  void onWindowCloseRequested(fw.RegularWindowController controller) {
+  void onWindowCloseRequested(fw.WindowController controller) {
     if (onCloseRequested != null) {
       onCloseRequested!();
       return;
@@ -248,28 +256,28 @@ class _LdWindowRootDelegate with fw.RegularWindowControllerDelegate {
 
 // Flutter renamed the regular window size/constraint parameters from
 // `preferredSize`/`preferredConstraints` (3.44) to `size`/`constraints` (3.47).
-fw.RegularWindowController _createRegularWindowController({
+fw.WindowController _createRegularWindowController({
   required Size size,
   required BoxConstraints? constraints,
   required String title,
-  required fw.RegularWindowControllerDelegate delegate,
+  required fw.WindowControllerDelegate delegate,
 }) {
   final baseArgs = <Symbol, dynamic>{
     #title: title,
     #delegate: delegate,
   };
   try {
-    return Function.apply(fw.RegularWindowController.new, const [], {
+    return Function.apply(fw.WindowController.new, const [], {
       ...baseArgs,
       #size: size,
       #constraints: constraints,
-    }) as fw.RegularWindowController;
+    }) as fw.WindowController;
   } on NoSuchMethodError {
-    return Function.apply(fw.RegularWindowController.new, const [], {
+    return Function.apply(fw.WindowController.new, const [], {
       ...baseArgs,
       #preferredSize: size,
       #preferredConstraints: constraints,
-    }) as fw.RegularWindowController;
+    }) as fw.WindowController;
   }
 }
 
@@ -467,6 +475,7 @@ class LdNativeWindowingAdapter implements LdWindowingAdapter {
     }
 
     try {
+      final ambient = _LdWindowAmbient.capture(context);
       late final _LdChildWindowHandle handle;
       final delegate = createDelegate(() => handle.handlePlatformDestroyed());
       final controller = createController(
@@ -481,6 +490,7 @@ class LdNativeWindowingAdapter implements LdWindowingAdapter {
           providers,
           builder,
           onPop: (_) => handle.close(),
+          ambient: ambient,
         ),
       );
       handle = _LdChildWindowHandle(
@@ -524,6 +534,7 @@ class LdNativeWindowingAdapter implements LdWindowingAdapter {
         settings: settings,
         builder: builder,
         providers: providers,
+        ambient: _LdWindowAmbient.capture(context),
       );
     } on UnsupportedError {
       return null;
@@ -645,20 +656,61 @@ fw_positioner.WindowPositioner _toPositioner(LdWindowPosition position) {
   );
 }
 
+class _LdWindowAmbient {
+  const _LdWindowAmbient({
+    required this.delegates,
+    required this.locale,
+    required this.directionality,
+  });
+
+  final List<LocalizationsDelegate<dynamic>>? delegates;
+  final Locale? locale;
+  final TextDirection directionality;
+
+  static _LdWindowAmbient capture(BuildContext context) {
+    final localizations = context.findAncestorWidgetOfExactType<Localizations>();
+    return _LdWindowAmbient(
+      delegates: localizations?.delegates.toList(growable: false),
+      locale: Localizations.maybeLocaleOf(context),
+      directionality: Directionality.maybeOf(context) ?? TextDirection.ltr,
+    );
+  }
+}
+
 Widget _wrapWindowContent(
   BuildContext context,
   List<SingleChildWidget> providers,
   WidgetBuilder builder, {
   required void Function(Object? result) onPop,
+  required _LdWindowAmbient ambient,
 }) {
   final content = _LdWindowNavigatorShim(
     onPop: onPop,
     child: Builder(builder: builder),
   );
-  if (providers.isEmpty) {
-    return content;
+  Widget result = providers.isEmpty ? content : MultiProvider(providers: providers, builder: (context, _) => content);
+  if (providers.every((provider) => provider is! Provider<LdSurfaceInfo>)) {
+    // Window content is rendered outside the app's tree, so provide the same
+    // default surface information that `LdThemeProvider` installs at the root.
+    result = Provider<LdSurfaceInfo>(
+      create: (_) => LdSurfaceInfo(isSurface: false),
+      child: result,
+    );
   }
-  return MultiProvider(providers: providers, builder: (context, _) => content);
+
+  if (context.findAncestorWidgetOfExactType<Directionality>() == null) {
+    result = Directionality(textDirection: ambient.directionality, child: result);
+  }
+  if (context.findAncestorWidgetOfExactType<Localizations>() == null &&
+      ambient.delegates != null &&
+      ambient.locale != null) {
+    result = Localizations(
+      locale: ambient.locale!,
+      delegates: ambient.delegates!,
+      child: result,
+    );
+  }
+  return result;
 }
 
 /// A minimal navigator that lets window content call
@@ -793,6 +845,15 @@ class _LdChildWindowHandle implements LdWindowHandle {
       return;
     }
     _isClosed = true;
+    if (!_closed.isCompleted) {
+      _closed.complete();
+    }
+    // Tearing down the window unmounts the widget tree rendered into it, which
+    // must not happen while that tree is handling the event that closed it.
+    scheduleMicrotask(() => _destroy(alreadyDestroyed: alreadyDestroyed));
+  }
+
+  void _destroy({required bool alreadyDestroyed}) {
     try {
       _registry.unregister(_entry);
     } on UnsupportedError {
@@ -806,9 +867,6 @@ class _LdChildWindowHandle implements LdWindowHandle {
       // Ignore: the feature is no longer enabled.
     }
     _controller.dispose();
-    if (!_closed.isCompleted) {
-      _closed.complete();
-    }
   }
 }
 
@@ -831,13 +889,15 @@ class _LdDialogWindowRoute<T> extends Route<T> {
     required String? title,
     required WidgetBuilder builder,
     required List<SingleChildWidget> providers,
+    required _LdWindowAmbient ambient,
     super.settings,
   })  : _parent = parent,
         _registry = registry,
         _builder = builder,
         _providers = providers,
         _title = title,
-        _size = size {
+        _size = size,
+        _ambient = ambient {
     _controller = _createDialogWindowController(
       parent: _parent,
       size: _size,
@@ -852,12 +912,14 @@ class _LdDialogWindowRoute<T> extends Route<T> {
   final List<SingleChildWidget> _providers;
   final String? _title;
   final Size _size;
+  final _LdWindowAmbient _ambient;
 
   late final fw.DialogWindowController _controller;
   late final List<OverlayEntry> _overlayEntries;
   fw.WindowEntry? _entry;
   bool _popping = false;
   bool _destroyed = false;
+  bool _destroyScheduled = false;
 
   @override
   List<OverlayEntry> get overlayEntries => _overlayEntries;
@@ -879,6 +941,7 @@ class _LdDialogWindowRoute<T> extends Route<T> {
         _providers,
         _builder,
         onPop: popFromWindow,
+        ambient: _ambient,
       ),
     );
     _entry = entry;
@@ -902,6 +965,16 @@ class _LdDialogWindowRoute<T> extends Route<T> {
   }
 
   void _unregisterAndDestroy() {
+    if (_destroyed || _destroyScheduled) {
+      return;
+    }
+    _destroyScheduled = true;
+    // Destroying the window unmounts the content rendered into it, which must
+    // not happen while the navigator is updating its history.
+    scheduleMicrotask(_destroy);
+  }
+
+  void _destroy() {
     if (_destroyed) {
       return;
     }
@@ -931,7 +1004,7 @@ class _LdDialogWindowRoute<T> extends Route<T> {
 
   @override
   void dispose() {
-    _unregisterAndDestroy();
+    _destroy();
     super.dispose();
   }
 }
