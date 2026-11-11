@@ -44,7 +44,18 @@ void main() async {
 
   final screenRadius = await getScreenRadius();
 
-  runApp(LiquidExample(screenRadius: screenRadius));
+  // `LdWindowRoot` renders into Flutter's implicit view on mobile, web and
+  // older Flutter versions, and into a native window when desktop windowing is
+  // available. `runApp` is not an option because it requires the implicit view,
+  // which hosts with windowing support do not create.
+  runWidget(
+    LdWindowRoot(
+      title: 'Liquid Design Demo',
+      size: const Size(1280, 900),
+      constraints: const BoxConstraints(minWidth: 900, minHeight: 600),
+      child: LiquidExample(screenRadius: screenRadius),
+    ),
+  );
 }
 
 class LiquidExample extends StatefulWidget {
