@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:liquid_flutter/src/list/list_page.dart';
 import 'package:liquid_flutter/src/monkey/data/fetch_page_parameters.dart';
 import 'package:liquid_flutter/src/monkey/data/identifiable.dart';

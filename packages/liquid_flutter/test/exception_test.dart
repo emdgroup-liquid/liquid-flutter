@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
@@ -11,7 +11,7 @@ LdNotificationProvider _wrapWithMaterialApp(Widget widget) {
     child: LdThemeProvider(
       child: LdThemedAppBuilder(appBuilder: (context, theme) {
         return MaterialApp(
-          localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+          localizationsDelegates: liquidLocalizationsDelegates,
           locale: const Locale('en'),
           debugShowCheckedModeBanner: false,
           theme: theme,

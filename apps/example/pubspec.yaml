@@ -12,6 +12,7 @@ publish_to: "none"
 dependencies:
   flutter:
     sdk: flutter
+  material_ui: ^1.11.0
   liquid_flutter:
     path: ../../packages/liquid_flutter
   liquid_flutter_emd_theme:

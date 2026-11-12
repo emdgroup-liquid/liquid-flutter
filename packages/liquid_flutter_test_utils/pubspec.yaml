@@ -4,12 +4,13 @@ version: 1.7.0-14
 homepage: https://github.com/emdgroup-liquid/liquid-flutter-test-utils
 environment:
   sdk: ">=3.5.0 <4.0.0"
-  flutter: ">=1.17.0"
+  flutter: ">=3.47.0"
 resolution: workspace
 dependencies:
   diff_match_patch: ^0.4.1
   flutter:
     sdk: flutter
+  material_ui: ^1.11.0
   flutter_localizations:
     sdk: flutter
   flutter_test:

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
@@ -46,7 +46,7 @@ Widget ldFrame({
           supportedLocales: LiquidLocalizations.supportedLocales,
           localizationsDelegates: [
             ...ldGoldenLocalizationsDelegates,
-            ...LiquidLocalizations.localizationsDelegates,
+            ...liquidLocalizationsDelegates,
           ],
           routerConfig: router(
             (context, state) {

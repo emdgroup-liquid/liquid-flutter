@@ -4,7 +4,7 @@
 // viewing) without a real GoRouter so other monkey tests can simulate state
 // changes. These tests verify the harness itself behaves correctly.
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 

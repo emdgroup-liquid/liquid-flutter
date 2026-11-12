@@ -3,7 +3,7 @@
 //
 // Source: _LdButtonWidget dartdoc comments.
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:liquid/components/component_page.dart';
 import 'package:liquid/components/demo_registry.dart';
 import 'package:liquid_flutter_md/liquid_flutter_md.dart';

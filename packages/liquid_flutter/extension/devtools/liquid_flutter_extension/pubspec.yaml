@@ -20,6 +20,7 @@ dependencies:
     path: ../../..
   lucide_icons_flutter: ^3.0.3
 
+  material_ui: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

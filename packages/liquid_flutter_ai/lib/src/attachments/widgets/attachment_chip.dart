@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter_ai/src/attachments/attachment_models.dart';
 import 'package:liquid_flutter_ai/src/models/compose_attachment.dart';

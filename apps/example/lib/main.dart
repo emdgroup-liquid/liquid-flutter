@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
@@ -93,7 +93,7 @@ class _LiquidExampleState extends State<LiquidExample> {
                     var router = context.read<AppRouter>().router;
 
                     return MaterialApp.router(
-                      localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+                      localizationsDelegates: liquidLocalizationsDelegates,
                       locale: const Locale('en'),
                       title: 'Liquid Design Demo',
                       debugShowCheckedModeBanner: false,

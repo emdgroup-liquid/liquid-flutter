@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 /// A simple card component with a shadow to elevate it from the page. Header and Footer are optional and separated by color.

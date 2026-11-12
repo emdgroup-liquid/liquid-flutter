@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
@@ -45,7 +45,7 @@ void main() {
           LdThemeProvider(
             child: MaterialApp.router(
               localizationsDelegates: const [
-                ...LiquidLocalizations.localizationsDelegates,
+                ...liquidLocalizationsDelegates,
               ],
               routerConfig: router,
             ),
@@ -92,7 +92,7 @@ void main() {
           LdThemeProvider(
             child: MaterialApp.router(
               localizationsDelegates: const [
-                ...LiquidLocalizations.localizationsDelegates,
+                ...liquidLocalizationsDelegates,
               ],
               routerConfig: router,
             ),
@@ -139,7 +139,7 @@ void main() {
           LdThemeProvider(
             child: MaterialApp.router(
               localizationsDelegates: const [
-                ...LiquidLocalizations.localizationsDelegates,
+                ...liquidLocalizationsDelegates,
               ],
               routerConfig: router,
             ),
@@ -189,7 +189,7 @@ void main() {
           LdThemeProvider(
             child: MaterialApp.router(
               localizationsDelegates: const [
-                ...LiquidLocalizations.localizationsDelegates,
+                ...liquidLocalizationsDelegates,
               ],
               routerConfig: router,
             ),
@@ -253,7 +253,7 @@ void main() {
           LdThemeProvider(
             child: MaterialApp.router(
               localizationsDelegates: const [
-                ...LiquidLocalizations.localizationsDelegates,
+                ...liquidLocalizationsDelegates,
               ],
               routerConfig: router,
             ),
@@ -303,7 +303,7 @@ void main() {
           LdThemeProvider(
             child: MaterialApp.router(
               localizationsDelegates: const [
-                ...LiquidLocalizations.localizationsDelegates,
+                ...liquidLocalizationsDelegates,
               ],
               routerConfig: router,
             ),
@@ -360,7 +360,7 @@ void main() {
           LdThemeProvider(
             child: MaterialApp.router(
               localizationsDelegates: const [
-                ...LiquidLocalizations.localizationsDelegates,
+                ...liquidLocalizationsDelegates,
               ],
               routerConfig: router,
             ),

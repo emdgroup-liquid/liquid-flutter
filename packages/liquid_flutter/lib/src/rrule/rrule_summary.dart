@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:intl/intl.dart';
 import 'package:liquid_flutter/src/l10n/generated/liquid_localizations.dart';
 import 'package:liquid_flutter/src/rrule/rrule_draft.dart';

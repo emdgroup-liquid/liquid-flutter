@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:liquid/demos/layout_documentation.dart';
 import 'package:liquid/demos/radius_documentation.dart';
 import 'package:liquid/demos/spacing_padding_documentation.dart';

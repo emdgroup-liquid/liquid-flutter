@@ -16,3 +16,34 @@ To simply install run
 ```sh
 flutter pub add liquid_flutter
 ```
+
+## Requirements
+
+Flutter `3.47.0` or newer. Since Flutter 3.47, Material lives in the
+[`material_ui`](https://pub.dev/packages/material_ui) package rather than
+`package:flutter/material.dart`, and `liquid_flutter` imports it from there.
+
+If your app still imports `package:flutter/material.dart`, wrap it in
+`MaterialUiCompatibilityBridge` so legacy widgets keep resolving
+`ThemeData` and `MaterialLocalizations` inside our widget trees:
+
+```dart
+MaterialApp(
+  builder: (context, child) => MaterialUiCompatibilityBridge(child: child!),
+  // ...
+)
+```
+
+Use `liquidLocalizationsDelegates` rather than the generated
+`LiquidLocalizations.localizationsDelegates`: the latter still references the
+deprecated `flutter_localizations` delegates, which a `material_ui` app cannot
+resolve, leaving Material strings untranslated.
+
+```dart
+MaterialApp(
+  localizationsDelegates: liquidLocalizationsDelegates,
+  supportedLocales: LiquidLocalizations.supportedLocales,
+  // ...
+)
+```
+

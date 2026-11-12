@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
@@ -7,7 +7,7 @@ Widget _wrapWithMaterialApp(Widget widget) {
     child: LdThemeProvider(
       child: LdThemedAppBuilder(
         appBuilder: (context, theme) => MaterialApp(
-          localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+          localizationsDelegates: liquidLocalizationsDelegates,
           locale: const Locale('en'),
           debugShowCheckedModeBanner: false,
           theme: theme,
