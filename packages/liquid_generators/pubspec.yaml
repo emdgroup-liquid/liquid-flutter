@@ -5,7 +5,9 @@ environment:
   sdk: ">=3.5.0 <4.0.0"
 resolution: workspace
 dependencies:
-  analyzer: ^8.1.1
+  # Upper bound matches source_gen/build/dart_style so the workspace can resolve
+  # against Flutter SDKs whose flutter_test pins a newer test_api.
+  analyzer: ">=8.1.1 <15.0.0"
   build: ^4.0.0
   code_builder: ^4.11.1
   dart_style: ^3.1.1

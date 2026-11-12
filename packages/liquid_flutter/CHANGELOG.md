@@ -1,8 +1,6 @@
 ## 23.0.0-15
 Released on: 11/12/2026, changelog automatically generated.
 
-<!-- Republished to recover the failed pub.dev publish run (Flutter SDK pin, a83f6acf). -->
-
 ## 23.0.0-14
 Released on: 11/12/2026, changelog automatically generated.
 

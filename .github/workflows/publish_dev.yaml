@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - dev
+    # Workflow-only pushes cannot produce a release: api_guard versions a
+    # package only when a file under its directory changed, so the run would
+    # always end with "0 package(s)" versioned.
+    paths-ignore:
+      - ".github/**"
 
 jobs:
   release_packages:

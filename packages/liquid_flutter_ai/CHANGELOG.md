@@ -9,8 +9,6 @@ Released on: 11/12/2026, changelog automatically generated.
 - 📦 `liquid_flutter_md` version changed: from `^0.0.1-3` to `^0.0.1-4`
 
 
-<!-- Republished to recover the failed pub.dev publish run (Flutter SDK pin, a83f6acf). -->
-
 ## 0.0.1-3
 Released on: 11/12/2026, changelog automatically generated.
 
