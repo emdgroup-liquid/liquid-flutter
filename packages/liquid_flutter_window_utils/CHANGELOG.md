@@ -1,3 +1,6 @@
+## 1.0.0-8
+Released on: 11/12/2026, changelog automatically generated.
+
 ## 1.0.0-7
 Released on: 8/6/2026, changelog automatically generated.
 
@@ -38,7 +41,6 @@ Released on: 6/23/2026, changelog automatically generated.
 - ❌ Modifier `static` removed from property: `_windowStateController`
 - ❇️ Modifier `late` added to property: `_windowStateController`
 
-
 ## 1.0.0-1
 Released on: 6/23/2026, changelog automatically generated.
 
@@ -61,7 +63,6 @@ Released on: 6/23/2026, changelog automatically generated.
 - ❌ Property removed: `_screenRadiusController`
 - ❌ Modifier `static` removed from property: `_windowStateController`
 - ❇️ Modifier `late` added to property: `_windowStateController`
-
 
 ## 0.0.1-2
 
