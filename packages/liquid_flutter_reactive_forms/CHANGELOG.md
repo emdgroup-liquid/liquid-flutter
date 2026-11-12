@@ -1,3 +1,46 @@
+## 0.1.1-6
+Released on: 11/12/2026, changelog automatically generated.
+
+### API Changes
+
+#### ✨ Minor changes
+
+**`class` LdForm<T extends Identifiable<IdType>, IdType, TDetail extends Object, TCreate, TUpdate>** ([lib/src/monkey_detail/detail_form.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_reactive_forms/v0.1.1-5..liquid_flutter_reactive_forms/v0.1.1-6#diff-89b4bb66eebde2fa45d4db603df7a31fd895700872ef73e55f84ea3817c3a2b9))
+- ❇️ Params added in default constructor: `controls` (named, optional, default: LdFormControls.adaptive), `layoutMode` (named, optional, default: LdFormLayoutMode.page)
+- ❇️ Properties added: `controls`, `layoutMode`
+
+**`enum` LdFormControls** ([lib/src/monkey_detail/detail_form.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_reactive_forms/v0.1.1-5..liquid_flutter_reactive_forms/v0.1.1-6#diff-89b4bb66eebde2fa45d4db603df7a31fd895700872ef73e55f84ea3817c3a2b9))
+- ❇️ Enum added: `LdFormControls`
+
+**`class` LdFormDatePicker** ([lib/src/form_widgets/ld_form_date_picker.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_reactive_forms/v0.1.1-5..liquid_flutter_reactive_forms/v0.1.1-6#diff-93a1f4effadc11b78fe11164afcc1588e128fba8c1dba693cb50229846dfecd8))
+- ❇️ Param added in default constructor: `size` (named, optional, default: LdSize.m)
+- ❇️ Property added: `size`
+
+**`class` LdFormDurationPicker** ([lib/src/form_widgets/ld_form_duration_picker.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_reactive_forms/v0.1.1-5..liquid_flutter_reactive_forms/v0.1.1-6#diff-c2334e3d7fc5381034e19496c22b3a77289c5eb8e34d7b642190c687052262a7))
+- ❇️ Class added: `LdFormDurationPicker`
+
+**`enum` LdFormLayoutMode** ([lib/src/monkey_detail/detail_form.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_reactive_forms/v0.1.1-5..liquid_flutter_reactive_forms/v0.1.1-6#diff-89b4bb66eebde2fa45d4db603df7a31fd895700872ef73e55f84ea3817c3a2b9))
+- ❇️ Enum added: `LdFormLayoutMode`
+
+**`class` LdFormRecurrenceMultiPicker** ([lib/src/form_widgets/ld_form_recurrence_multi_picker.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_reactive_forms/v0.1.1-5..liquid_flutter_reactive_forms/v0.1.1-6#diff-633231656a64e1bc3c23f23af97aa9f14353a9f36386f040b6063e6482ac02ba))
+- ❇️ Class added: `LdFormRecurrenceMultiPicker`
+
+**`class` LdFormRecurrencePicker** ([lib/src/form_widgets/ld_form_recurrence_picker.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_reactive_forms/v0.1.1-5..liquid_flutter_reactive_forms/v0.1.1-6#diff-b0ea3a2e07688cd6bd0d661f8c5479d9e00c754adf8d58ea86258727e6069d93))
+- ❇️ Class added: `LdFormRecurrencePicker`
+
+**`class` LdFormResetButton** ([lib/src/monkey_detail/buttons.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_reactive_forms/v0.1.1-5..liquid_flutter_reactive_forms/v0.1.1-6#diff-0434a5673df65cdbc36541f53e7b0423d0b677a82a2819f4102320ddcce47c09))
+- ❇️ Param added in default constructor: `mode` (named, optional, default: LdButtonMode.outline)
+- ❇️ Property added: `mode`
+
+**`class` LdFormTimePicker** ([lib/src/form_widgets/ld_form_time_picker.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_reactive_forms/v0.1.1-5..liquid_flutter_reactive_forms/v0.1.1-6#diff-e57b7a06055742465e82d0d337afbada998dcfe8e9e8e218391b915fe43e3a2a))
+- ❇️ Param added in default constructor: `size` (named, optional, default: LdSize.m)
+- ❇️ Property added: `size`
+
+#### 👀 Patch changes
+
+**`class` LdFormEmojiPicker** ([lib/src/form_widgets/ld_form_emoji_picker.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_reactive_forms/v0.1.1-5..liquid_flutter_reactive_forms/v0.1.1-6#diff-7694a239f1e11a6b9844d60182518c6368722364e9a4549507bc20d3c0907c63))
+- ❌ Method removed: `_getEmojiSize`
+
 ## 0.1.1-5
 Released on: 8/11/2026, changelog automatically generated.
 
