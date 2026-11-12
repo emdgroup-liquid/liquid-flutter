@@ -1,3 +1,13 @@
+## 0.0.1-5
+Released on: 11/12/2026, changelog automatically generated.
+
+### API Changes
+
+#### 👀 Patch changes
+
+**`meta` pubspec.yaml** ([pubspec.yaml](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_ai/v0.0.1-4..liquid_flutter_ai/v0.0.1-5#diff-8b7e9df87668ffa6a04b32e1769a33434999e54ae081c52e5d943c541d4c0d25))
+- 📦 `liquid_flutter_md` version changed: from `^0.0.1-4` to `^0.0.1-5`
+
 ## 0.0.1-4
 Released on: 11/12/2026, changelog automatically generated.
 
@@ -7,7 +17,6 @@ Released on: 11/12/2026, changelog automatically generated.
 
 **`meta` pubspec.yaml** ([pubspec.yaml](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_ai/v0.0.1-3..liquid_flutter_ai/v0.0.1-4#diff-8b7e9df87668ffa6a04b32e1769a33434999e54ae081c52e5d943c541d4c0d25))
 - 📦 `liquid_flutter_md` version changed: from `^0.0.1-3` to `^0.0.1-4`
-
 
 ## 0.0.1-3
 Released on: 11/12/2026, changelog automatically generated.
