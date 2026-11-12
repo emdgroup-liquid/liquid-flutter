@@ -29,7 +29,7 @@ class _EmojiPickerDemoState extends State<EmojiPickerDemo> {
         initialCategoryIndex: initialCategoryIndex,
         onEmojiSelected: onSelected,
       ),
-    ).show(context);
+    ).show(context, useRootNavigator: true);
   }
 
   @override

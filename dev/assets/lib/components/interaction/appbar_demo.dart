@@ -453,6 +453,9 @@ class _AppBarDemoState extends State<AppBarDemo> {
 
   String _activeTabRoute = '/home';
   bool _showTabNavigation = false;
+  bool _showRawAppBar = true;
+  LdRawAppBarLayout _rawAppBarLayout = LdRawAppBarLayout.expand;
+  bool _rawAppBarDecorate = true;
   bool _mockSafeArea = false;
   bool _mockKeyboard = false;
   LdAppBarAttachedMode _tabAttachedMode = LdAppBarAttachedMode.adaptive;
@@ -557,7 +560,12 @@ class _AppBarDemoState extends State<AppBarDemo> {
       ),
     ),
     LdAppBarAction(leading: const Icon(LucideIcons.bell), onPressed: () {}, child: const Text('Notification')),
-    LdAppBarAction(leading: const Icon(LucideIcons.trash2), onPressed: () {}, child: const Text('Delete')),
+    LdAppBarAction(
+      leading: const Icon(LucideIcons.trash2),
+      onPressed: () {},
+      overflowMode: LdAppBarActionOverflowMode.always,
+      child: const Text('Delete'),
+    ),
   ];
 
   Widget _wrapWithAppBars(Widget body) {
@@ -572,6 +580,7 @@ class _AppBarDemoState extends State<AppBarDemo> {
   Widget build(BuildContext context) {
     final scaffoldContent = LdScaffoldBody(
       addContainer: true,
+
       children: [
         LdText.h('LdAppBar Demo'),
         LdButton.outline(
@@ -630,6 +639,34 @@ class _AppBarDemoState extends State<AppBarDemo> {
             onPressed: _openTabNavConfig,
           ),
         ),
+        LdText.caption('Raw app bar'),
+        LdCard(
+          child: LdAutoSpace(
+            children: [
+              LdToggle(
+                label: 'Show LdRawAppBar.bottom (chips + leading/trailing)',
+                checked: _showRawAppBar,
+                onChanged: (value) => setState(() => _showRawAppBar = value),
+              ),
+              if (_showRawAppBar)
+                LdSwitch<LdRawAppBarLayout>(
+                  label: 'Layout',
+                  value: _rawAppBarLayout,
+                  onChanged: (value) => setState(() => _rawAppBarLayout = value),
+                  children: const {
+                    LdRawAppBarLayout.expand: Text('.expand'),
+                    LdRawAppBarLayout.center: Text('.center'),
+                  },
+                ),
+              if (_showRawAppBar)
+                LdToggle(
+                  label: 'Inside / outside decoration',
+                  checked: _rawAppBarDecorate,
+                  onChanged: (value) => setState(() => _rawAppBarDecorate = value),
+                ),
+            ],
+          ),
+        ),
         LdText.caption('System simulation'),
         LdCard(
           child: LdAutoSpace(
@@ -659,21 +696,84 @@ class _AppBarDemoState extends State<AppBarDemo> {
 
     Widget body = scaffoldContent;
 
+    if (_showRawAppBar) {
+      final content = switch (_rawAppBarLayout) {
+        LdRawAppBarLayout.expand => LdHorizontalScroll(
+          layout: LdHorizontalScrollLayout.scroll,
+          children: const [
+            LdTag(child: Text('Inbox')),
+            LdTag(child: Text('Starred')),
+            LdTag(child: Text('Sent')),
+            LdTag(child: Text('Drafts')),
+            LdTag(child: Text('Archive')),
+            LdTag(child: Text('Spam')),
+          ],
+        ),
+        LdRawAppBarLayout.center => Row(
+          mainAxisSize: MainAxisSize.min,
+          children: const [
+            LdTag(child: Text('Inbox')),
+            LdTag(child: Text('Starred')),
+          ],
+        ).spaceS(),
+      };
+
+      final theme = LdTheme.of(context);
+      body = LdRawAppBar.bottom(
+        layout: _rawAppBarLayout,
+        leading: LdButton.outline(onPressed: () {}, child: const Icon(LucideIcons.plus)),
+        trailing: LdButton.filled(onPressed: () {}, child: const Icon(LucideIcons.arrowUp)),
+        content: Container(
+          padding: theme.pad(size: LdSize.m),
+          decoration: BoxDecoration(
+            color: theme.surface,
+            borderRadius: theme.radius(LdSize.l),
+            border: Border.all(color: theme.floatingBorder, width: theme.borderWidth),
+          ),
+          child: content,
+        ),
+
+        floating: false,
+        outsideDecoration: _rawAppBarDecorate
+            ? BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [theme.surface.withAlpha(0), theme.surface.withAlpha(255)],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
+              )
+            : null,
+
+        child: body,
+      );
+    }
+
     if (_showTabNavigation) {
       body = LdTabNavigation(
         activeRoute: _activeTabRoute,
         onTabPressed: (route) => setState(() => _activeTabRoute = route),
-        tabs: const [
-          LdNavigationTab(label: 'Home', icon: Icon(LucideIcons.house), route: '/home'),
+        tabs: [
+          LdNavigationTab(
+            label: 'Home',
+            icon: Icon(LucideIcons.house),
+            route: '/home',
+            badge: LdNavigationTabBadge(value: 100, color: LdTheme.of(context).warning),
+          ),
           LdNavigationTab(label: 'Search', icon: Icon(LucideIcons.search), route: '/search'),
           LdNavigationTab(label: 'Settings', icon: Icon(LucideIcons.settings), route: '/settings'),
           LdNavigationTab(label: 'Profile', icon: Icon(LucideIcons.user), route: '/profile'),
-          LdNavigationTab(label: 'Notifications', icon: Icon(LucideIcons.bell), route: '/notifications'),
+          LdNavigationTab(
+            label: 'Notifications',
+            icon: Icon(LucideIcons.bell),
+            route: '/notifications',
+            badge: LdNavigationTabBadge(color: LdTheme.of(context).warning),
+          ),
         ],
         attachedMode: _tabAttachedMode,
         backgroundMode: _tabBackgroundMode,
         position: _tabPosition,
         scrollBehavior: _tabScrollBehavior,
+        //trailing: LdButton.filled(size: LdSize.l, onPressed: () {}, child: const Icon(LucideIcons.arrowUp)),
         child: body,
       );
     }

@@ -85,6 +85,10 @@ class _ListItemDemoState extends State<ListItemDemo> {
                 ),
                 LdDivider(),
                 LdListItem(
+                  tradeLeadingForSelectionControl: false,
+                  selectionControl: _showSelectionControls,
+                  isSelected: _selectedItems.contains(1),
+                  onSelectionChanged: (selected) => _selectItem(1),
                   leading: LdAvatar(child: Text("B")),
                   onPressed: () {
                     LdNotificationsController.of(context).addNotification(
@@ -92,7 +96,7 @@ class _ListItemDemoState extends State<ListItemDemo> {
                     );
                   },
                   title: Text("Press me"),
-                  subtitle: Text("I will  trade leading for selection control"),
+                  subtitle: Text("I will not trade leading for selection control"),
                 ),
                 LdListSeperator(child: LdText.caption("This is a separator")),
                 LdListItem(
