@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:golden_toolkit/golden_toolkit.dart' hide loadAppFonts;
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter_test_utils/liquid_flutter_test_utils.dart';

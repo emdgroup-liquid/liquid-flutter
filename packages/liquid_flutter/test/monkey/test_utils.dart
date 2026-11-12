@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
@@ -298,7 +298,13 @@ LdListController<TestItem, int> createTestListController({
 /// schedules a frame in the meantime, which means [WidgetTester.pumpAndSettle]
 /// on its own returns before the clock gets there.
 Future<void> pumpPastSubmitMountDelay(WidgetTester tester) async {
-  await tester.pump(Durations.medium1 + const Duration(milliseconds: 50));
+  // LdSubmit mounts after Durations.medium1. pumpAndSettle only advances fake
+  // time while frames are scheduled, so step time explicitly; nested submit
+  // scopes (e.g. a child monkey route) start their timer after the parent
+  // already settled.
+  for (var i = 0; i < 8; i++) {
+    await tester.pump(Durations.medium1);
+  }
   await tester.pumpAndSettle();
 }
 

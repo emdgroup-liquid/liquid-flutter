@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/submit/builders/cancel_button.dart';
 import 'package:liquid_flutter/src/submit/builders/error_view.dart';

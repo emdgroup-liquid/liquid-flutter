@@ -2,7 +2,7 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:liquid_flutter/src/emoji/analyzer.dart';
 import 'package:liquid_flutter/src/emoji/optical_center.dart';
 

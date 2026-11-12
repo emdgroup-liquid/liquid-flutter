@@ -5,12 +5,13 @@ repository: https://github.com/emdgroup-liquid/liquid-flutter
 
 environment:
   sdk: ^3.10.7
-  flutter: ">=1.17.0"
+  flutter: ">=3.47.0"
 
 resolution: workspace
 dependencies:
   flutter:
     sdk: flutter
+  material_ui: ^1.11.0
   collection: ^1.19.1
   liquid_flutter: ^23.0.0-8
   flutter_highlight: ^0.7.0

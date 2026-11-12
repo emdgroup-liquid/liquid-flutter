@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 
 /// LdExceptionMoreInfoButton is a button that will open a dialog with more info

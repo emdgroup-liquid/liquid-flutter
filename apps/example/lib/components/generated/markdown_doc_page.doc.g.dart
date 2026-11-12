@@ -3,7 +3,7 @@
 //
 // Source: LdMarkdown dartdoc comments.
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:liquid/components/component_page.dart';
 import 'package:liquid/components/demo_registry.dart';
 import 'package:liquid_flutter_md/liquid_flutter_md.dart';
@@ -27,7 +27,7 @@ class LdMarkdownDocPage extends StatelessWidget {
             data: r'''
 Renders a markdown string using native Liquid Flutter components.
 
-The parser uses the GitHub Web extension set, supporting tables, fenced code blocks, strikethrough, task lists, and GitHub-flavored alerts (`> [!NOTE]`, `> [!WARNING]`, etc.).
+The parser uses the GitHub Web extension set, supporting tables, fenced code blocks, strikethrough, task lists, GitHub-flavored alerts (`> [!NOTE]`, `> [!WARNING]`, etc.), and GFM footnotes (`[^label]`). Footnote references open their definition in an `LdContextMenu`.
 
 The parsed AST is cached: re-rendering with the same `data` string does not re-parse.
 

@@ -1,3 +1,7 @@
+# flutter gen-l10n still wires GlobalMaterialLocalizations and
+# GlobalCupertinoLocalizations from flutter_localizations, which are
+# deprecated since Flutter 3.47. After regenerating, point those two
+# delegates at material_ui / cupertino_ui in liquid_localizations.dart.
 arb-dir: lib/src/l10n
 template-arb-file: app_en.arb
 output-localization-file: liquid_localizations.dart
