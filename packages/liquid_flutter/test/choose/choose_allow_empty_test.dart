@@ -39,7 +39,7 @@ void main() {
     await tester.pumpWidget(
       LdThemeProvider(
         child: MaterialApp(
-          localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+          localizationsDelegates: liquidLocalizationsDelegates,
           home: Scaffold(
             body: LdChoose.fromSelectItems<String>(
               label: 'Pie',
@@ -72,7 +72,7 @@ void main() {
     await tester.pumpWidget(
       LdThemeProvider(
         child: MaterialApp(
-          localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+          localizationsDelegates: liquidLocalizationsDelegates,
           home: Scaffold(
             body: LdChoose.fromSelectItems<String>(
               label: 'Pie',
@@ -109,7 +109,7 @@ void main() {
     await tester.pumpWidget(
       LdThemeProvider(
         child: MaterialApp(
-          localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+          localizationsDelegates: liquidLocalizationsDelegates,
           home: Scaffold(
             body: LdChoose.fromSelectItems<String>(
               label: 'Pie',
@@ -149,7 +149,7 @@ void main() {
     await tester.pumpWidget(
       LdThemeProvider(
         child: MaterialApp(
-          localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+          localizationsDelegates: liquidLocalizationsDelegates,
           home: Scaffold(
             body: LdChoose.fromSelectItems<String>(
               label: 'Pie',
@@ -195,7 +195,7 @@ void main() {
     await tester.pumpWidget(
       LdThemeProvider(
         child: MaterialApp(
-          localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+          localizationsDelegates: liquidLocalizationsDelegates,
           home: Scaffold(
             body: LdChoose.fromSelectItems<String>(
               label: 'Pie',

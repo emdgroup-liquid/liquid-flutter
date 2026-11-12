@@ -110,7 +110,7 @@ void main() {
     await tester.pumpWidget(
       LdThemeProvider(
         child: MaterialApp(
-          localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+          localizationsDelegates: liquidLocalizationsDelegates,
           home: ListenableProvider<LdListController<_SearchItem, int>>.value(
             value: repository,
             child: LdEphemeralMonkeyAdapter<_SearchItem, int>(

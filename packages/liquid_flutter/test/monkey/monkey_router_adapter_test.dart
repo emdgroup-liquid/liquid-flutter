@@ -114,7 +114,7 @@ void main() {
         LdThemeProvider(
           child: MaterialApp.router(
             localizationsDelegates: const [
-              ...LiquidLocalizations.localizationsDelegates,
+              ...liquidLocalizationsDelegates,
             ],
             routerConfig: router,
           ),

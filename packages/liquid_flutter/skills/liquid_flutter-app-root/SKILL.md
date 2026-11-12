@@ -77,7 +77,7 @@ class _MyAppState extends State<MyApp> {
                   appBuilder: (context, theme) {
                     final router = context.read<AppRouter>().router;
                     return MaterialApp.router(
-                      localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+                      localizationsDelegates: liquidLocalizationsDelegates,
                       title: 'Your App Name',
                       debugShowCheckedModeBanner: false,
                       theme: theme,

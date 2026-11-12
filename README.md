@@ -33,3 +33,17 @@ MaterialApp(
   // ...
 )
 ```
+
+Use `liquidLocalizationsDelegates` rather than the generated
+`LiquidLocalizations.localizationsDelegates`: the latter still references the
+deprecated `flutter_localizations` delegates, which a `material_ui` app cannot
+resolve, leaving Material strings untranslated.
+
+```dart
+MaterialApp(
+  localizationsDelegates: liquidLocalizationsDelegates,
+  supportedLocales: LiquidLocalizations.supportedLocales,
+  // ...
+)
+```
+

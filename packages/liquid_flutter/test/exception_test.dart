@@ -11,7 +11,7 @@ LdNotificationProvider _wrapWithMaterialApp(Widget widget) {
     child: LdThemeProvider(
       child: LdThemedAppBuilder(appBuilder: (context, theme) {
         return MaterialApp(
-          localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+          localizationsDelegates: liquidLocalizationsDelegates,
           locale: const Locale('en'),
           debugShowCheckedModeBanner: false,
           theme: theme,

@@ -93,7 +93,7 @@ class _LiquidExampleState extends State<LiquidExample> {
                     var router = context.read<AppRouter>().router;
 
                     return MaterialApp.router(
-                      localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+                      localizationsDelegates: liquidLocalizationsDelegates,
                       locale: const Locale('en'),
                       title: 'Liquid Design Demo',
                       debugShowCheckedModeBanner: false,

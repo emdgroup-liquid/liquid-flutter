@@ -46,7 +46,7 @@ Widget ldFrame({
           supportedLocales: LiquidLocalizations.supportedLocales,
           localizationsDelegates: [
             ...ldGoldenLocalizationsDelegates,
-            ...LiquidLocalizations.localizationsDelegates,
+            ...liquidLocalizationsDelegates,
           ],
           routerConfig: router(
             (context, state) {

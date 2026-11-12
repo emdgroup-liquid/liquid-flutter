@@ -12,7 +12,7 @@ void main() {
           appBuilder: (context, theme) {
             return MaterialApp(
               theme: theme,
-              localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+              localizationsDelegates: liquidLocalizationsDelegates,
               home: LdScaffold(
                 body: LdAppBar(title: Text('Liquid Flutter Extension'), child: const LiquidFlutterExtension()),
               ),

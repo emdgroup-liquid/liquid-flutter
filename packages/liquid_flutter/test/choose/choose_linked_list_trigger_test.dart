@@ -10,7 +10,7 @@ import 'package:lucide_icons_flutter/lucide_icons.dart';
 Widget _wrap(Widget child) {
   return LdThemeProvider(
     child: MaterialApp(
-      localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+      localizationsDelegates: liquidLocalizationsDelegates,
       home: Scaffold(body: child),
     ),
   );

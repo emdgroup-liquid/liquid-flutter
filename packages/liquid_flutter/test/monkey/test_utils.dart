@@ -367,7 +367,7 @@ Widget wrapMonkeyFilterTestContext<T extends Identifiable<IdType>, IdType>({
 
   return LdThemeProvider(
     child: MaterialApp.router(
-      localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+      localizationsDelegates: liquidLocalizationsDelegates,
       locale: const Locale('en'),
       routerConfig: router,
     ),
@@ -506,7 +506,7 @@ Widget wrapMonkeyMasterPage<T extends Identifiable<IdType>, IdType>({
   shellState ??= TestSortAndFilterState<T, IdType>();
   return LdThemeProvider(
     child: MaterialApp(
-      localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+      localizationsDelegates: liquidLocalizationsDelegates,
       home: ChangeNotifierProvider<LdMonkeyActionScope<T, IdType>>(
         create: (_) => LdMonkeyActionScope<T, IdType>(),
         child: Provider<LdMonkeySearchFocusNode>(
@@ -555,7 +555,7 @@ Widget wrapMonkeyDetailPage<T extends Identifiable<IdType>, IdType>({
 }) {
   return LdThemeProvider(
     child: MaterialApp(
-      localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+      localizationsDelegates: liquidLocalizationsDelegates,
       home: ChangeNotifierProvider<LdMonkeyActionScope<T, IdType>>(
         create: (_) => LdMonkeyActionScope<T, IdType>(),
         child: ListenableProvider<LdListController<T, IdType>>.value(

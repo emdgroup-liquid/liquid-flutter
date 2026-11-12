@@ -53,7 +53,7 @@ Widget _wrapChipsHarness({
   return LdThemeProvider(
     platform: platform,
     child: MaterialApp(
-      localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+      localizationsDelegates: liquidLocalizationsDelegates,
       home: Scaffold(
         body: ListenableProvider<LdListController<TestItem, int>>.value(
           value: createTestListController(),
@@ -300,7 +300,7 @@ void main() {
         LdThemeProvider(
           platform: LdPlatform.macos,
           child: MaterialApp(
-            localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+            localizationsDelegates: liquidLocalizationsDelegates,
             home: Center(
               child: SizedBox(
                 width: 600,
@@ -351,7 +351,7 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+          localizationsDelegates: liquidLocalizationsDelegates,
           home: Center(
             child: SizedBox(
               width: 160,

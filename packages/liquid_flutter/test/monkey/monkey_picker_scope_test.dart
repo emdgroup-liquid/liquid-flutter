@@ -17,7 +17,7 @@ void main() {
     await tester.pumpWidget(
       LdThemeProvider(
         child: MaterialApp(
-          localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+          localizationsDelegates: liquidLocalizationsDelegates,
           home: Builder(
             builder: (context) {
               return LdButton(

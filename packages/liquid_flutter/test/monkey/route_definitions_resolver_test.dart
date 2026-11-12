@@ -66,7 +66,7 @@ void main() {
       await tester.pumpWidget(
         LdThemeProvider(
           child: MaterialApp.router(
-            localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+            localizationsDelegates: liquidLocalizationsDelegates,
             routerConfig: router,
           ),
         ),
@@ -109,7 +109,7 @@ void main() {
       await tester.pumpWidget(
         LdThemeProvider(
           child: MaterialApp.router(
-            localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+            localizationsDelegates: liquidLocalizationsDelegates,
             routerConfig: router,
           ),
         ),
@@ -171,7 +171,7 @@ void main() {
       await tester.pumpWidget(
         LdThemeProvider(
           child: MaterialApp.router(
-            localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+            localizationsDelegates: liquidLocalizationsDelegates,
             routerConfig: router,
           ),
         ),
@@ -245,7 +245,7 @@ void main() {
       await tester.pumpWidget(
         LdThemeProvider(
           child: MaterialApp.router(
-            localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+            localizationsDelegates: liquidLocalizationsDelegates,
             routerConfig: router,
           ),
         ),

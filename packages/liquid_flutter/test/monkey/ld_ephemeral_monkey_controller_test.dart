@@ -56,7 +56,7 @@ void main() {
       await tester.pumpWidget(
         LdThemeProvider(
           child: MaterialApp(
-            localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+            localizationsDelegates: liquidLocalizationsDelegates,
             home: ListenableProvider<LdListController<TestItem, int>>.value(
               value: repository,
               child: LdEphemeralMonkeyAdapter<TestItem, int>(

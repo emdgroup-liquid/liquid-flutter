@@ -103,7 +103,7 @@ void main() {
 
         Widget buildTree() => LdThemeProvider(
               child: MaterialApp(
-                localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+                localizationsDelegates: liquidLocalizationsDelegates,
                 home: ListenableProvider<LdListController<TestItem, int>>.value(
                   value: repository,
                   child: Provider<LdMonkeySelection<TestItem, int>>.value(
@@ -148,7 +148,7 @@ void main() {
         await tester.pumpWidget(
           LdThemeProvider(
             child: MaterialApp(
-              localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+              localizationsDelegates: liquidLocalizationsDelegates,
               home: ListenableProvider<LdListController<TestItem, int>>.value(
                 value: repository,
                 child: Provider<LdMonkeySelection<TestItem, int>>.value(

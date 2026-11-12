@@ -44,7 +44,7 @@ void main() {
       await tester.pumpWidget(
         LdThemeProvider(
           child: MaterialApp.router(
-            localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+            localizationsDelegates: liquidLocalizationsDelegates,
             locale: const Locale('en'),
             routerConfig: router = GoRouter(
               initialLocation: '/detail',
@@ -90,7 +90,7 @@ void main() {
       await tester.pumpWidget(
         LdThemeProvider(
           child: MaterialApp.router(
-            localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+            localizationsDelegates: liquidLocalizationsDelegates,
             locale: const Locale('en'),
             routerConfig: router = GoRouter(
               initialLocation: '/detail',
@@ -141,7 +141,7 @@ void main() {
       await tester.pumpWidget(
         LdThemeProvider(
           child: MaterialApp.router(
-            localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+            localizationsDelegates: liquidLocalizationsDelegates,
             locale: const Locale('en'),
             routerConfig: router = GoRouter(
               initialLocation: '/detail',

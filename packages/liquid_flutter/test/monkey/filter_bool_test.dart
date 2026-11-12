@@ -338,7 +338,7 @@ void main() {
         await tester.pumpWidget(
           LdThemeProvider(
             child: MaterialApp(
-              localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+              localizationsDelegates: liquidLocalizationsDelegates,
               home: Scaffold(
                 body: ListenableProvider<LdListController<TestItem, int>>.value(
                   value: repository,

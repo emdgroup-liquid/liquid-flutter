@@ -77,7 +77,7 @@ Widget _harness({required bool withParentAppBar}) {
     size: LdThemeSize.m,
     brightnessMode: LdThemeBrightnessMode.light,
     child: MaterialApp(
-      localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+      localizationsDelegates: liquidLocalizationsDelegates,
       home: MediaQuery(
         data: _shellPatchedMediaQuery,
         child: Navigator(
