@@ -1,3 +1,6 @@
+## 1.0.0-10
+Released on: 11/12/2026, changelog automatically generated.
+
 ## 1.0.0-9
 Released on: 11/12/2026, changelog automatically generated.
 
