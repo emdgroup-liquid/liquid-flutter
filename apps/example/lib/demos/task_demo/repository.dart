@@ -94,7 +94,6 @@ LdCallbackModel<Task, int, Task, Task> taskModel(BuildContext context) => LdCall
     testData.removeWhere((element) => element.id == id);
   },
   updateItem: (context, id, newItem) async {
-    print('updating item: $newItem');
     await _maybeDelay(_writeDelay);
     final index = testData.indexWhere((element) => element.id == id);
     final previous = testData[index];
@@ -118,7 +117,6 @@ LdCallbackModel<Task, int, Task, Task> taskModel(BuildContext context) => LdCall
 
     testData[index] = newItem;
 
-    print('updated item: $newItem');
     return newItem;
   },
   createItem: (context, item) async {

@@ -153,7 +153,13 @@ class RenderLdOverflowAdaptiveChild extends RenderBox
     }
 
     final activeChild = _useCompact ? compactChild : expandedChild;
+    final idleChild = _useCompact ? expandedChild : compactChild;
     activeChild.layout(constraints, parentUsesSize: true);
+    // The idle variant stays attached, so it still rebuilds. A child that is
+    // never laid out keeps stale dirty flags and trips the relayout boundary
+    // assertion on its next rebuild; laying it out without using its size makes
+    // it a boundary of its own instead.
+    idleChild.layout(constraints, parentUsesSize: false);
     size = activeChild.size;
 
     final activeParentData = activeChild.parentData! as _OverflowAdaptiveChildParentData;

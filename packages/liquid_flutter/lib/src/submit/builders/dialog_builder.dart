@@ -171,9 +171,7 @@ class _LdSubmitDialogState<T, Arg> extends State<LdSubmitDialog<T, Arg>> {
 
   void _handleDismiss() {
     if (_submitController.state.type == LdSubmitStateType.error) {
-      if (_submitController.canRetry) {
-        _submitController.reset();
-      }
+      _submitController.reset();
     }
     if (_submitController.state.type == LdSubmitStateType.loading) {
       if (_submitController.canCancel) {
@@ -219,7 +217,7 @@ class _LdSubmitDialogState<T, Arg> extends State<LdSubmitDialog<T, Arg>> {
                         ),
                         child: Column(
                           children: [
-                            if (_submitController.canCancel || _submitController.canRetry)
+                            if (_submitController.canCancel || _submitController.state.type == LdSubmitStateType.error)
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [

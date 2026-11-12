@@ -284,7 +284,6 @@ class _LdListItemWidgetState extends State<LdListItemWidget> with AutomaticKeepA
           if (widget.trailing != null) _buildTrailing(context, theme),
           LdReveal.quick(
             key: Key("drag-handle"),
-            axes: const {Axis.horizontal},
             revealed: widget.showDragHandle,
             initialRevealed: widget.showDragHandle,
             child: Draggable(

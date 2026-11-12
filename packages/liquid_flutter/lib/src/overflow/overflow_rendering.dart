@@ -926,6 +926,17 @@ class LdRenderOverflowView extends RenderBox
     for (var i = 0; i < children.length; i++) {
       final parentData = children[i].parentData as LdOverflowViewParentData;
       parentData.offstage = !onStageMask[i];
+      if (parentData.offstage!) {
+        // Off-stage children keep rebuilding while hidden. Laying them out at
+        // their measured size, without reading it back, makes each one its own
+        // relayout boundary so those rebuilds stay local.
+        children[i].layout(
+          BoxConstraints.loose(Size(
+            _isHorizontal ? childrenSizes[i] : constraints.maxWidth,
+            _isHorizontal ? constraints.maxHeight : childrenSizes[i],
+          )),
+        );
+      }
     }
 
     var totalUsedSpace = _projectedOnStageExtentForMask(children, childrenSizes, onStageMask);

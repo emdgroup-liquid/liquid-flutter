@@ -6,7 +6,6 @@ import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/src/appbar/appbar_decoration.dart';
 import 'package:liquid_flutter/src/appbar/appbar_scrolled_under.dart';
 import 'package:liquid_flutter/src/modal/size_notifier.dart';
-import 'package:liquid_flutter/src/theme/adaptive_radius.dart';
 import 'package:provider/provider.dart';
 
 class AppBarFrame extends StatefulWidget {
@@ -214,7 +213,7 @@ class _AppBarFrameState extends State<AppBarFrame> {
     if (parentMetrics.level == -1) return 0;
 
     while (parentMetrics?.position != widget.position && parentMetrics != null) {
-      parentMetrics = parentMetrics?.parentMetrics;
+      parentMetrics = parentMetrics.parentMetrics;
     }
 
     if (parentMetrics == null) return 0;

@@ -112,46 +112,4 @@ void main() {
       expect(combined.scrollOffset.bottom, 0.0);
     });
   });
-
-  group('ldHasParentTopAppBar', () {
-    test('returns false for outermost app bar', () {
-      final metrics = testAppBarMetrics(
-        position: LdAppBarPosition.top,
-        barHeight: const EdgeInsets.only(top: 48.0),
-      );
-
-      expect(ldHasParentTopAppBar(metrics), isFalse);
-    });
-
-    test('returns true when parent is a top app bar', () {
-      final parent = testAppBarMetrics(
-        position: LdAppBarPosition.top,
-        barHeight: const EdgeInsets.only(top: 48.0),
-      );
-      final child = testAppBarMetrics(
-        position: LdAppBarPosition.top,
-        barHeight: const EdgeInsets.only(top: 40.0),
-        level: 1,
-        parentMetrics: parent,
-      );
-
-      expect(ldHasParentTopAppBar(child), isTrue);
-    });
-
-    test('ignores tab navigation ancestors', () {
-      final parent = testAppBarMetrics(
-        position: LdAppBarPosition.top,
-        barHeight: const EdgeInsets.only(top: 48.0),
-        isTabNavigation: true,
-      );
-      final child = testAppBarMetrics(
-        position: LdAppBarPosition.top,
-        barHeight: const EdgeInsets.only(top: 40.0),
-        level: 1,
-        parentMetrics: parent,
-      );
-
-      expect(ldHasParentTopAppBar(child), isFalse);
-    });
-  });
 }

@@ -155,6 +155,7 @@ void main() {
                   value: selection,
                   child: LdMonkeyViewingBuilder<TestItem, int>(
                     builder: (context, items) => Column(
+                      key: const ValueKey('viewing-items'),
                       children: items
                           .map((item) => Text(item.value?.name ?? ''))
                           .toList(),
@@ -167,7 +168,7 @@ void main() {
         );
 
         await _pumpStream(tester);
-        expect(find.byType(SizedBox), findsWidgets);
+        expect(find.byKey(const ValueKey('viewing-items')), findsOneWidget);
         expect(find.textContaining('Item'), findsNothing);
       });
     });
@@ -361,9 +362,7 @@ void main() {
           ),
         );
 
-        await tester.pump();
-        await tester.pump();
-        await tester.pumpAndSettle();
+        await pumpPastSubmitMountDelay(tester);
 
         expect(find.byKey(const Key('retry-button')), findsOneWidget);
         expect(find.byType(LdExceptionView), findsOneWidget);

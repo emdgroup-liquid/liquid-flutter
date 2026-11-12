@@ -451,8 +451,17 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
       return;
     }
 
-    await _attachedModel.persistReorder(context, item, fromIndex, toIndex, activeSortOption);
+    final updated = await _attachedModel.persistReorder(context, item, fromIndex, toIndex, activeSortOption);
+
+    // The hook returns the item as persisted. Apply it in place; the row keeps
+    // whatever reveal state it is in, and nothing is written a second time.
+    final current = getItemById(id);
+    if (current != null) {
+      setItemState(id, current.state, value: updated);
+    }
   }
+
+  final Map<IdType, Timer> _revealTimers = {};
 
   /// Triggers a reveal animation on the moved item and resets to [loaded]
   /// after the spring settles.
@@ -462,9 +471,20 @@ class LdListController<T extends Identifiable<IdType>, IdType> extends LdPaginat
 
     setItemState(id, LdPaginatorItemState.moved);
 
-    Future.delayed(const Duration(milliseconds: 500), () {
+    _revealTimers.remove(id)?.cancel();
+    _revealTimers[id] = Timer(const Duration(milliseconds: 500), () {
+      _revealTimers.remove(id);
       setItemState(id, LdPaginatorItemState.loaded);
     });
+  }
+
+  @override
+  void dispose() {
+    for (final timer in _revealTimers.values) {
+      timer.cancel();
+    }
+    _revealTimers.clear();
+    super.dispose();
   }
 
   /// Updates a batch of items. [items] maps each item's id to the update payload.

@@ -118,11 +118,23 @@ class LdSheetDragController {
 
   final AnimationController controller;
   final NavigatorState navigator;
+
   final ValueGetter<bool> getIsActive;
   final ValueGetter<bool> getIsCurrent;
 
   static const double minFlingVelocity = 2.0;
   static const Duration droppedDragAnimationDuration = Duration(milliseconds: 300);
+
+  bool _userGestureStopped = false;
+
+  /// Ends the navigator's user gesture at most once. The gesture can finish
+  /// either from the drag itself or from the listener being disposed, and the
+  /// navigator asserts on an unbalanced stop.
+  void stopUserGesture() {
+    if (_userGestureStopped) return;
+    _userGestureStopped = true;
+    navigator.didStopUserGesture();
+  }
 
   void dragUpdate(double delta) {
     controller.value -= delta;
@@ -178,13 +190,13 @@ class LdSheetDragController {
 
     if (controller.isAnimating) {
       void animationStatusCallback(AnimationStatus status) {
-        navigator.didStopUserGesture();
+        stopUserGesture();
         controller.removeStatusListener(animationStatusCallback);
       }
 
       controller.addStatusListener(animationStatusCallback);
     } else {
-      navigator.didStopUserGesture();
+      stopUserGesture();
     }
   }
 }
@@ -251,7 +263,16 @@ class _LdSheetScrollDismissListenerState extends State<LdSheetScrollDismissListe
   void dispose() {
     final LdSheetDragController? dragController = _dragController;
     _dragController = null;
-    dragController?.navigator.didStopUserGesture();
+    if (dragController != null) {
+      // Stopping the gesture writes to a ValueNotifier that the navigator's
+      // transitions listen to, so doing it straight from dispose rebuilds a
+      // widget while the tree is locked. Deferred to after the frame.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (dragController.navigator.mounted) {
+          dragController.stopUserGesture();
+        }
+      });
+    }
     super.dispose();
   }
 
