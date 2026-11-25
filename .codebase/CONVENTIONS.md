@@ -102,7 +102,7 @@ melos analyze
 Imports are organized in the following order:
 
 1. **Dart core imports** (`dart:async`, `dart:io`, etc.)
-2. **Flutter SDK imports** (`package:flutter/material.dart`)
+2. **Flutter SDK imports** (`package:flutter/widgets.dart`, `package:flutter/services.dart`)
 3. **Third-party package imports** (alphabetically)
 4. **Package imports** (`package:liquid_flutter/liquid_flutter.dart`)
 5. **Relative imports** (for local files)
@@ -112,11 +112,11 @@ Imports are organized in the following order:
 import 'dart:async';
 import 'dart:math';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:provider/provider.dart';
 
 import 'touchable/touchable_colors.dart';

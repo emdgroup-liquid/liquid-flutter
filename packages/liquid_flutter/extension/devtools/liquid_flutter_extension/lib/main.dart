@@ -1,5 +1,5 @@
 import 'package:devtools_extensions/devtools_extensions.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter/liquid_flutter_devtools.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -12,7 +12,7 @@ void main() {
           appBuilder: (context, theme) {
             return MaterialApp(
               theme: theme,
-              localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+              localizationsDelegates: liquidLocalizationsDelegates,
               home: LdScaffold(
                 body: LdAppBar(title: Text('Liquid Flutter Extension'), child: const LiquidFlutterExtension()),
               ),

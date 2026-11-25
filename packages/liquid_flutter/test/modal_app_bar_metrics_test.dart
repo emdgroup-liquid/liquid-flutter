@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:liquid_flutter_test_utils/ld_frame.dart';
@@ -77,7 +77,7 @@ Widget _harness({required bool withParentAppBar}) {
     size: LdThemeSize.m,
     brightnessMode: LdThemeBrightnessMode.light,
     child: MaterialApp(
-      localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+      localizationsDelegates: liquidLocalizationsDelegates,
       home: MediaQuery(
         data: _shellPatchedMediaQuery,
         child: Navigator(

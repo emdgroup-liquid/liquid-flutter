@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:liquid_flutter/src/size_reporting_widget.dart';
 import 'package:liquid_flutter/src/spring.dart';
 

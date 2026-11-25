@@ -2,7 +2,7 @@ import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:path/path.dart' as path;
@@ -127,6 +127,11 @@ Future<void> multiGolden(
     ldDisableAnimations = true;
     ldIncludeFontPackage = false;
     await loadAppFonts();
+    // Loading fonts notifies the system-font listeners asynchronously through a
+    // platform message. Flush it now, otherwise the scheduled relayout outlives
+    // the widget tree and trips the scheduler invariant at teardown.
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 20)));
+    await tester.pump();
 
     // Track if any test fails
     List<String> failureMessages = [];

@@ -304,7 +304,7 @@ String _generateFile(_ComponentConfig config, List<_Segment> segments) {
   buf.writeln('//');
   buf.writeln('// Source: ${config.descriptionSource ?? 'inline'} dartdoc comments.');
   buf.writeln();
-  buf.writeln("import 'package:flutter/material.dart';");
+  buf.writeln("import 'package:material_ui/material_ui.dart';");
   buf.writeln("import 'package:liquid/components/component_page.dart';");
   buf.writeln("import 'package:liquid/components/demo_registry.dart';");
   buf.writeln("import 'package:liquid_flutter_md/liquid_flutter_md.dart';");

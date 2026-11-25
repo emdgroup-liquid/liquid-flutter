@@ -15,17 +15,14 @@ class LdNativeFileFacade implements LdFileFacade {
 
   @override
   Future<List<LdFileEntry>> pickFiles({bool allowMultiple = true}) async {
-    final result = await FilePicker.pickFiles(
-      allowMultiple: allowMultiple,
-      withData: kIsWeb,
-    );
-    if (result == null) {
-      return const [];
+    final List<PlatformFile> files;
+    if (allowMultiple) {
+      files = await FilePicker.pickFiles();
+    } else {
+      final file = await FilePicker.pickFile();
+      files = file == null ? const [] : [file];
     }
-    return result.files
-        .map(_toEntry)
-        .whereType<LdFileEntry>()
-        .toList(growable: false);
+    return files.map(_toEntry).toList(growable: false);
   }
 
   @override
@@ -55,29 +52,13 @@ class LdNativeFileFacade implements LdFileFacade {
     }
   }
 
-  LdFileEntry? _toEntry(PlatformFile file) {
-    final xfile = _xfile(file);
-    if (xfile == null) {
-      return null;
-    }
+  LdFileEntry _toEntry(PlatformFile file) {
     return LdFileEntry(
       name: file.name,
-      file: xfile,
-      size: file.size,
+      file: file.xFile,
+      size: file.lengthSync(),
       mimeType: _mimeFromName(file.name),
     );
-  }
-
-  XFile? _xfile(PlatformFile file) {
-    final path = file.path;
-    if (path != null && path.isNotEmpty) {
-      return XFile(path);
-    }
-    final bytes = file.bytes;
-    if (bytes != null) {
-      return XFile.fromData(bytes, name: file.name, length: file.size);
-    }
-    return null;
   }
 
   String _basename(String path) {

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
@@ -54,7 +54,7 @@ Widget _wrapDetailForm({
 }) {
   return LdThemeProvider(
     child: MaterialApp.router(
-      localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+      localizationsDelegates: liquidLocalizationsDelegates,
       locale: const Locale('en'),
       routerConfig: GoRouter(
         initialLocation: '/task-demo/1',
@@ -333,7 +333,7 @@ void main() {
     await tester.pumpWidget(
       LdThemeProvider(
         child: MaterialApp.router(
-          localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+          localizationsDelegates: liquidLocalizationsDelegates,
           locale: const Locale('en'),
           routerConfig: GoRouter(
             initialLocation: '/list',
@@ -421,7 +421,7 @@ void main() {
     await tester.pumpWidget(
       LdThemeProvider(
         child: MaterialApp.router(
-          localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+          localizationsDelegates: liquidLocalizationsDelegates,
           locale: const Locale('en'),
           routerConfig: GoRouter(
             initialLocation: '/list',

@@ -1,5 +1,5 @@
 import 'package:flutter/gestures.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
@@ -427,7 +427,7 @@ void main() {
         await tester.pumpWidget(
           LdThemeProvider(
             child: MaterialApp(
-              localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+              localizationsDelegates: liquidLocalizationsDelegates,
               home: LdScaffold(
                 body: wrapMonkeyActionBuild(
                   repository: repository,
@@ -520,7 +520,7 @@ void main() {
         await tester.pumpWidget(
           LdThemeProvider(
             child: MaterialApp(
-              localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+              localizationsDelegates: liquidLocalizationsDelegates,
               home: wrapMonkeyActionBuild(
                 repository: repository,
                 shellState: shellState,
@@ -588,7 +588,7 @@ void main() {
         await tester.pumpWidget(
           LdThemeProvider(
             child: MaterialApp(
-              localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+              localizationsDelegates: liquidLocalizationsDelegates,
               home: LdScaffold(
                 body: wrapMonkeyActionBuild(
                   repository: repository,
@@ -906,7 +906,7 @@ void main() {
         await tester.pumpWidget(
           LdThemeProvider(
             child: MaterialApp(
-              localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+              localizationsDelegates: liquidLocalizationsDelegates,
               home: wrapMonkeyActionBuild(
                 repository: repository,
                 shellState: shellState,
@@ -1001,7 +1001,7 @@ void main() {
         await tester.pumpWidget(
           LdThemeProvider(
             child: MaterialApp(
-              localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+              localizationsDelegates: liquidLocalizationsDelegates,
               home: wrapMonkeyActionBuild(
                 repository: repository,
                 shellState: shellState,
@@ -1032,7 +1032,7 @@ void main() {
         await tester.pumpWidget(
           LdThemeProvider(
             child: MaterialApp(
-              localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+              localizationsDelegates: liquidLocalizationsDelegates,
               home: wrapMonkeyActionBuild(
                 repository: repository,
                 shellState: shellState,
@@ -1093,7 +1093,7 @@ void main() {
         await tester.pumpWidget(
           LdThemeProvider(
             child: MaterialApp(
-              localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+              localizationsDelegates: liquidLocalizationsDelegates,
               home: wrapMonkeyActionBuild(
                 repository: repository,
                 shellState: shellState,
@@ -1156,7 +1156,7 @@ void main() {
           LdThemeProvider(
             platform: LdPlatform.ios,
             child: MaterialApp(
-              localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+              localizationsDelegates: liquidLocalizationsDelegates,
               locale: const Locale('en'),
               home: wrapMonkeyActionVisibility(
                 repository: repository,
@@ -1210,7 +1210,7 @@ void main() {
 
         await tester.pumpWidget(
           MaterialApp.router(
-            localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+            localizationsDelegates: liquidLocalizationsDelegates,
             locale: const Locale('en'),
             routerConfig: router,
           ),
@@ -1246,7 +1246,7 @@ void main() {
         await tester.pumpWidget(
           LdThemeProvider(
             child: MaterialApp(
-              localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+              localizationsDelegates: liquidLocalizationsDelegates,
               home: ListenableProvider<LdListController<TestItem, int>>.value(
                 value: repository,
                 child: Provider<LdMonkeyRouterController<TestItem, int>>.value(
@@ -1316,7 +1316,7 @@ void main() {
         await tester.pumpWidget(
           LdThemeProvider(
             child: MaterialApp(
-              localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+              localizationsDelegates: liquidLocalizationsDelegates,
               home: wrapMonkeyActionBuild(
                 repository: repository,
                 shellState: shellState,

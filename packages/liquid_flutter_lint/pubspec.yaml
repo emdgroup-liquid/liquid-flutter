@@ -5,6 +5,9 @@ repository: https://github.com/emdgroup-liquid/liquid-flutter
 environment:
   sdk: ">=3.5.0 <4.0.0"
 
+# Standalone by design: this package is not a workspace member (see README.md).
+# `analysis_server_plugin` 0.2.x pins the legacy analyzer 8 generation, so it
+# cannot resolve against the workspace's analyzer 13+ until it is migrated.
 dependencies:
   analysis_server_plugin: ^0.2.2
   analyzer: ^8.1.1

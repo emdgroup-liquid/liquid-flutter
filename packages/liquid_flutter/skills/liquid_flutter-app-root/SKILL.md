@@ -48,7 +48,9 @@ void main() async {
 
 ## Root Widget Tree Structure
 
-The root widget tree must follow this exact hierarchy:
+The root widget tree must follow this exact hierarchy. `MaterialApp`, `ThemeData`
+and the other Material types come from `package:material_ui/material_ui.dart`,
+not `package:flutter/material.dart`:
 
 ```dart
 class MyApp extends StatefulWidget {
@@ -77,7 +79,7 @@ class _MyAppState extends State<MyApp> {
                   appBuilder: (context, theme) {
                     final router = context.read<AppRouter>().router;
                     return MaterialApp.router(
-                      localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+                      localizationsDelegates: liquidLocalizationsDelegates,
                       title: 'Your App Name',
                       debugShowCheckedModeBanner: false,
                       theme: theme,

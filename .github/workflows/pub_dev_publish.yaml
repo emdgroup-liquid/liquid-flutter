@@ -27,11 +27,10 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           # Keep in sync with publish_dev.yaml and pr_validation.yaml. The
-          # workspace resolves all packages together (liquid_generators pins
-          # analyzer ^8.1.1), so a newer stable SDK with a newer test_api
-          # pin breaks `melos bootstrap` before anything can be published.
+          # workspace resolves all packages together, so a mismatched SDK
+          # breaks `melos bootstrap` before anything can be published.
           channel: stable
-          flutter-version: 3.44.8
+          flutter-version: 3.50.0
 
       - name: Install Melos
         run: dart pub global activate melos

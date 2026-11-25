@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:liquid_flutter/src/theme/theme.dart';
 import 'package:liquid_flutter/src/tokens.dart';
 import 'package:liquid_flutter/src/typography.dart';

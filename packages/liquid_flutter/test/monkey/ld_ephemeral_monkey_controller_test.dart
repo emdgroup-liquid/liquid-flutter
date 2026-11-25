@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:provider/provider.dart';
@@ -56,7 +56,7 @@ void main() {
       await tester.pumpWidget(
         LdThemeProvider(
           child: MaterialApp(
-            localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+            localizationsDelegates: liquidLocalizationsDelegates,
             home: ListenableProvider<LdListController<TestItem, int>>.value(
               value: repository,
               child: LdEphemeralMonkeyAdapter<TestItem, int>(

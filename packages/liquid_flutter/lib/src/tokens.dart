@@ -1,5 +1,5 @@
 // Liquid only provides rem values. These seem appropiate (sm based on actual values from figma)
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:liquid_flutter/src/spacer.dart';
 import 'package:liquid_flutter/src/theme/theme.dart';
 

@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_flutter/liquid_flutter.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
@@ -199,7 +199,7 @@ void main() {
         await tester.pumpWidget(
           LdThemeProvider(
             child: MaterialApp(
-              localizationsDelegates: LiquidLocalizations.localizationsDelegates,
+              localizationsDelegates: liquidLocalizationsDelegates,
               home: Scaffold(
                 body: ListenableProvider<LdListController<_RangeTestItem, int>>.value(
                   value: repository,
