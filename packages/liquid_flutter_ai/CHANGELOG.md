@@ -1,3 +1,26 @@
+## 0.0.1-6
+Released on: 11/25/2026, changelog automatically generated.
+
+### API Changes
+
+#### 💣 Breaking changes
+
+**`meta` pubspec.yaml** ([pubspec.yaml](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_ai/v0.0.1-5..liquid_flutter_ai/v0.0.1-6#diff-8b7e9df87668ffa6a04b32e1769a33434999e54ae081c52e5d943c541d4c0d25))
+- 🎯 Minimum Flutter SDK version increased: from `>=1.17.0` to `>=3.47.0`
+
+#### 👀 Patch changes
+
+**`class` _BottomAnchoredScrollController** ([lib/src/conversation/conversation.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_ai/v0.0.1-5..liquid_flutter_ai/v0.0.1-6#diff-e5a35ca4d3d4595a399c2a4d1b948c8533ba246752c3f50870a39ebc58a19ed6))
+- ➕ Method annotation added: `animateTo` (@awaitNotRequired)
+
+**`class` _BottomAnchoredScrollPosition** ([lib/src/conversation/conversation.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_ai/v0.0.1-5..liquid_flutter_ai/v0.0.1-6#diff-e5a35ca4d3d4595a399c2a4d1b948c8533ba246752c3f50870a39ebc58a19ed6))
+- ➕ Methods annotation added: `animateTo` (@awaitNotRequired), `ensureVisible` (@awaitNotRequired), `moveTo` (@awaitNotRequired)
+
+**`meta` pubspec.yaml** ([pubspec.yaml](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_ai/v0.0.1-5..liquid_flutter_ai/v0.0.1-6#diff-8b7e9df87668ffa6a04b32e1769a33434999e54ae081c52e5d943c541d4c0d25))
+- 📦 `liquid_flutter_md` version changed: from `^0.0.1-5` to `^0.0.1-6`
+- 📦 `file_picker` version changed: from `^11.0.3` to `^13.0.0`
+- 📦 Added `material_ui`: with version `^1.11.0`
+
 ## 0.0.1-5
 Released on: 11/12/2026, changelog automatically generated.
 
