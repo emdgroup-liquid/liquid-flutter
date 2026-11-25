@@ -7,7 +7,7 @@ import Foundation
 
 import audioplayers_darwin
 import device_info_plus
-import file_picker
+import file_picker_darwin
 import flutter_contacts
 import flutter_doc_scanner
 import geolocator_apple
