@@ -1,3 +1,18 @@
+## 0.0.1-6
+Released on: 11/25/2026, changelog automatically generated.
+
+### API Changes
+
+#### 💣 Breaking changes
+
+**`meta` pubspec.yaml** ([pubspec.yaml](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_md/v0.0.1-5..liquid_flutter_md/v0.0.1-6#diff-8b7e9df87668ffa6a04b32e1769a33434999e54ae081c52e5d943c541d4c0d25))
+- 🎯 Minimum Flutter SDK version increased: from `>=1.17.0` to `>=3.47.0`
+
+#### 👀 Patch changes
+
+**`meta` pubspec.yaml** ([pubspec.yaml](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_md/v0.0.1-5..liquid_flutter_md/v0.0.1-6#diff-8b7e9df87668ffa6a04b32e1769a33434999e54ae081c52e5d943c541d4c0d25))
+- 📦 Added `material_ui`: with version `^1.11.0`
+
 ## 0.0.1-5
 Released on: 11/12/2026, changelog automatically generated.
 
