@@ -1,3 +1,19 @@
+## 1.7.0-15
+Released on: 11/25/2026, changelog automatically generated.
+
+### API Changes
+
+#### 💣 Breaking changes
+
+**`meta` pubspec.yaml** ([pubspec.yaml](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_test_utils/v1.7.0-14..liquid_flutter_test_utils/v1.7.0-15#diff-8b7e9df87668ffa6a04b32e1769a33434999e54ae081c52e5d943c541d4c0d25))
+- 🎯 Minimum Flutter SDK version increased: from `>=1.17.0` to `>=3.47.0`
+
+#### 👀 Patch changes
+
+**`meta` pubspec.yaml** ([pubspec.yaml](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_test_utils/v1.7.0-14..liquid_flutter_test_utils/v1.7.0-15#diff-8b7e9df87668ffa6a04b32e1769a33434999e54ae081c52e5d943c541d4c0d25))
+- 📦 Removed `flutter_localizations`
+- 📦 Added `material_ui`: with version `^1.11.0`
+
 ## 1.7.0-14
 Released on: 11/12/2026, changelog automatically generated.
 
