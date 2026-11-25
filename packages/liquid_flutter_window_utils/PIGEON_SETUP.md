@@ -97,6 +97,7 @@ Future<bool> setWindowSize(int width, int height) async {
 - **Linter errors**: These are expected until you run `flutter pub get` and generate the code
 - **Missing generated files**: Run the generation command to create them
 - **Platform-specific errors**: Check that the generated platform files are properly implemented
+- **Publish fails with "does not have meta in the `dependencies` section"**: Pigeon 27+ emits `import 'package:meta/meta.dart'` in `lib/messages.g.dart`. Keep `meta` in this package's `dependencies`, even though it is available transitively in the workspace.
 
 ## Next Steps
 
