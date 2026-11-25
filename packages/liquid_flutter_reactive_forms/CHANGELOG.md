@@ -1,3 +1,18 @@
+## 0.1.1-9
+Released on: 11/25/2026, changelog automatically generated.
+
+### API Changes
+
+#### 💣 Breaking changes
+
+**`meta` pubspec.yaml** ([pubspec.yaml](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_reactive_forms/v0.1.1-8..liquid_flutter_reactive_forms/v0.1.1-9#diff-8b7e9df87668ffa6a04b32e1769a33434999e54ae081c52e5d943c541d4c0d25))
+- 🎯 Minimum Flutter SDK version increased: from `not constrained` to `>=3.47.0`
+
+#### 👀 Patch changes
+
+**`meta` pubspec.yaml** ([pubspec.yaml](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_reactive_forms/v0.1.1-8..liquid_flutter_reactive_forms/v0.1.1-9#diff-8b7e9df87668ffa6a04b32e1769a33434999e54ae081c52e5d943c541d4c0d25))
+- 📦 Added `material_ui`: with version `^1.11.0`
+
 ## 0.1.1-8
 Released on: 11/12/2026, changelog automatically generated.
 
