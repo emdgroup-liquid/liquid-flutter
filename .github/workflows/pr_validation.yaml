@@ -38,7 +38,13 @@ jobs:
         run: melos bootstrap
 
       - name: Install mtrust_api_guard
-        run: dart pub global activate mtrust_api_guard 8.1.6
+        run: dart pub global activate mtrust_api_guard 8.3.0
+
+      - name: Install FVM
+        # api_guard resolves the Flutter SDK pinned by the previous tag before
+        # running `pub get` in the comparison worktree. Tags created before the
+        # 3.50 migration pin 3.44.8, so FVM is needed to provide that SDK.
+        run: dart pub global activate fvm
 
       - name: Generate API guard snapshots
         run: melos run generate_api
