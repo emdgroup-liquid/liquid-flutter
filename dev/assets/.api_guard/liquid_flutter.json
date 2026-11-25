@@ -1,13 +1,21 @@
 {
   "metadata": {
     "packageName": "liquid_flutter",
-    "packageVersion": "23.0.0-15",
+    "packageVersion": "23.0.0-16",
     "sdkVersion": ">=3.5.0 <4.0.0",
-    "flutterVersion": null,
+    "flutterVersion": ">=3.47.0",
     "dependencies": [
       {
         "packageName": "flutter",
         "packageVersion": null
+      },
+      {
+        "packageName": "material_ui",
+        "packageVersion": "^1.11.0"
+      },
+      {
+        "packageName": "cupertino_ui",
+        "packageVersion": "^1.1.6"
       },
       {
         "packageName": "flutter_localizations",
@@ -55,7 +63,7 @@
       },
       {
         "packageName": "device_info_plus",
-        "packageVersion": "^11.2.0"
+        "packageVersion": "^13.0.0"
       },
       {
         "packageName": "go_router",
@@ -2392,7 +2400,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -4378,7 +4386,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -14771,7 +14779,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -18224,7 +18232,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -24182,7 +24190,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -28596,7 +28604,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -30007,7 +30015,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -37037,7 +37045,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -39419,7 +39427,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -47823,7 +47831,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -52691,7 +52699,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -56453,7 +56461,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -57868,7 +57876,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -59033,7 +59041,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -64572,7 +64580,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -67783,6 +67791,52 @@
           "typeParameters": []
         },
         {
+          "name": "_debugCheckCanConsumeResult",
+          "returnType": {
+            "name": "bool",
+            "superTypes": [
+              "Object"
+            ],
+            "isNullable": false
+          },
+          "signature": [
+            {
+              "name": "result",
+              "description": "",
+              "type": {
+                "name": "Object?",
+                "superTypes": [],
+                "isNullable": true
+              },
+              "named": false,
+              "required": true,
+              "defaultValue": null,
+              "annotations": []
+            },
+            {
+              "name": "methodName",
+              "description": "",
+              "type": {
+                "name": "String",
+                "superTypes": [
+                  "Object",
+                  "Comparable",
+                  "Pattern"
+                ],
+                "isNullable": false
+              },
+              "named": true,
+              "required": true,
+              "defaultValue": null,
+              "annotations": []
+            }
+          ],
+          "features": [],
+          "description": " Asserts that the given [result] is of a type that can be consumed by this route.\n\n This is used by [Navigator] to provide a clear error message when a route is popped with a mismatched result type.",
+          "annotations": [],
+          "typeParameters": []
+        },
+        {
           "name": "addLocalHistoryEntry",
           "returnType": {
             "name": "void",
@@ -69678,7 +69732,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -70852,7 +70906,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -74450,7 +74504,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -75562,7 +75616,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -80188,7 +80242,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -84637,7 +84691,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -93198,7 +93252,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -100975,7 +101029,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -107757,7 +107811,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -108361,7 +108415,7 @@
       ],
       "superClassPackages": [
         "flutter",
-        "flutter"
+        "listen"
       ],
       "interfaces": [],
       "mixins": [],
@@ -108905,7 +108959,7 @@
       ],
       "superClassPackages": [
         "flutter",
-        "flutter"
+        "listen"
       ],
       "interfaces": [],
       "mixins": [],
@@ -111237,7 +111291,7 @@
       ],
       "superClassPackages": [
         "flutter",
-        "flutter"
+        "listen"
       ],
       "interfaces": [],
       "mixins": [],
@@ -113228,7 +113282,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -122057,7 +122111,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -128541,7 +128595,7 @@
             ],
             "isNullable": false
           },
-          "description": " If true, the event [ObjectCreated] for this instance was dispatched to\n [FlutterMemoryAllocations].\n\n As [ChangeNotifier] is used as mixin, it does not have constructor,\n so we use [addListener] to dispatch the event.",
+          "description": " If true, the creation of this instance was dispatched to\n [Listenable.debugMaybeDispatchCreated].\n\n As [ChangeNotifier] is used as mixin, it does not have constructor,\n so we use [addListener] to dispatch the event.",
           "features": [],
           "annotations": []
         },
@@ -129124,7 +129178,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Call all the registered listeners.\n\n Call this method whenever the object changes, to notify any clients the\n object may have changed. Listeners that are added during this iteration\n will not be visited. Listeners that are removed during this iteration will\n not be visited after they are removed.\n\n Exceptions thrown by listeners will be caught and reported using\n [FlutterError.reportError].\n\n This method must not be called after [dispose] has been called.\n\n Surprising behavior can result when reentrantly removing a listener (e.g.\n in response to a notification) that has been registered multiple times.\n See the discussion at [removeListener].",
+          "description": " Call all the registered listeners.\n\n Call this method whenever the object changes, to notify any clients the\n object may have changed. Listeners that are added during this iteration\n will not be visited. Listeners that are removed during this iteration will\n not be visited after they are removed.\n\n Exceptions thrown by listeners will be caught and reported using\n [Listenable.onError].\n\n This method must not be called after [dispose] has been called.\n\n Surprising behavior can result when reentrantly removing a listener (e.g.\n in response to a notification) that has been registered multiple times.\n See the discussion at [removeListener].",
           "annotations": [
             "@protected",
             "@visibleForTesting",
@@ -131122,7 +131176,7 @@
         "ChangeNotifier"
       ],
       "superClassPackages": [
-        "flutter"
+        "listen"
       ],
       "interfaces": [],
       "mixins": [],
@@ -133451,7 +133505,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -137860,7 +137914,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -139774,7 +139828,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -141108,7 +141162,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -143225,7 +143279,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -143876,7 +143930,7 @@
       ],
       "superClassPackages": [
         "flutter",
-        "flutter"
+        "listen"
       ],
       "interfaces": [],
       "mixins": [],
@@ -145183,7 +145237,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -145452,7 +145506,7 @@
             ],
             "isNullable": false
           },
-          "description": " If true, the event [ObjectCreated] for this instance was dispatched to\n [FlutterMemoryAllocations].\n\n As [ChangeNotifier] is used as mixin, it does not have constructor,\n so we use [addListener] to dispatch the event.",
+          "description": " If true, the creation of this instance was dispatched to\n [Listenable.debugMaybeDispatchCreated].\n\n As [ChangeNotifier] is used as mixin, it does not have constructor,\n so we use [addListener] to dispatch the event.",
           "features": [],
           "annotations": []
         },
@@ -145612,7 +145666,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Call all the registered listeners.\n\n Call this method whenever the object changes, to notify any clients the\n object may have changed. Listeners that are added during this iteration\n will not be visited. Listeners that are removed during this iteration will\n not be visited after they are removed.\n\n Exceptions thrown by listeners will be caught and reported using\n [FlutterError.reportError].\n\n This method must not be called after [dispose] has been called.\n\n Surprising behavior can result when reentrantly removing a listener (e.g.\n in response to a notification) that has been registered multiple times.\n See the discussion at [removeListener].",
+          "description": " Call all the registered listeners.\n\n Call this method whenever the object changes, to notify any clients the\n object may have changed. Listeners that are added during this iteration\n will not be visited. Listeners that are removed during this iteration will\n not be visited after they are removed.\n\n Exceptions thrown by listeners will be caught and reported using\n [Listenable.onError].\n\n This method must not be called after [dispose] has been called.\n\n Surprising behavior can result when reentrantly removing a listener (e.g.\n in response to a notification) that has been registered multiple times.\n See the discussion at [removeListener].",
           "annotations": [
             "@protected",
             "@visibleForTesting",
@@ -145785,7 +145839,7 @@
         "ChangeNotifier"
       ],
       "superClassPackages": [
-        "flutter"
+        "listen"
       ],
       "interfaces": [],
       "mixins": [],
@@ -148835,7 +148889,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -149261,7 +149315,7 @@
         {
           "name": "_currentCallingAction",
           "type": {
-            "name": "Action<T>?",
+            "name": "Action<Intent>?",
             "superTypes": [
               "Object",
               "Diagnosticable"
@@ -149339,7 +149393,7 @@
               "name": "value",
               "description": "",
               "type": {
-                "name": "Action<OpenDrawerIntent>?",
+                "name": "Action<Intent>?",
                 "superTypes": [
                   "Object",
                   "Diagnosticable"
@@ -149356,6 +149410,37 @@
           "description": "",
           "annotations": [],
           "typeParameters": []
+        },
+        {
+          "name": "_debugCanHandleIntent",
+          "returnType": {
+            "name": "bool",
+            "superTypes": [
+              "Object"
+            ],
+            "isNullable": false
+          },
+          "signature": [
+            {
+              "name": "intent",
+              "description": "",
+              "type": {
+                "name": "I?",
+                "superTypes": [],
+                "isNullable": true
+              },
+              "named": false,
+              "required": true,
+              "defaultValue": null,
+              "annotations": []
+            }
+          ],
+          "features": [],
+          "description": "",
+          "annotations": [],
+          "typeParameters": [
+            "I extends Intent"
+          ]
         },
         {
           "name": "isEnabled",
@@ -149899,7 +149984,7 @@
         {
           "name": "_currentCallingAction",
           "type": {
-            "name": "Action<T>?",
+            "name": "Action<Intent>?",
             "superTypes": [
               "Object",
               "Diagnosticable"
@@ -149977,7 +150062,7 @@
               "name": "value",
               "description": "",
               "type": {
-                "name": "Action<CloseDrawerIntent>?",
+                "name": "Action<Intent>?",
                 "superTypes": [
                   "Object",
                   "Diagnosticable"
@@ -149994,6 +150079,37 @@
           "description": "",
           "annotations": [],
           "typeParameters": []
+        },
+        {
+          "name": "_debugCanHandleIntent",
+          "returnType": {
+            "name": "bool",
+            "superTypes": [
+              "Object"
+            ],
+            "isNullable": false
+          },
+          "signature": [
+            {
+              "name": "intent",
+              "description": "",
+              "type": {
+                "name": "I?",
+                "superTypes": [],
+                "isNullable": true
+              },
+              "named": false,
+              "required": true,
+              "defaultValue": null,
+              "annotations": []
+            }
+          ],
+          "features": [],
+          "description": "",
+          "annotations": [],
+          "typeParameters": [
+            "I extends Intent"
+          ]
         },
         {
           "name": "isEnabled",
@@ -150552,7 +150668,7 @@
         {
           "name": "_currentCallingAction",
           "type": {
-            "name": "Action<T>?",
+            "name": "Action<Intent>?",
             "superTypes": [
               "Object",
               "Diagnosticable"
@@ -150645,7 +150761,7 @@
               "name": "value",
               "description": "",
               "type": {
-                "name": "Action<ToggleDrawerIntent>?",
+                "name": "Action<Intent>?",
                 "superTypes": [
                   "Object",
                   "Diagnosticable"
@@ -150662,6 +150778,37 @@
           "description": "",
           "annotations": [],
           "typeParameters": []
+        },
+        {
+          "name": "_debugCanHandleIntent",
+          "returnType": {
+            "name": "bool",
+            "superTypes": [
+              "Object"
+            ],
+            "isNullable": false
+          },
+          "signature": [
+            {
+              "name": "intent",
+              "description": "",
+              "type": {
+                "name": "I?",
+                "superTypes": [],
+                "isNullable": true
+              },
+              "named": false,
+              "required": true,
+              "defaultValue": null,
+              "annotations": []
+            }
+          ],
+          "features": [],
+          "description": "",
+          "annotations": [],
+          "typeParameters": [
+            "I extends Intent"
+          ]
         },
         {
           "name": "isEnabled",
@@ -159091,7 +159238,7 @@
             ],
             "isNullable": false
           },
-          "description": " If true, the event [ObjectCreated] for this instance was dispatched to\n [FlutterMemoryAllocations].\n\n As [ChangeNotifier] is used as mixin, it does not have constructor,\n so we use [addListener] to dispatch the event.",
+          "description": " If true, the creation of this instance was dispatched to\n [Listenable.debugMaybeDispatchCreated].\n\n As [ChangeNotifier] is used as mixin, it does not have constructor,\n so we use [addListener] to dispatch the event.",
           "features": [],
           "annotations": []
         },
@@ -161423,7 +161570,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Call all the registered listeners.\n\n Call this method whenever the object changes, to notify any clients the\n object may have changed. Listeners that are added during this iteration\n will not be visited. Listeners that are removed during this iteration will\n not be visited after they are removed.\n\n Exceptions thrown by listeners will be caught and reported using\n [FlutterError.reportError].\n\n This method must not be called after [dispose] has been called.\n\n Surprising behavior can result when reentrantly removing a listener (e.g.\n in response to a notification) that has been registered multiple times.\n See the discussion at [removeListener].",
+          "description": " Call all the registered listeners.\n\n Call this method whenever the object changes, to notify any clients the\n object may have changed. Listeners that are added during this iteration\n will not be visited. Listeners that are removed during this iteration will\n not be visited after they are removed.\n\n Exceptions thrown by listeners will be caught and reported using\n [Listenable.onError].\n\n This method must not be called after [dispose] has been called.\n\n Surprising behavior can result when reentrantly removing a listener (e.g.\n in response to a notification) that has been registered multiple times.\n See the discussion at [removeListener].",
           "annotations": [
             "@protected",
             "@visibleForTesting",
@@ -162681,7 +162828,7 @@
       ],
       "superClassPackages": [
         "liquid_flutter",
-        "flutter"
+        "listen"
       ],
       "interfaces": [],
       "mixins": [],
@@ -163549,7 +163696,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -165655,6 +165802,7 @@
               "OverlayRoute",
               "Route",
               "_RoutePlaceholder",
+              "Object",
               "PredictiveBackRoute",
               "LocalHistoryRoute"
             ],
@@ -178803,6 +178951,7 @@
               "OverlayRoute",
               "Route",
               "_RoutePlaceholder",
+              "Object",
               "PredictiveBackRoute",
               "LocalHistoryRoute"
             ],
@@ -179783,7 +179932,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -181399,7 +181548,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -183034,7 +183183,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -187817,7 +187966,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -191397,7 +191546,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -192806,7 +192955,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -193188,7 +193337,7 @@
             ],
             "isNullable": false
           },
-          "description": " If true, the event [ObjectCreated] for this instance was dispatched to\n [FlutterMemoryAllocations].\n\n As [ChangeNotifier] is used as mixin, it does not have constructor,\n so we use [addListener] to dispatch the event.",
+          "description": " If true, the creation of this instance was dispatched to\n [Listenable.debugMaybeDispatchCreated].\n\n As [ChangeNotifier] is used as mixin, it does not have constructor,\n so we use [addListener] to dispatch the event.",
           "features": [],
           "annotations": []
         },
@@ -193504,7 +193653,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Call all the registered listeners.\n\n Call this method whenever the object changes, to notify any clients the\n object may have changed. Listeners that are added during this iteration\n will not be visited. Listeners that are removed during this iteration will\n not be visited after they are removed.\n\n Exceptions thrown by listeners will be caught and reported using\n [FlutterError.reportError].\n\n This method must not be called after [dispose] has been called.\n\n Surprising behavior can result when reentrantly removing a listener (e.g.\n in response to a notification) that has been registered multiple times.\n See the discussion at [removeListener].",
+          "description": " Call all the registered listeners.\n\n Call this method whenever the object changes, to notify any clients the\n object may have changed. Listeners that are added during this iteration\n will not be visited. Listeners that are removed during this iteration will\n not be visited after they are removed.\n\n Exceptions thrown by listeners will be caught and reported using\n [Listenable.onError].\n\n This method must not be called after [dispose] has been called.\n\n Surprising behavior can result when reentrantly removing a listener (e.g.\n in response to a notification) that has been registered multiple times.\n See the discussion at [removeListener].",
           "annotations": [
             "@protected",
             "@visibleForTesting",
@@ -193729,7 +193878,7 @@
         "ChangeNotifier"
       ],
       "superClassPackages": [
-        "flutter"
+        "listen"
       ],
       "interfaces": [],
       "mixins": [],
@@ -195012,7 +195161,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -196504,7 +196653,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -198936,7 +199085,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -201534,7 +201683,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -206356,6 +206505,52 @@
           "typeParameters": []
         },
         {
+          "name": "_debugCheckCanConsumeResult",
+          "returnType": {
+            "name": "bool",
+            "superTypes": [
+              "Object"
+            ],
+            "isNullable": false
+          },
+          "signature": [
+            {
+              "name": "result",
+              "description": "",
+              "type": {
+                "name": "Object?",
+                "superTypes": [],
+                "isNullable": true
+              },
+              "named": false,
+              "required": true,
+              "defaultValue": null,
+              "annotations": []
+            },
+            {
+              "name": "methodName",
+              "description": "",
+              "type": {
+                "name": "String",
+                "superTypes": [
+                  "Object",
+                  "Comparable",
+                  "Pattern"
+                ],
+                "isNullable": false
+              },
+              "named": true,
+              "required": true,
+              "defaultValue": null,
+              "annotations": []
+            }
+          ],
+          "features": [],
+          "description": " Asserts that the given [result] is of a type that can be consumed by this route.\n\n This is used by [Navigator] to provide a clear error message when a route is popped with a mismatched result type.",
+          "annotations": [],
+          "typeParameters": []
+        },
+        {
           "name": "addLocalHistoryEntry",
           "returnType": {
             "name": "void",
@@ -206997,6 +207192,7 @@
                   "OverlayRoute",
                   "Route",
                   "_RoutePlaceholder",
+                  "Object",
                   "PredictiveBackRoute",
                   "LocalHistoryRoute"
                 ],
@@ -207094,6 +207290,7 @@
               "OverlayRoute",
               "Route",
               "_RoutePlaceholder",
+              "Object",
               "PredictiveBackRoute",
               "LocalHistoryRoute"
             ],
@@ -207880,7 +208077,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -208310,6 +208507,7 @@
                   "OverlayRoute",
                   "Route",
                   "_RoutePlaceholder",
+                  "Object",
                   "PredictiveBackRoute",
                   "LocalHistoryRoute"
                 ],
@@ -208412,6 +208610,7 @@
               "OverlayRoute",
               "Route",
               "_RoutePlaceholder",
+              "Object",
               "PredictiveBackRoute",
               "LocalHistoryRoute"
             ],
@@ -209138,7 +209337,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -210639,7 +210838,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -211679,7 +211878,7 @@
             ],
             "isNullable": false
           },
-          "description": " If true, the event [ObjectCreated] for this instance was dispatched to\n [FlutterMemoryAllocations].\n\n As [ChangeNotifier] is used as mixin, it does not have constructor,\n so we use [addListener] to dispatch the event.",
+          "description": " If true, the creation of this instance was dispatched to\n [Listenable.debugMaybeDispatchCreated].\n\n As [ChangeNotifier] is used as mixin, it does not have constructor,\n so we use [addListener] to dispatch the event.",
           "features": [],
           "annotations": []
         },
@@ -211865,7 +212064,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Call all the registered listeners.\n\n Call this method whenever the object changes, to notify any clients the\n object may have changed. Listeners that are added during this iteration\n will not be visited. Listeners that are removed during this iteration will\n not be visited after they are removed.\n\n Exceptions thrown by listeners will be caught and reported using\n [FlutterError.reportError].\n\n This method must not be called after [dispose] has been called.\n\n Surprising behavior can result when reentrantly removing a listener (e.g.\n in response to a notification) that has been registered multiple times.\n See the discussion at [removeListener].",
+          "description": " Call all the registered listeners.\n\n Call this method whenever the object changes, to notify any clients the\n object may have changed. Listeners that are added during this iteration\n will not be visited. Listeners that are removed during this iteration will\n not be visited after they are removed.\n\n Exceptions thrown by listeners will be caught and reported using\n [Listenable.onError].\n\n This method must not be called after [dispose] has been called.\n\n Surprising behavior can result when reentrantly removing a listener (e.g.\n in response to a notification) that has been registered multiple times.\n See the discussion at [removeListener].",
           "annotations": [
             "@protected",
             "@visibleForTesting",
@@ -212037,7 +212236,7 @@
         "ChangeNotifier"
       ],
       "superClassPackages": [
-        "flutter"
+        "listen"
       ],
       "interfaces": [],
       "mixins": [],
@@ -216257,7 +216456,7 @@
             ],
             "isNullable": false
           },
-          "description": " If true, the event [ObjectCreated] for this instance was dispatched to\n [FlutterMemoryAllocations].\n\n As [ChangeNotifier] is used as mixin, it does not have constructor,\n so we use [addListener] to dispatch the event.",
+          "description": " If true, the creation of this instance was dispatched to\n [Listenable.debugMaybeDispatchCreated].\n\n As [ChangeNotifier] is used as mixin, it does not have constructor,\n so we use [addListener] to dispatch the event.",
           "features": [],
           "annotations": []
         },
@@ -216455,7 +216654,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Call all the registered listeners.\n\n Call this method whenever the object changes, to notify any clients the\n object may have changed. Listeners that are added during this iteration\n will not be visited. Listeners that are removed during this iteration will\n not be visited after they are removed.\n\n Exceptions thrown by listeners will be caught and reported using\n [FlutterError.reportError].\n\n This method must not be called after [dispose] has been called.\n\n Surprising behavior can result when reentrantly removing a listener (e.g.\n in response to a notification) that has been registered multiple times.\n See the discussion at [removeListener].",
+          "description": " Call all the registered listeners.\n\n Call this method whenever the object changes, to notify any clients the\n object may have changed. Listeners that are added during this iteration\n will not be visited. Listeners that are removed during this iteration will\n not be visited after they are removed.\n\n Exceptions thrown by listeners will be caught and reported using\n [Listenable.onError].\n\n This method must not be called after [dispose] has been called.\n\n Surprising behavior can result when reentrantly removing a listener (e.g.\n in response to a notification) that has been registered multiple times.\n See the discussion at [removeListener].",
           "annotations": [
             "@protected",
             "@visibleForTesting",
@@ -216891,7 +217090,7 @@
         "ChangeNotifier"
       ],
       "superClassPackages": [
-        "flutter"
+        "listen"
       ],
       "interfaces": [],
       "mixins": [],
@@ -218049,7 +218248,7 @@
         {
           "name": "_debugForgottenChildrenWithGlobalKey",
           "type": {
-            "name": "Set<Element>?",
+            "name": "Set<Element>",
             "superTypes": [
               "Object",
               "Iterable",
@@ -218057,11 +218256,12 @@
               "EfficientLengthIterable",
               "HideEfficientLengthIterable"
             ],
-            "isNullable": true
+            "isNullable": false
           },
           "description": "",
           "features": [
-            "final"
+            "final",
+            "late"
           ],
           "annotations": [
             "@_debugOnly"
@@ -219943,7 +220143,7 @@
           "features": [
             "abstract"
           ],
-          "description": " Returns the nearest widget of the given type `T` and creates a dependency\n on it, or null if no appropriate widget is found.\n\n The widget found will be a concrete [InheritedWidget] subclass, and\n calling [dependOnInheritedWidgetOfExactType] registers this build context\n with the returned widget. When that widget changes (or a new widget of\n that type is introduced, or the widget goes away), this build context is\n rebuilt so that it can obtain new values from that widget.\n\n {@template flutter.widgets.BuildContext.dependOnInheritedWidgetOfExactType}\n This is typically called implicitly from `of()` static methods, e.g.\n [Theme.of].\n\n This method should not be called from widget constructors or from\n [State.initState] methods, because those methods would not get called\n again if the inherited value were to change. To ensure that the widget\n correctly updates itself when the inherited value changes, only call this\n (directly or indirectly) from build methods, layout and paint callbacks,\n or from [State.didChangeDependencies] (which is called immediately after\n [State.initState]).\n\n This method should not be called from [State.dispose] because the element\n tree is no longer stable at that time. To refer to an ancestor from that\n method, save a reference to the ancestor in [State.didChangeDependencies].\n It is safe to use this method from [State.deactivate], which is called\n whenever the widget is removed from the tree.\n\n It is also possible to call this method from interaction event handlers\n (e.g. gesture callbacks) or timers, to obtain a value once, as long as\n that value is not cached and/or reused later.\n\n Calling this method is O(1) with a small constant factor, but will lead to\n the widget being rebuilt more often.\n\n Once a widget registers a dependency on a particular type by calling this\n method, it will be rebuilt, and [State.didChangeDependencies] will be\n called, whenever changes occur relating to that widget until the next time\n the widget or one of its ancestors is moved (for example, because an\n ancestor is added or removed).\n\n The [aspect] parameter is only used when `T` is an\n [InheritedWidget] subclasses that supports partial updates, like\n [InheritedModel]. It specifies what \"aspect\" of the inherited\n widget this context depends on.\n {@endtemplate}",
+          "description": " Returns the nearest widget of the given type `T` and creates a dependency\n on it, or null if no appropriate widget is found.\n\n The widget found will be a concrete [InheritedWidget] subclass, and\n calling [dependOnInheritedWidgetOfExactType] registers this build context\n with the returned widget. When that widget changes (or a new widget of\n that type is introduced, or the widget goes away), this build context is\n rebuilt so that it can obtain new values from that widget.\n\n {@template flutter.widgets.BuildContext.dependOnInheritedWidgetOfExactType}\n This is typically called implicitly from `of()` static methods, e.g.\n [Theme.of].\n\n This method should not be called from widget constructors or from\n [State.initState] methods. While calling this method effectively registers\n the [BuildContext] as a dependent for future rebuilds, the constructor and\n [State.initState] are lifecycle-locked and only execute once during the\n initial creation of the element.\n\n If an inherited value changes later, the framework will correctly trigger\n the [State.build] method to run again, but it cannot re-run the\n constructor or [State.initState]. Consequently, if any internal variables,\n controllers, or side effects were initialized using a \"snapshot\" of the\n inherited value in those one-time methods, they will retain their original,\n now-obsolete values. This leads to a state desynchronization where the\n widget's [State.build] method might be using updated data while its\n internal logic remains bound to stale data captured during [State.initState].\n\n To ensure the widget stays in sync, call this (directly or indirectly)\n from build methods, layout and paint callbacks, or from [State.didChangeDependencies].\n\n [State.didChangeDependencies] is called immediately after [State.initState]\n and is re-invoked whenever the inherited widget this context depends on\n changes, until the next time the widget or one of its ancestors is moved\n (for example, because an ancestor is added or removed). This allows the\n [State] to update internal variables or perform initialization logic that\n depends on the inherited value before [State.build] is called.\n\n This method should not be called from [State.dispose] because the element\n tree is no longer stable at that time. To refer to an ancestor from that\n method, save a reference to the ancestor in [State.didChangeDependencies].\n It is safe to use this method from [State.deactivate], which is called\n whenever the widget is removed from the tree.\n\n It is also possible to call this method from interaction event handlers\n (e.g. gesture callbacks) or timers, to obtain a value once, as long as\n that value is not cached and/or reused later.\n\n Calling this method is O(1) with a small constant factor, but will lead to\n the widget being rebuilt more often.\n\n The [aspect] parameter is only used when `T` is an\n [InheritedWidget] subclasses that supports partial updates, like\n [InheritedModel]. It specifies what \"aspect\" of the inherited\n widget this context depends on.\n {@endtemplate}",
           "annotations": [],
           "typeParameters": [
             "T extends InheritedWidget"
@@ -222996,6 +223196,17 @@
           "annotations": []
         },
         {
+          "name": "_debugClosestMutationRoot",
+          "type": {
+            "name": "(RenderObject, bool)?",
+            "superTypes": [],
+            "isNullable": true
+          },
+          "description": "",
+          "features": [],
+          "annotations": []
+        },
+        {
           "name": "_debugCanPerformMutations",
           "type": {
             "name": "bool",
@@ -224288,7 +224499,7 @@
             }
           ],
           "features": [],
-          "description": " Called from [computeDryLayout] or [computeDryBaseline] within an assert if\n the given [RenderBox] subclass does not support calculating a dry layout.\n\n When asserts are enabled and [debugCheckingIntrinsics] is not true, this\n method will either throw the provided [FlutterError] or it will create and\n throw a [FlutterError] with the provided `reason`. Otherwise, it will\n return true.\n\n One of the arguments has to be provided.\n\n See also:\n\n  * [computeDryLayout], which lists some reasons why it may not be feasible\n    to compute the dry layout.",
+          "description": " Called from [computeDryLayout] or [computeDryBaseline] within an assert if\n the given [RenderBox] subclass does not support calculating a dry layout.\n\n When asserts are enabled and [RenderObject.debugCheckingIntrinsics] is not\n true, this method will either throw the provided [FlutterError] or it will\n create and throw a [FlutterError] with the provided `reason`. Otherwise,\n it will return true.\n\n One of the arguments has to be provided.\n\n See also:\n\n  * [computeDryLayout], which lists some reasons why it may not be feasible\n    to compute the dry layout.",
           "annotations": [],
           "typeParameters": []
         },
@@ -224766,7 +224977,7 @@
             }
           ],
           "features": [],
-          "description": " Convert the given point from the global coordinate system in logical pixels\n to the local coordinate system for this box.\n\n This method will un-project the point from the screen onto the widget,\n which makes it different from [MatrixUtils.transformPoint].\n\n If the transform from global coordinates to local coordinates is\n degenerate, this function returns [Offset.zero].\n\n If `ancestor` is non-null, this function converts the given point from the\n coordinate system of `ancestor` (which must be an ancestor of this render\n object) instead of from the global coordinate system.\n\n This method is implemented in terms of [getTransformTo].",
+          "description": " Convert the given point from the global coordinate system in logical pixels\n to the local coordinate system for this box.\n\n This method will un-project the point from the screen onto the local\n render plane, which makes it different from [MatrixUtils.transformPoint].\n That extra step matters when transforms include perspective: a single 2D\n screen point can correspond to many 3D points, and the framework needs the\n point that lies on this render box's local coordinate plane for hit testing\n and gestures.\n\n If the transform from global coordinates to local coordinates is\n degenerate, or if the local plane is parallel to the view direction, this\n function returns [Offset.zero]. A degenerate transform is one that\n collapses the coordinate space so it cannot be inverted, such as a zero\n scale.\n\n If `ancestor` is non-null, this function converts the given point from the\n coordinate system of `ancestor` (which must be an ancestor of this render\n object) instead of from the global coordinate system.\n\n This method is implemented in terms of [getTransformTo].",
           "annotations": [],
           "typeParameters": []
         },
@@ -227840,6 +228051,17 @@
           "annotations": []
         },
         {
+          "name": "_debugClosestMutationRoot",
+          "type": {
+            "name": "(RenderObject, bool)?",
+            "superTypes": [],
+            "isNullable": true
+          },
+          "description": "",
+          "features": [],
+          "annotations": []
+        },
+        {
           "name": "_debugCanPerformMutations",
           "type": {
             "name": "bool",
@@ -229009,7 +229231,7 @@
             }
           ],
           "features": [],
-          "description": " Called from [computeDryLayout] or [computeDryBaseline] within an assert if\n the given [RenderBox] subclass does not support calculating a dry layout.\n\n When asserts are enabled and [debugCheckingIntrinsics] is not true, this\n method will either throw the provided [FlutterError] or it will create and\n throw a [FlutterError] with the provided `reason`. Otherwise, it will\n return true.\n\n One of the arguments has to be provided.\n\n See also:\n\n  * [computeDryLayout], which lists some reasons why it may not be feasible\n    to compute the dry layout.",
+          "description": " Called from [computeDryLayout] or [computeDryBaseline] within an assert if\n the given [RenderBox] subclass does not support calculating a dry layout.\n\n When asserts are enabled and [RenderObject.debugCheckingIntrinsics] is not\n true, this method will either throw the provided [FlutterError] or it will\n create and throw a [FlutterError] with the provided `reason`. Otherwise,\n it will return true.\n\n One of the arguments has to be provided.\n\n See also:\n\n  * [computeDryLayout], which lists some reasons why it may not be feasible\n    to compute the dry layout.",
           "annotations": [],
           "typeParameters": []
         },
@@ -229489,7 +229711,7 @@
             }
           ],
           "features": [],
-          "description": " Convert the given point from the global coordinate system in logical pixels\n to the local coordinate system for this box.\n\n This method will un-project the point from the screen onto the widget,\n which makes it different from [MatrixUtils.transformPoint].\n\n If the transform from global coordinates to local coordinates is\n degenerate, this function returns [Offset.zero].\n\n If `ancestor` is non-null, this function converts the given point from the\n coordinate system of `ancestor` (which must be an ancestor of this render\n object) instead of from the global coordinate system.\n\n This method is implemented in terms of [getTransformTo].",
+          "description": " Convert the given point from the global coordinate system in logical pixels\n to the local coordinate system for this box.\n\n This method will un-project the point from the screen onto the local\n render plane, which makes it different from [MatrixUtils.transformPoint].\n That extra step matters when transforms include perspective: a single 2D\n screen point can correspond to many 3D points, and the framework needs the\n point that lies on this render box's local coordinate plane for hit testing\n and gestures.\n\n If the transform from global coordinates to local coordinates is\n degenerate, or if the local plane is parallel to the view direction, this\n function returns [Offset.zero]. A degenerate transform is one that\n collapses the coordinate space so it cannot be inverted, such as a zero\n scale.\n\n If `ancestor` is non-null, this function converts the given point from the\n coordinate system of `ancestor` (which must be an ancestor of this render\n object) instead of from the global coordinate system.\n\n This method is implemented in terms of [getTransformTo].",
           "annotations": [],
           "typeParameters": []
         },
@@ -232386,7 +232608,7 @@
         {
           "name": "_debugForgottenChildrenWithGlobalKey",
           "type": {
-            "name": "Set<Element>?",
+            "name": "Set<Element>",
             "superTypes": [
               "Object",
               "Iterable",
@@ -232394,11 +232616,12 @@
               "EfficientLengthIterable",
               "HideEfficientLengthIterable"
             ],
-            "isNullable": true
+            "isNullable": false
           },
           "description": "",
           "features": [
-            "final"
+            "final",
+            "late"
           ],
           "annotations": [
             "@_debugOnly"
@@ -234246,7 +234469,7 @@
           "features": [
             "abstract"
           ],
-          "description": " Returns the nearest widget of the given type `T` and creates a dependency\n on it, or null if no appropriate widget is found.\n\n The widget found will be a concrete [InheritedWidget] subclass, and\n calling [dependOnInheritedWidgetOfExactType] registers this build context\n with the returned widget. When that widget changes (or a new widget of\n that type is introduced, or the widget goes away), this build context is\n rebuilt so that it can obtain new values from that widget.\n\n {@template flutter.widgets.BuildContext.dependOnInheritedWidgetOfExactType}\n This is typically called implicitly from `of()` static methods, e.g.\n [Theme.of].\n\n This method should not be called from widget constructors or from\n [State.initState] methods, because those methods would not get called\n again if the inherited value were to change. To ensure that the widget\n correctly updates itself when the inherited value changes, only call this\n (directly or indirectly) from build methods, layout and paint callbacks,\n or from [State.didChangeDependencies] (which is called immediately after\n [State.initState]).\n\n This method should not be called from [State.dispose] because the element\n tree is no longer stable at that time. To refer to an ancestor from that\n method, save a reference to the ancestor in [State.didChangeDependencies].\n It is safe to use this method from [State.deactivate], which is called\n whenever the widget is removed from the tree.\n\n It is also possible to call this method from interaction event handlers\n (e.g. gesture callbacks) or timers, to obtain a value once, as long as\n that value is not cached and/or reused later.\n\n Calling this method is O(1) with a small constant factor, but will lead to\n the widget being rebuilt more often.\n\n Once a widget registers a dependency on a particular type by calling this\n method, it will be rebuilt, and [State.didChangeDependencies] will be\n called, whenever changes occur relating to that widget until the next time\n the widget or one of its ancestors is moved (for example, because an\n ancestor is added or removed).\n\n The [aspect] parameter is only used when `T` is an\n [InheritedWidget] subclasses that supports partial updates, like\n [InheritedModel]. It specifies what \"aspect\" of the inherited\n widget this context depends on.\n {@endtemplate}",
+          "description": " Returns the nearest widget of the given type `T` and creates a dependency\n on it, or null if no appropriate widget is found.\n\n The widget found will be a concrete [InheritedWidget] subclass, and\n calling [dependOnInheritedWidgetOfExactType] registers this build context\n with the returned widget. When that widget changes (or a new widget of\n that type is introduced, or the widget goes away), this build context is\n rebuilt so that it can obtain new values from that widget.\n\n {@template flutter.widgets.BuildContext.dependOnInheritedWidgetOfExactType}\n This is typically called implicitly from `of()` static methods, e.g.\n [Theme.of].\n\n This method should not be called from widget constructors or from\n [State.initState] methods. While calling this method effectively registers\n the [BuildContext] as a dependent for future rebuilds, the constructor and\n [State.initState] are lifecycle-locked and only execute once during the\n initial creation of the element.\n\n If an inherited value changes later, the framework will correctly trigger\n the [State.build] method to run again, but it cannot re-run the\n constructor or [State.initState]. Consequently, if any internal variables,\n controllers, or side effects were initialized using a \"snapshot\" of the\n inherited value in those one-time methods, they will retain their original,\n now-obsolete values. This leads to a state desynchronization where the\n widget's [State.build] method might be using updated data while its\n internal logic remains bound to stale data captured during [State.initState].\n\n To ensure the widget stays in sync, call this (directly or indirectly)\n from build methods, layout and paint callbacks, or from [State.didChangeDependencies].\n\n [State.didChangeDependencies] is called immediately after [State.initState]\n and is re-invoked whenever the inherited widget this context depends on\n changes, until the next time the widget or one of its ancestors is moved\n (for example, because an ancestor is added or removed). This allows the\n [State] to update internal variables or perform initialization logic that\n depends on the inherited value before [State.build] is called.\n\n This method should not be called from [State.dispose] because the element\n tree is no longer stable at that time. To refer to an ancestor from that\n method, save a reference to the ancestor in [State.didChangeDependencies].\n It is safe to use this method from [State.deactivate], which is called\n whenever the widget is removed from the tree.\n\n It is also possible to call this method from interaction event handlers\n (e.g. gesture callbacks) or timers, to obtain a value once, as long as\n that value is not cached and/or reused later.\n\n Calling this method is O(1) with a small constant factor, but will lead to\n the widget being rebuilt more often.\n\n The [aspect] parameter is only used when `T` is an\n [InheritedWidget] subclasses that supports partial updates, like\n [InheritedModel]. It specifies what \"aspect\" of the inherited\n widget this context depends on.\n {@endtemplate}",
           "annotations": [],
           "typeParameters": [
             "T extends InheritedWidget"
@@ -235227,6 +235450,17 @@
               "Object"
             ],
             "isNullable": false
+          },
+          "description": "",
+          "features": [],
+          "annotations": []
+        },
+        {
+          "name": "_debugClosestMutationRoot",
+          "type": {
+            "name": "(RenderObject, bool)?",
+            "superTypes": [],
+            "isNullable": true
           },
           "description": "",
           "features": [],
@@ -236410,7 +236644,7 @@
             }
           ],
           "features": [],
-          "description": " Called from [computeDryLayout] or [computeDryBaseline] within an assert if\n the given [RenderBox] subclass does not support calculating a dry layout.\n\n When asserts are enabled and [debugCheckingIntrinsics] is not true, this\n method will either throw the provided [FlutterError] or it will create and\n throw a [FlutterError] with the provided `reason`. Otherwise, it will\n return true.\n\n One of the arguments has to be provided.\n\n See also:\n\n  * [computeDryLayout], which lists some reasons why it may not be feasible\n    to compute the dry layout.",
+          "description": " Called from [computeDryLayout] or [computeDryBaseline] within an assert if\n the given [RenderBox] subclass does not support calculating a dry layout.\n\n When asserts are enabled and [RenderObject.debugCheckingIntrinsics] is not\n true, this method will either throw the provided [FlutterError] or it will\n create and throw a [FlutterError] with the provided `reason`. Otherwise,\n it will return true.\n\n One of the arguments has to be provided.\n\n See also:\n\n  * [computeDryLayout], which lists some reasons why it may not be feasible\n    to compute the dry layout.",
           "annotations": [],
           "typeParameters": []
         },
@@ -236889,7 +237123,7 @@
             }
           ],
           "features": [],
-          "description": " Convert the given point from the global coordinate system in logical pixels\n to the local coordinate system for this box.\n\n This method will un-project the point from the screen onto the widget,\n which makes it different from [MatrixUtils.transformPoint].\n\n If the transform from global coordinates to local coordinates is\n degenerate, this function returns [Offset.zero].\n\n If `ancestor` is non-null, this function converts the given point from the\n coordinate system of `ancestor` (which must be an ancestor of this render\n object) instead of from the global coordinate system.\n\n This method is implemented in terms of [getTransformTo].",
+          "description": " Convert the given point from the global coordinate system in logical pixels\n to the local coordinate system for this box.\n\n This method will un-project the point from the screen onto the local\n render plane, which makes it different from [MatrixUtils.transformPoint].\n That extra step matters when transforms include perspective: a single 2D\n screen point can correspond to many 3D points, and the framework needs the\n point that lies on this render box's local coordinate plane for hit testing\n and gestures.\n\n If the transform from global coordinates to local coordinates is\n degenerate, or if the local plane is parallel to the view direction, this\n function returns [Offset.zero]. A degenerate transform is one that\n collapses the coordinate space so it cannot be inverted, such as a zero\n scale.\n\n If `ancestor` is non-null, this function converts the given point from the\n coordinate system of `ancestor` (which must be an ancestor of this render\n object) instead of from the global coordinate system.\n\n This method is implemented in terms of [getTransformTo].",
           "annotations": [],
           "typeParameters": []
         },
@@ -244685,7 +244919,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -247021,7 +247255,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -250995,7 +251229,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -253545,7 +253779,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -255718,7 +255952,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -257216,7 +257450,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -259213,7 +259447,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -262285,7 +262519,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -264608,7 +264842,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -266037,7 +266271,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -271431,7 +271665,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -272278,7 +272512,7 @@
             ],
             "isNullable": false
           },
-          "description": " If true, the event [ObjectCreated] for this instance was dispatched to\n [FlutterMemoryAllocations].\n\n As [ChangeNotifier] is used as mixin, it does not have constructor,\n so we use [addListener] to dispatch the event.",
+          "description": " If true, the creation of this instance was dispatched to\n [Listenable.debugMaybeDispatchCreated].\n\n As [ChangeNotifier] is used as mixin, it does not have constructor,\n so we use [addListener] to dispatch the event.",
           "features": [],
           "annotations": []
         },
@@ -272720,7 +272954,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Call all the registered listeners.\n\n Call this method whenever the object changes, to notify any clients the\n object may have changed. Listeners that are added during this iteration\n will not be visited. Listeners that are removed during this iteration will\n not be visited after they are removed.\n\n Exceptions thrown by listeners will be caught and reported using\n [FlutterError.reportError].\n\n This method must not be called after [dispose] has been called.\n\n Surprising behavior can result when reentrantly removing a listener (e.g.\n in response to a notification) that has been registered multiple times.\n See the discussion at [removeListener].",
+          "description": " Call all the registered listeners.\n\n Call this method whenever the object changes, to notify any clients the\n object may have changed. Listeners that are added during this iteration\n will not be visited. Listeners that are removed during this iteration will\n not be visited after they are removed.\n\n Exceptions thrown by listeners will be caught and reported using\n [Listenable.onError].\n\n This method must not be called after [dispose] has been called.\n\n Surprising behavior can result when reentrantly removing a listener (e.g.\n in response to a notification) that has been registered multiple times.\n See the discussion at [removeListener].",
           "annotations": [
             "@protected",
             "@visibleForTesting",
@@ -274894,7 +275128,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -278643,7 +278877,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -287888,7 +288122,7 @@
             ],
             "isNullable": false
           },
-          "description": " If true, the event [ObjectCreated] for this instance was dispatched to\n [FlutterMemoryAllocations].\n\n As [ChangeNotifier] is used as mixin, it does not have constructor,\n so we use [addListener] to dispatch the event.",
+          "description": " If true, the creation of this instance was dispatched to\n [Listenable.debugMaybeDispatchCreated].\n\n As [ChangeNotifier] is used as mixin, it does not have constructor,\n so we use [addListener] to dispatch the event.",
           "features": [],
           "annotations": []
         },
@@ -288671,7 +288905,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Call all the registered listeners.\n\n Call this method whenever the object changes, to notify any clients the\n object may have changed. Listeners that are added during this iteration\n will not be visited. Listeners that are removed during this iteration will\n not be visited after they are removed.\n\n Exceptions thrown by listeners will be caught and reported using\n [FlutterError.reportError].\n\n This method must not be called after [dispose] has been called.\n\n Surprising behavior can result when reentrantly removing a listener (e.g.\n in response to a notification) that has been registered multiple times.\n See the discussion at [removeListener].",
+          "description": " Call all the registered listeners.\n\n Call this method whenever the object changes, to notify any clients the\n object may have changed. Listeners that are added during this iteration\n will not be visited. Listeners that are removed during this iteration will\n not be visited after they are removed.\n\n Exceptions thrown by listeners will be caught and reported using\n [Listenable.onError].\n\n This method must not be called after [dispose] has been called.\n\n Surprising behavior can result when reentrantly removing a listener (e.g.\n in response to a notification) that has been registered multiple times.\n See the discussion at [removeListener].",
           "annotations": [
             "@protected",
             "@visibleForTesting",
@@ -289165,7 +289399,7 @@
         "ChangeNotifier"
       ],
       "superClassPackages": [
-        "flutter"
+        "listen"
       ],
       "interfaces": [],
       "mixins": [],
@@ -290435,7 +290669,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -291963,7 +292197,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -295229,7 +295463,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -296396,7 +296630,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -298581,7 +298815,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -300654,7 +300888,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -302704,7 +302938,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -306805,7 +307039,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -308665,7 +308899,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
@@ -313280,7 +313514,7 @@
           },
           "signature": [],
           "features": [],
-          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.",
+          "description": " Called when a dependency of this [State] object changes.\n\n For example, if the previous call to [build] referenced an\n [InheritedWidget] that later changed, the framework would call this\n method to notify this object about the change.\n\n This method is also called immediately after [initState]. It is safe to\n call [BuildContext.dependOnInheritedWidgetOfExactType] from this method.\n\n Subclasses rarely override this method because the framework always\n calls [build] after a dependency changes. Some subclasses do override\n this method because they need to do some expensive work (e.g., network\n fetches) when their dependencies change, and that work would be too\n expensive to do for every build.\n\n Implementations of this method should start with a call to the inherited\n method, as in `super.didChangeDependencies`.",
           "annotations": [
             "@protected",
             "@mustCallSuper"
