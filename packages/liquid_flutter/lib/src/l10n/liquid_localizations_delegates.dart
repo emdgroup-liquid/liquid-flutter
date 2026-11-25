@@ -4,10 +4,11 @@ import 'generated/liquid_localizations.dart';
 
 /// Localization delegates for apps built with Liquid Flutter.
 ///
-/// `flutter gen-l10n` still wires `liquidLocalizationsDelegates`
-/// to the deprecated `flutter_localizations` delegates, which a `material_ui`
-/// app cannot resolve - Material strings would silently fall back to English.
-/// Prefer this list:
+/// `flutter gen-l10n` still wires the generated
+/// [LiquidLocalizations.localizationsDelegates] getter to the deprecated
+/// `flutter_localizations` delegates, which a `material_ui` app cannot
+/// resolve - Material strings would silently fall back to English. Prefer this
+/// list:
 ///
 /// ```dart
 /// MaterialApp(

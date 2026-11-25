@@ -290,6 +290,14 @@ LdListController<TestItem, int> createTestListController({
   );
 }
 
+/// How many mount delays [pumpPastSubmitMountDelay] steps through.
+///
+/// Nested submit scopes (e.g. a child monkey route) start their mount timer
+/// after the parent already settled, so a single pump is not enough. Each
+/// iteration advances fake time by [Durations.medium1]; eight covers realistic
+/// nesting depths without hard-coding a total duration.
+const _maxNestedSubmitMountDelays = 8;
+
 /// Pumps past the delay [LdSubmit] waits before mounting its child, then
 /// settles.
 ///
@@ -299,10 +307,8 @@ LdListController<TestItem, int> createTestListController({
 /// on its own returns before the clock gets there.
 Future<void> pumpPastSubmitMountDelay(WidgetTester tester) async {
   // LdSubmit mounts after Durations.medium1. pumpAndSettle only advances fake
-  // time while frames are scheduled, so step time explicitly; nested submit
-  // scopes (e.g. a child monkey route) start their timer after the parent
-  // already settled.
-  for (var i = 0; i < 8; i++) {
+  // time while frames are scheduled, so step time explicitly.
+  for (var i = 0; i < _maxNestedSubmitMountDelays; i++) {
     await tester.pump(Durations.medium1);
   }
   await tester.pumpAndSettle();
