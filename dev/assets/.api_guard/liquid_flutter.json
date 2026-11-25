@@ -1,7 +1,7 @@
 {
   "metadata": {
     "packageName": "liquid_flutter",
-    "packageVersion": "23.0.0-16",
+    "packageVersion": "23.0.0-17",
     "sdkVersion": ">=3.5.0 <4.0.0",
     "flutterVersion": ">=3.47.0",
     "dependencies": [
