@@ -1,3 +1,18 @@
+## 1.0.0-12
+Released on: 11/25/2026, changelog automatically generated.
+
+
+### Bug Fixes
+
+- **liquid_flutter_window_utils:** declare meta dependency ([48f9133](commit/48f9133))
+
+### API Changes
+
+#### 👀 Patch changes
+
+**`meta` pubspec.yaml** ([pubspec.yaml](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_window_utils/v1.0.0-11..liquid_flutter_window_utils/v1.0.0-12#diff-8b7e9df87668ffa6a04b32e1769a33434999e54ae081c52e5d943c541d4c0d25))
+- 📦 Added `meta`: with version `^1.9.0`
+
 ## 1.0.0-11
 Released on: 11/25/2026, changelog automatically generated.
 
