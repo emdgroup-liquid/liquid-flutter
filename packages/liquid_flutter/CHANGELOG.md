@@ -1,3 +1,65 @@
+## 23.0.0-17
+Released on: 11/25/2026, changelog automatically generated.
+
+
+### Bug Fixes
+
+- **l10n:** resolve Material delegates from material_ui ([92b05d5](commit/92b05d5))
+- resolve win32 conflict for file_picker 13 ([6881235](commit/6881235))
+- migrate to material_ui and Flutter 3.50 ([83ab0a4](commit/83ab0a4))
+
+### API Changes
+
+#### 💣 Breaking changes
+
+**`meta` pubspec.yaml** ([pubspec.yaml](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-16..liquid_flutter/v23.0.0-17#diff-8b7e9df87668ffa6a04b32e1769a33434999e54ae081c52e5d943c541d4c0d25))
+- 🎯 Minimum Flutter SDK version increased: from `not constrained` to `>=3.47.0`
+
+#### 👀 Patch changes
+
+**`class` CloseDrawerAction** ([lib/src/monkey/actions/drawer_actions.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-16..liquid_flutter/v23.0.0-17#diff-c56df6b5238b5baed507b8b398fb6499ec733931b798b3a1045a636e8eab40e2))
+- 🔄 Property type changed: `_currentCallingAction`
+- 🔄 Param type changed in method `_updateCallingAction`: `value` (`Action<CloseDrawerIntent>?` → `Action<Intent>?`)
+- ❇️ Method added: `_debugCanHandleIntent`
+
+**`class` LdContextMenuRoute** ([lib/src/context_menu.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-16..liquid_flutter/v23.0.0-17#diff-bd031ede2f184bbdb13c86e7300dc3ab6f62af650bf3cc1bd5c74ad2fe3e824e))
+- ❇️ Method added: `_debugCheckCanConsumeResult`
+
+**`class` LdModalRoute<T>** ([lib/src/modal/modal.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-16..liquid_flutter/v23.0.0-17#diff-2d55c400b021d628a7e92bc6d07673f3775bac69b40c544c8332ae622d0f715d))
+- ❇️ Method added: `_debugCheckCanConsumeResult`
+
+**`mixin` LdOverflowAdaptiveSize** ([lib/src/overflow/adaptive_child.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-16..liquid_flutter/v23.0.0-17#diff-760e5fd183bffd11a755e6189fa0a5b3064b68c7d914ff3afd5a88725aaf3f89))
+- ❇️ Property added: `_debugClosestMutationRoot`
+
+**`class` LdOverflowViewElement** ([lib/src/overflow/overflow_view.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-16..liquid_flutter/v23.0.0-17#diff-3c4bab9daad078a31ff7546452536df0e86c05aae4e6e28655236688cd516a39))
+- 🔄 Property type changed: `_debugForgottenChildrenWithGlobalKey`
+- ❇️ Modifier `late` added to property: `_debugForgottenChildrenWithGlobalKey`
+
+**`class` OpenDrawerAction** ([lib/src/monkey/actions/drawer_actions.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-16..liquid_flutter/v23.0.0-17#diff-c56df6b5238b5baed507b8b398fb6499ec733931b798b3a1045a636e8eab40e2))
+- 🔄 Property type changed: `_currentCallingAction`
+- 🔄 Param type changed in method `_updateCallingAction`: `value` (`Action<OpenDrawerIntent>?` → `Action<Intent>?`)
+- ❇️ Method added: `_debugCanHandleIntent`
+
+**`class` RenderLdOverflowAdaptiveChild** ([lib/src/overflow/adaptive_child.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-16..liquid_flutter/v23.0.0-17#diff-760e5fd183bffd11a755e6189fa0a5b3064b68c7d914ff3afd5a88725aaf3f89))
+- ❇️ Property added: `_debugClosestMutationRoot`
+
+**`class` ToggleDrawerAction** ([lib/src/monkey/actions/drawer_actions.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-16..liquid_flutter/v23.0.0-17#diff-c56df6b5238b5baed507b8b398fb6499ec733931b798b3a1045a636e8eab40e2))
+- 🔄 Property type changed: `_currentCallingAction`
+- 🔄 Param type changed in method `_updateCallingAction`: `value` (`Action<ToggleDrawerIntent>?` → `Action<Intent>?`)
+- ❇️ Method added: `_debugCanHandleIntent`
+
+**`class` _LdOverflowAlwaysChildElement** ([lib/src/overflow/always_child.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-16..liquid_flutter/v23.0.0-17#diff-7ca10594f81b83d216be83e2bf855b2c2809c23a4429eb4087e795e2d8748ec1))
+- 🔄 Property type changed: `_debugForgottenChildrenWithGlobalKey`
+- ❇️ Modifier `late` added to property: `_debugForgottenChildrenWithGlobalKey`
+
+**`class` _RenderLdOverflowAlwaysChild** ([lib/src/overflow/always_child.dart](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-16..liquid_flutter/v23.0.0-17#diff-7ca10594f81b83d216be83e2bf855b2c2809c23a4429eb4087e795e2d8748ec1))
+- ❇️ Property added: `_debugClosestMutationRoot`
+
+**`meta` pubspec.yaml** ([pubspec.yaml](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter/v23.0.0-16..liquid_flutter/v23.0.0-17#diff-8b7e9df87668ffa6a04b32e1769a33434999e54ae081c52e5d943c541d4c0d25))
+- 📦 `device_info_plus` version changed: from `^11.2.0` to `^13.0.0`
+- 📦 Added `material_ui`: with version `^1.11.0`
+- 📦 Added `cupertino_ui`: with version `^1.1.6`
+
 ## 23.0.0-16
 Released on: 11/12/2026, changelog automatically generated.
 
