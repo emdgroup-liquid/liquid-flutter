@@ -12,6 +12,8 @@ dependencies:
     sdk: flutter
   plugin_platform_interface: ^2.0.2
   device_info_plus: ^13.0.0
+  # Pigeon-generated bindings (lib/messages.g.dart) import package:meta.
+  meta: ^1.9.0
 
 dev_dependencies:
   flutter_test:
