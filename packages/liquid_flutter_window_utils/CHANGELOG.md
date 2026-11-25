@@ -1,3 +1,13 @@
+## 1.0.0-11
+Released on: 11/25/2026, changelog automatically generated.
+
+### API Changes
+
+#### 👀 Patch changes
+
+**`meta` pubspec.yaml** ([pubspec.yaml](https://github.com/emdgroup-liquid/liquid-flutter/compare/liquid_flutter_window_utils/v1.0.0-10..liquid_flutter_window_utils/v1.0.0-11#diff-8b7e9df87668ffa6a04b32e1769a33434999e54ae081c52e5d943c541d4c0d25))
+- 📦 `device_info_plus` version changed: from `^11.2.0` to `^13.0.0`
+
 ## 1.0.0-10
 Released on: 11/12/2026, changelog automatically generated.
 
